@@ -13,6 +13,28 @@ python db/init_db.py                 # creates db/backtester.db
 python run_backtest.py --csv data/sample/spx_proxy_sample.csv
 ```
 
+## 0DTE strike-selection logic (Classes #01-#05)
+
+`strategy_logic/` codifies the objectively-computable rules from the
+GEXOptionsTrading Premium Academy course used to design the 0DTE side of
+this project: the gap x VWAP direction matrix (Class #02), a Put
+Wall / Call Wall GEX calculator (standard community formula -- the
+course names these but never gives the formula), and the short-strike
+placement rule from Class #05 (short strike must sit at/beyond the
+wall). See `strategy_logic/README_STRATEGY_LOGIC.md` for the full
+class-by-class source map, including what's still manual/discretionary
+(Market Structure, Price Action quality, Squeeze Risk -- the course
+never quantifies these, so this project doesn't fake a formula for
+them either).
+
+Try it:
+```bash
+python run_strike_selector.py
+python -m pytest tests/test_strategy_logic.py -v
+```
+
+Not yet wired into worker/ -- these are backend formulas only for now.
+
 ## What's real vs. synthetic right now
 
 - `data/sample/spx_proxy_sample.csv` is **~50 trading days of real SPY
