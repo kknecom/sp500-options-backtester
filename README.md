@@ -1,8 +1,8 @@
 # SPX Credit Spread Backtester (starter scaffold)
 
 Backtests 3 SPX options strategies -- Bull Put Spread, Bear Call Spread,
-Iron Condor -- and is structured so daily data collected via the Tiger
-Open API can gradually replace the synthetic pricer with real market
+Iron Condor -- and is structured so daily data collected via the moomoo
+OpenAPI can gradually replace the synthetic pricer with real market
 data. Telegram bot I/O is a planned phase 2 (not built here).
 
 ## Quick start
@@ -12,6 +12,55 @@ pip install -r requirements.txt
 python db/init_db.py                 # creates db/backtester.db
 python run_backtest.py --csv data/sample/spx_proxy_sample.csv
 ```
+
+For live data instead of the bundled sample CSV, see **moomoo OpenAPI
+setup** below, then run:
+```bash
+python run_backtest.py --source moomoo --symbol SPY --start 2024-01-01
+```
+
+## moomoo OpenAPI setup (live data)
+
+Real SPX option chains (bid/ask + full greeks) and underlying daily
+closes come from the [moomoo OpenAPI](https://openapi.moomoo.com/moomoo-api-doc/en/),
+via a local gateway process called **OpenD** -- your Python code never
+talks to moomoo's servers directly, it talks to OpenD, which must
+already be running and logged in.
+
+1. **Install and start OpenD**, and log it into your moomoo account:
+   https://www.moomoo.com/download/OpenAPI (desktop app or headless,
+   Windows/Mac/CentOS/Ubuntu all supported). Leave it running -- every
+   script here connects to it over a local socket (default
+   `127.0.0.1:11111`; override with the `MOOMOO_OPEND_HOST` /
+   `MOOMOO_OPEND_PORT` env vars, see `moomoo_client.py`, if OpenD runs
+   elsewhere, e.g. a small cloud box for unattended daily collection).
+2. **US options quote entitlement:** moomoo grants free LV1 US options
+   (OPRA) real-time quotes to any account with total assets > $0 or
+   existing US positions -- no separate purchase needed if you meet
+   that bar. Otherwise, buy the "OPRA Options Real-time Quote" card from
+   the moomoo marketplace. Details:
+   https://openapi.moomoo.com/moomoo-api-doc/en/intro/authority.html
+3. **Verify the connection:**
+   ```bash
+   pip install -r requirements.txt   # installs moomoo-api
+   python tests/local_test.py
+   ```
+   This connects to OpenD, lists real SPX expirations, and pulls the
+   full chain nearest `config.TARGET_DTE` with live greeks -- if it
+   prints a populated DataFrame instead of a permission or connection
+   error, you're set.
+
+**Known limitation:** `US..SPX` (and `US..VIX`) work fine for option
+chain/expiration lookups but are rejected by moomoo's historical-kline
+endpoint ("US stock indices are not supported", confirmed live) --
+`collectors/moomoo_daily_collector.py::fetch_underlying_bars` and
+`run_backtest.py --source moomoo` default to **SPY** as the historical
+underlying-close proxy instead (same one the bundled sample CSV uses).
+
+(This project previously targeted the Tiger Open API instead; that
+account lacked US options quote permission with no self-serve way to
+buy it, so the project switched to moomoo. `tiger_client.py` and its
+collector no longer exist in this repo.)
 
 ## 0DTE strike-selection logic (Classes #01-#05)
 
@@ -61,15 +110,15 @@ Not yet wired into worker/ -- these are backend formulas only for now.
    without needing real historical option chains, which are expensive
    and hard to source in bulk.
 2. **Forward daily collection (shallow, exact):** `collectors/
-   tiger_daily_collector.py` is a stub for pulling **today's** relevant
-   SPX strikes via the Tiger Open API and writing them to
-   `option_daily_bar` in the DB every day. Tiger's historical options
-   quota (10-200 unique symbols, see the module docstring) is far too
-   small to backtest years of history in bulk, but it's plenty for
-   collecting a handful of strikes once a day. After a year of daily
-   collection you'll have a real (if narrow) proprietary chain history
-   to backtest against -- far more trustworthy than the synthetic
-   pricer.
+   moomoo_daily_collector.py` pulls **today's** relevant SPX strikes
+   (real bid/ask + full greeks, confirmed live) via the moomoo OpenAPI
+   and writes them to `option_daily_bar` in the DB every day. moomoo's
+   historical-kline quota is per unique symbol (~300 total observed,
+   see the module docstring) -- far too small to backtest years of
+   options history in bulk, but plenty for collecting a handful of
+   strikes once a day. After a year of daily collection you'll have a
+   real (if narrow) proprietary chain history to backtest against --
+   far more trustworthy than the synthetic pricer.
 
 ## Project layout
 
@@ -80,9 +129,10 @@ strategies/                  Trade/Leg data model + the 3 strategy rule sets
 backtest/engine.py           daily-loop backtest runner (open/manage/close trades)
 backtest/metrics.py          win rate, Sharpe, max drawdown, etc.
 db/schema.sql                SQLite schema (trades, legs, option bars, backtest runs)
-collectors/tiger_daily_collector.py   Tiger Open API daily collector stub
+moomoo_client.py             OpenD gateway connection bootstrap
+collectors/moomoo_daily_collector.py  moomoo OpenAPI daily collector
 data/sample/                 demo CSV (see caveat above)
-run_backtest.py              CLI entry point
+run_backtest.py              CLI entry point (--source csv|moomoo)
 ```
 
 ## Backtesting pitfalls this scaffold tries to respect
@@ -111,7 +161,7 @@ Planned I/O split:
   summaries to a Telegram channel via `python-telegram-bot`.
 - **Input:** commands like `/backtest iron_condor 2y`, `/status`,
   `/positions` that trigger the same `backtest/engine.py` and
-  `collectors/tiger_daily_collector.py` functions already built here --
+  `collectors/moomoo_daily_collector.py` functions already built here --
   the bot is a thin front-end over this existing engine, not a rewrite.
 
 
@@ -157,12 +207,16 @@ python run_seasonality.py --csv data/sample/spx_proxy_sample.csv
 **This needs a long history to mean anything** -- 20-30+ years, not the
 ~50-day bundled sample (which exists only to prove the code runs; it
 correctly finds nothing "significant," which is what noise should look
-like). For a real run, pull SPX or SPY's full daily history via Tiger:
-unlike options, Tiger's Day Bar data for Stocks/ETFs is stored
-"Complete" (full available history) and sits under the much larger
-stock/ETF quota tier, not the tight options quota that constrains the
-credit-spread side of this project. Save that history as a `date,close`
-CSV and point `--csv` at it. Once a long series is loaded, cross-check
+like). For a real run, pull SPY's full daily history via moomoo
+(`python run_backtest.py --source moomoo --symbol SPY --start 1996-01-01`,
+or fetch it standalone with `collectors.moomoo_daily_collector
+.fetch_underlying_bars`) -- moomoo's history quota is per unique symbol
+(confirmed live: one `request_history_kline` call for a multi-month
+range only used 1 of ~300 quota units), so pulling years of SPY history
+in one call is cheap even though it shares the same quota pool the
+options side draws from. Save that history as a `date,close` CSV and
+point `--csv` at it if you'd rather not hit the live API each run. Once
+a long series is loaded, cross-check
 any effect that looks promising against the credit-spread strategies --
 e.g. does the OPEX week or Sell-in-May window correlate with lower
 realized volatility, which would favor iron condors specifically over
