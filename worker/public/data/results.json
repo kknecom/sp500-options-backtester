@@ -1,0 +1,572 @@
+{
+  "generated_at": "2026-08-31T12:55:33",
+  "synthetic": {
+    "caveat": "Demo run over ~50 trading days of SPY-derived SPX-proxy closes with a synthetic Black-Scholes options chain (no real quotes, no skew). Too short and too calm a window to validate a strategy -- shown only to prove the engine runs end-to-end. See README for details.",
+    "price_series_range": [
+      "2026-06-11",
+      "2026-08-21"
+    ],
+    "strategies": [
+      {
+        "name": "bull_put_spread",
+        "stats": {
+          "trades": 3,
+          "win_rate": 1.0,
+          "total_pnl": 11528.511906175238,
+          "avg_pnl_per_trade": 3842.837302058412,
+          "avg_win": 3842.837302058412,
+          "avg_loss": 0.0,
+          "stdev_pnl": 854.0041070776425,
+          "sharpe_per_trade": 4.499787846698303,
+          "max_drawdown": 0.0,
+          "final_equity": 11528.511906175238
+        },
+        "equity_curve": [
+          5048.3,
+          8224.21,
+          11528.51
+        ],
+        "trades": [
+          {
+            "entry_date": "2026-06-11",
+            "exit_date": "2026-06-15",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P7215",
+              "LONG P6935"
+            ],
+            "entry_credit": 56.95,
+            "pnl": 5048.3043900166795
+          },
+          {
+            "entry_date": "2026-06-24",
+            "exit_date": "2026-07-02",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P7160",
+              "LONG P6865"
+            ],
+            "entry_credit": 60.4,
+            "pnl": 3175.90603814092
+          },
+          {
+            "entry_date": "2026-07-13",
+            "exit_date": "2026-08-03",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P7345",
+              "LONG P7085"
+            ],
+            "entry_credit": 52.15,
+            "pnl": 3304.3014780176377
+          }
+        ]
+      },
+      {
+        "name": "bear_call_spread",
+        "stats": {
+          "trades": 4,
+          "win_rate": 1.0,
+          "total_pnl": 11032.004170141103,
+          "avg_pnl_per_trade": 2758.001042535276,
+          "avg_win": 2758.001042535276,
+          "avg_loss": 0.0,
+          "stdev_pnl": 411.61056529521585,
+          "sharpe_per_trade": 6.700510810642529,
+          "max_drawdown": 0.0,
+          "final_equity": 11032.004170141103
+        },
+        "equity_curve": [
+          3114.82,
+          6049.46,
+          8106.63,
+          11032.0
+        ],
+        "trades": [
+          {
+            "entry_date": "2026-06-11",
+            "exit_date": "2026-06-26",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C7625",
+              "LONG C7935"
+            ],
+            "entry_credit": 53.82,
+            "pnl": 3114.8159924084352
+          },
+          {
+            "entry_date": "2026-07-07",
+            "exit_date": "2026-07-17",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C7715",
+              "LONG C8015"
+            ],
+            "entry_credit": 52.21,
+            "pnl": 2934.6429308212037
+          },
+          {
+            "entry_date": "2026-07-27",
+            "exit_date": "2026-07-29",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C7575",
+              "LONG C7805"
+            ],
+            "entry_credit": 40.94,
+            "pnl": 2057.172597188145
+          },
+          {
+            "entry_date": "2026-08-06",
+            "exit_date": "2026-08-20",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C7925",
+              "LONG C8225"
+            ],
+            "entry_credit": 52.46,
+            "pnl": 2925.37264972332
+          }
+        ]
+      },
+      {
+        "name": "iron_condor",
+        "stats": {
+          "trades": 2,
+          "win_rate": 1.0,
+          "total_pnl": 5367.4332123047125,
+          "avg_pnl_per_trade": 2683.7166061523562,
+          "avg_win": 2683.7166061523562,
+          "avg_loss": 0.0,
+          "stdev_pnl": 1802.598587336766,
+          "sharpe_per_trade": 1.4888043433548843,
+          "max_drawdown": 0.0,
+          "final_equity": 5367.4332123047125
+        },
+        "equity_curve": [
+          4486.32,
+          5367.43
+        ],
+        "trades": [
+          {
+            "entry_date": "2026-06-11",
+            "exit_date": "2026-07-06",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P7215",
+              "LONG P6935",
+              "SHORT C7625",
+              "LONG C7935"
+            ],
+            "entry_credit": 110.77,
+            "pnl": 4486.315193489122
+          },
+          {
+            "entry_date": "2026-07-14",
+            "exit_date": "2026-08-07",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P7370",
+              "LONG P7115",
+              "SHORT C7745",
+              "LONG C8025"
+            ],
+            "entry_credit": 100.42,
+            "pnl": 881.1180188155902
+          }
+        ]
+      }
+    ]
+  },
+  "real": {
+    "caveat": "Computed from a real 36-trade signals-service log (data/real/SPX_Backtesting.xlsx). P&L is recomputed from strikes + settlement close price, not trusted from the sheet's W/L label -- rows where the label disagreed with the computed outcome are flagged below.",
+    "overall": {
+      "trades": 36,
+      "win_rate": 0.8611111111111112,
+      "total_pnl": 10100.0,
+      "avg_pnl_per_trade": 280.55555555555554,
+      "avg_win": 687.741935483871,
+      "avg_loss": -2244.0,
+      "stdev_pnl": 1187.7153475953655,
+      "sharpe_per_trade": 0.23621447354668357,
+      "max_drawdown": -5775.0,
+      "final_equity": 10100.0,
+      "equity_curve": [
+        105.0,
+        -265.0,
+        360.0,
+        860.0,
+        2260.0,
+        2360.0,
+        3680.0,
+        4455.0,
+        5230.0,
+        5930.0,
+        6655.0,
+        7755.0,
+        8855.0,
+        4855.0,
+        3080.0,
+        3330.0,
+        3770.0,
+        4445.0,
+        5145.0,
+        5620.0,
+        6120.0,
+        6570.0,
+        7170.0,
+        7720.0,
+        8270.0,
+        8745.0,
+        9465.0,
+        10505.0,
+        11625.0,
+        12475.0,
+        13275.0,
+        9335.0,
+        10035.0,
+        10735.0,
+        11235.0,
+        10100.0
+      ]
+    },
+    "mismatches": [
+      {
+        "entry_date": "2026-07-31",
+        "strategy": "IRON_CONDOR",
+        "notes": "sheet_label=WIN; computed=LOSE; MISMATCH vs sheet label"
+      },
+      {
+        "entry_date": "2026-08-03",
+        "strategy": "IRON_CONDOR",
+        "notes": "sheet_label=LOSE; computed=WIN; MISMATCH vs sheet label"
+      }
+    ],
+    "by_strategy": [
+      {
+        "name": "IRON_CONDOR",
+        "stats": {
+          "trades": 13,
+          "win_rate": 0.8461538461538461,
+          "total_pnl": -840.0,
+          "avg_pnl_per_trade": -64.61538461538461,
+          "avg_win": 645.4545454545455,
+          "avg_loss": -3970.0,
+          "stdev_pnl": 1708.9610671381847,
+          "sharpe_per_trade": -0.0378097464347676,
+          "max_drawdown": -5315.0,
+          "final_equity": -840.0,
+          "equity_curve": [
+            105.0,
+            1505.0,
+            1605.0,
+            2925.0,
+            3700.0,
+            4475.0,
+            475.0,
+            725.0,
+            1200.0,
+            1650.0,
+            2250.0,
+            3100.0,
+            -840.0
+          ]
+        }
+      },
+      {
+        "name": "VERTICAL",
+        "stats": {
+          "trades": 23,
+          "win_rate": 0.8695652173913043,
+          "total_pnl": 10940.0,
+          "avg_pnl_per_trade": 475.6521739130435,
+          "avg_win": 711.0,
+          "avg_loss": -1093.3333333333333,
+          "stdev_pnl": 672.199996681607,
+          "sharpe_per_trade": 0.7076051417154946,
+          "max_drawdown": -1775.0,
+          "final_equity": 10940.0,
+          "equity_curve": [
+            -370.0,
+            255.0,
+            755.0,
+            1455.0,
+            2180.0,
+            3280.0,
+            4380.0,
+            2605.0,
+            3045.0,
+            3720.0,
+            4420.0,
+            4920.0,
+            5470.0,
+            6020.0,
+            6495.0,
+            7215.0,
+            8255.0,
+            9375.0,
+            10175.0,
+            10875.0,
+            11575.0,
+            12075.0,
+            10940.0
+          ]
+        }
+      }
+    ],
+    "trades": [
+      {
+        "entry_date": "2026-06-08",
+        "strategy": "IRON_CONDOR",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 105.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-06-09",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": -370.0,
+        "notes": "sheet_label=LOSE; computed=LOSE"
+      },
+      {
+        "entry_date": "2026-07-23",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 625.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-07-23",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 500.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-07-24",
+        "strategy": "IRON_CONDOR",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 1400.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-07-24",
+        "strategy": "IRON_CONDOR",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 100.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-07-27",
+        "strategy": "IRON_CONDOR",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 1320.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-07-28",
+        "strategy": "IRON_CONDOR",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 775.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-07-28",
+        "strategy": "IRON_CONDOR",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 775.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-07-29",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 700.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-07-29",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 725.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-07-30",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 1100.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-07-30",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 1100.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-07-31",
+        "strategy": "IRON_CONDOR",
+        "status": "CLOSED_EXPIRY",
+        "pnl": -4000.0,
+        "notes": "sheet_label=WIN; computed=LOSE; MISMATCH vs sheet label"
+      },
+      {
+        "entry_date": "2026-07-31",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": -1775.0,
+        "notes": "sheet_label=LOSE; computed=LOSE"
+      },
+      {
+        "entry_date": "2026-08-03",
+        "strategy": "IRON_CONDOR",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 250.0,
+        "notes": "sheet_label=LOSE; computed=WIN; MISMATCH vs sheet label"
+      },
+      {
+        "entry_date": "2026-08-04",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 440.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-05",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 675.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-05",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 700.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-06",
+        "strategy": "IRON_CONDOR",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 475.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-06",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 500.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-07",
+        "strategy": "IRON_CONDOR",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 450.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-07",
+        "strategy": "IRON_CONDOR",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 600.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-10",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 550.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-10",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 550.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-11",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 475.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-12",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 720.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-13",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 1040.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-13",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 1120.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-14",
+        "strategy": "IRON_CONDOR",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 850.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-14",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 800.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-17",
+        "strategy": "IRON_CONDOR",
+        "status": "CLOSED_EXPIRY",
+        "pnl": -3940.0,
+        "notes": "sheet_label=LOSE; computed=LOSE"
+      },
+      {
+        "entry_date": "2026-08-18",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 700.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-18",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 700.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-20",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": 500.0,
+        "notes": "sheet_label=WIN; computed=WIN"
+      },
+      {
+        "entry_date": "2026-08-21",
+        "strategy": "VERTICAL",
+        "status": "CLOSED_EXPIRY",
+        "pnl": -1135.0,
+        "notes": "sheet_label=LOSE; computed=LOSE"
+      }
+    ]
+  }
+}

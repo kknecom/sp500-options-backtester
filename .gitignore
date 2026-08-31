@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+db/*.db
+
+# Node / Cloudflare Worker
+worker/node_modules/
+worker/.wrangler/
+.wrangler/
+
+# OS
+.DS_Store

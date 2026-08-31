@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>SPX Credit Spread Backtester</title>
+	<style>
+		:root {
+			--bg: #0b0e14;
+			--panel: #131722;
+			--panel-border: #232838;
+			--text: #e6e8ee;
+			--text-dim: #8b93a7;
+			--green: #3ecf8e;
+			--red: #ef5b5b;
+			--accent: #5b8cff;
+			--orange: #f0a63c;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+		}
+		* { box-sizing: border-box; }
+		body {
+			margin: 0;
+			background: var(--bg);
+			color: var(--text);
+			padding: 2rem 1.25rem 4rem;
+		}
+		main { max-width: 1180px; margin: 0 auto; }
+		h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+		.subtitle { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 1.25rem; }
+		h2 { font-size: 1.1rem; margin: 2.5rem 0 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+		h3 { font-size: 1rem; margin: 1.5rem 0 0.5rem; }
+		.badge {
+			font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+			padding: 0.15rem 0.5rem; border-radius: 999px;
+		}
+		.badge.real { background: rgba(62,207,142,0.15); color: var(--green); }
+		.badge.demo { background: rgba(239,91,91,0.15); color: var(--red); }
+		.caveat {
+			background: var(--panel); border: 1px solid var(--panel-border); border-left: 3px solid var(--accent);
+			border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1.25rem;
+		}
+		.stat-grid {
+			display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem;
+			margin-bottom: 1.25rem;
+		}
+		.stat-card {
+			background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px; padding: 0.9rem 1rem;
+		}
+		.stat-card .label { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.03em; }
+		.stat-card .value { font-size: 1.35rem; font-weight: 600; margin-top: 0.15rem; }
+		.value.pos { color: var(--green); }
+		.value.neg { color: var(--red); }
+		.panel {
+			background: var(--panel); border: 1px solid var(--panel-border); border-radius: 8px; padding: 1rem;
+			margin-bottom: 1rem;
+		}
+		canvas { width: 100%; height: 180px; display: block; }
+		table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+		th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--panel-border); }
+		th { color: var(--text-dim); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; }
+		td.num { text-align: right; font-variant-numeric: tabular-nums; }
+		.strategy-block { margin-bottom: 1.5rem; }
+		.strategy-block h3 { font-size: 0.95rem; margin: 1rem 0 0.5rem; color: var(--text); }
+		details { margin-top: 0.5rem; }
+		summary { cursor: pointer; color: var(--accent); font-size: 0.85rem; }
+		.mismatch-row { color: var(--red); }
+		.footer-note { color: var(--text-dim); font-size: 0.75rem; margin-top: 3rem; text-align: center; }
+		#error { color: var(--red); }
+		.calc-field { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.03em; }
+		.calc-field input {
+			background: var(--bg); border: 1px solid var(--panel-border); color: var(--text);
+			border-radius: 6px; padding: 0.45rem 0.5rem; font-size: 0.95rem; font-family: inherit;
+		}
+
+		/* Tabs */
+		.tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--panel-border); margin-bottom: 1.75rem; }
+		.tab-btn {
+			background: none; border: none; color: var(--text-dim); font-size: 0.95rem; font-weight: 600;
+			padding: 0.7rem 1.1rem; cursor: pointer; border-bottom: 2px solid transparent; font-family: inherit;
+		}
+		.tab-btn:hover { color: var(--text); }
+		.tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+		.tab-content { display: none; }
+		.tab-content.active { display: block; }
+
+		/* Dashboard */
+		.dash-grid { display: grid; grid-template-columns: 240px 1fr; gap: 1rem; align-items: start; }
+		.dash-sidebar { display: flex; flex-direction: column; gap: 1rem; }
+		.dash-main { display: flex; flex-direction: column; gap: 1rem; }
+		.dash-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+		.dash-row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+		@media (max-width: 900px) {
+			.dash-grid { grid-template-columns: 1fr; }
+			.dash-row-2, .dash-row-4 { grid-template-columns: 1fr 1fr; }
+		}
+		@media (max-width: 560px) {
+			.dash-row-2, .dash-row-4 { grid-template-columns: 1fr; }
+		}
+		.dash-panel {
+			background: var(--panel); border: 1px solid var(--panel-border); border-radius: 10px; padding: 1rem;
+		}
+		.dash-panel h4 {
+			margin: 0 0 0.7rem; font-size: 0.72rem; color: var(--text-dim); font-weight: 700;
+			text-transform: uppercase; letter-spacing: 0.04em;
+		}
+		.pnl-hero {
+			background: linear-gradient(160deg, rgba(62,207,142,0.16), rgba(62,207,142,0.04));
+			border: 1px solid rgba(62,207,142,0.35); border-radius: 10px; padding: 1rem;
+		}
+		.pnl-hero.neg {
+			background: linear-gradient(160deg, rgba(239,91,91,0.16), rgba(239,91,91,0.04));
+			border-color: rgba(239,91,91,0.35);
+		}
+		.pnl-hero .label { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.03em; }
+		.pnl-hero .value { font-size: 2rem; font-weight: 700; margin-top: 0.2rem; }
+		.dash-summary-list { display: flex; flex-direction: column; gap: 0.55rem; font-size: 0.82rem; }
+		.dash-summary-list .row { display: flex; justify-content: space-between; gap: 0.5rem; color: var(--text-dim); }
+		.dash-summary-list .row b { color: var(--text); font-weight: 600; }
+		.capital-table { font-size: 0.76rem; }
+		.capital-table td { padding: 0.32rem 0.4rem; border-bottom: none; }
+		.risk-pill {
+			display: inline-block; padding: 0.08rem 0.5rem; border-radius: 999px; font-size: 0.68rem; font-weight: 700;
+		}
+		.risk-scarce { background: rgba(239,91,91,0.15); color: var(--red); }
+		.risk-tight { background: rgba(240,166,60,0.15); color: var(--orange); }
+		.risk-robust { background: rgba(62,207,142,0.15); color: var(--green); }
+		.dash-canvas { height: 190px; }
+		.dash-canvas.short { height: 150px; }
+		.pie-wrap { display: flex; align-items: center; gap: 0.75rem; }
+		.pie-wrap canvas { width: 110px; height: 110px; flex: none; }
+		.pie-legend { display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.78rem; }
+		.pie-legend .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 0.4rem; }
+		.avgpl-bars { display: flex; align-items: flex-end; justify-content: center; gap: 1.5rem; height: 190px; }
+		.avgpl-bars .bar-col { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; }
+		.avgpl-bars .bar { width: 46px; border-radius: 4px 4px 0 0; }
+		.cal-month { margin-bottom: 0.6rem; }
+		.cal-month-label { font-size: 0.72rem; color: var(--text-dim); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.03em; }
+		.cal-row { display: flex; flex-wrap: wrap; gap: 4px; }
+		.cal-cell { width: 15px; height: 15px; border-radius: 3px; }
+		.cal-cell.win { background: var(--green); }
+		.cal-cell.loss { background: var(--red); }
+		.heat-table td { text-align: center; font-size: 0.72rem; border-radius: 4px; padding: 0.4rem 0.3rem; border-bottom: none; }
+		.heat-table th { font-size: 0.65rem; text-align: center; }
+		.heat-cell-empty { color: var(--text-dim); background: rgba(255,255,255,0.02); }
+	</style>
+</head>
+<body>
+	<main>
+		<h1>SPX Credit Spread Backtester</h1>
+		<p class="subtitle" id="generated-at">Loading results&hellip;</p>
+		<div id="error"></div>
+
+		<div class="tabs">
+			<button class="tab-btn active" data-tab="backtest">Backtesting</button>
+			<button class="tab-btn" data-tab="calc">0DTE Strike Calculator</button>
+		</div>
+
+		<div id="tab-backtest" class="tab-content active">
+			<div id="app"></div>
+		</div>
+
+		<div id="tab-calc" class="tab-content">
+			<div class="caveat">
+				Implements the formulas actually specified across Classes #01&ndash;#05 of the course this strategy
+				is based on: the gap&times;VWAP direction matrix (Class #02), the wall-placement rule for short
+				strikes (Class #05), and the credit-spread P&amp;L math (Classes #03/#04). Put Wall / Call Wall are
+				entered manually &mdash; the course reads these off a GEX chart rather than computing them, and this
+				page has no live options-chain feed. Runs entirely in your browser.
+			</div>
+			<div class="panel">
+				<div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;margin-bottom:1rem;">
+					<button id="calc-fetch-live" type="button" style="background:none;border:1px solid var(--accent);color:var(--accent);padding:0.5rem 0.9rem;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;">Fetch live SPX price / VWAP</button>
+					<span id="calc-live-status" style="font-size:0.78rem;color:var(--text-dim);"></span>
+				</div>
+				<div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
+					<label class="calc-field">Prior close
+						<input type="number" id="calc-priorClose" value="7700">
+					</label>
+					<label class="calc-field">Today's open
+						<input type="number" id="calc-todayOpen" value="7712">
+					</label>
+					<label class="calc-field">Current SPX price
+						<input type="number" id="calc-currentPrice" value="7728">
+					</label>
+					<label class="calc-field">Current VWAP
+						<input type="number" id="calc-vwap" value="7718">
+					</label>
+					<label class="calc-field">Put Wall / support
+						<input type="number" id="calc-putWall" value="7700">
+					</label>
+					<label class="calc-field">Call Wall / resistance
+						<input type="number" id="calc-callWall" value="7780">
+					</label>
+					<label class="calc-field">Proposed short strike
+						<input type="number" id="calc-shortStrike" value="7700">
+					</label>
+					<label class="calc-field">Spread width (pts)
+						<input type="number" id="calc-width" value="5">
+					</label>
+					<label class="calc-field">Credit received ($/contract)
+						<input type="number" id="calc-credit" value="150">
+					</label>
+				</div>
+				<button id="calc-run" style="margin-top:0.75rem;background:var(--accent);color:#fff;border:none;padding:0.6rem 1.1rem;border-radius:6px;font-weight:600;cursor:pointer;">Calculate</button>
+				<div id="calc-output" style="margin-top:1rem;"></div>
+			</div>
+		</div>
+
+		<p class="footer-note">Bull Put Spread &middot; Bear Call Spread &middot; Iron Condor &mdash; results regenerated by <code>export_results.py</code></p>
+	</main>
+
+	<script>
+	// Tab switching
+	document.querySelectorAll('.tab-btn').forEach(btn => {
+		btn.addEventListener('click', () => {
+			document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+			document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+			btn.classList.add('active');
+			document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+		});
+	});
+	</script>
+
+	<script>
+	const fmtMoney = (n) => (n == null || Number.isNaN(n)) ? '&mdash;' :
+		(n < 0 ? '-$' + Math.abs(n).toLocaleString(undefined, {maximumFractionDigits: 0}) : '$' + n.toLocaleString(undefined, {maximumFractionDigits: 0}));
+	const fmtPct = (n) => (n == null || Number.isNaN(n)) ? '&mdash;' : (n * 100).toFixed(1) + '%';
+	const fmtNum = (n) => (n == null || Number.isNaN(n)) ? '&mdash;' : n.toFixed(2);
+	const cls = (n) => n == null ? '' : (n >= 0 ? 'pos' : 'neg');
+	const sum = (arr) => arr.reduce((a, b) => a + b, 0);
+
+	function statCard(label, value, valueClass) {
+		return `<div class="stat-card"><div class="label">${label}</div><div class="value ${valueClass || ''}">${value}</div></div>`;
+	}
+
+	function statGrid(stats) {
+		if (!stats.trades) return '<div class="panel">No closed trades.</div>';
+		return `<div class="stat-grid">
+			${statCard('Trades', stats.trades)}
+			${statCard('Win rate', fmtPct(stats.win_rate))}
+			${statCard('Total P&amp;L', fmtMoney(stats.total_pnl), cls(stats.total_pnl))}
+			${statCard('Avg P&amp;L / trade', fmtMoney(stats.avg_pnl_per_trade), cls(stats.avg_pnl_per_trade))}
+			${statCard('Avg win / loss', `${fmtMoney(stats.avg_win)} / ${fmtMoney(stats.avg_loss)}`)}
+			${statCard('Sharpe (per-trade)', fmtNum(stats.sharpe_per_trade))}
+			${statCard('Max drawdown', fmtMoney(stats.max_drawdown), 'neg')}
+		</div>`;
+	}
+
+	function drawEquityCurve(canvas, curve, segmentColor) {
+		if (!curve || curve.length < 2) { canvas.parentElement.style.display = 'none'; return; }
+		const dpr = window.devicePixelRatio || 1;
+		const w = canvas.clientWidth, h = canvas.clientHeight;
+		canvas.width = w * dpr; canvas.height = h * dpr;
+		const ctx = canvas.getContext('2d');
+		ctx.scale(dpr, dpr);
+		const pad = 8;
+		const min = Math.min(0, ...curve), max = Math.max(0, ...curve);
+		const range = (max - min) || 1;
+		const x = (i) => pad + (i / (curve.length - 1)) * (w - pad * 2);
+		const y = (v) => h - pad - ((v - min) / range) * (h - pad * 2);
+
+		ctx.strokeStyle = '#232838';
+		ctx.lineWidth = 1;
+		ctx.beginPath();
+		ctx.moveTo(pad, y(0));
+		ctx.lineTo(w - pad, y(0));
+		ctx.stroke();
+
+		if (segmentColor) {
+			// color each segment by whether it rose or fell, like a per-day P&L evolution chart
+			for (let i = 1; i < curve.length; i++) {
+				ctx.strokeStyle = curve[i] >= curve[i - 1] ? '#3ecf8e' : '#ef5b5b';
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.moveTo(x(i - 1), y(curve[i - 1]));
+				ctx.lineTo(x(i), y(curve[i]));
+				ctx.stroke();
+			}
+		} else {
+			const positive = curve[curve.length - 1] >= 0;
+			ctx.strokeStyle = positive ? '#3ecf8e' : '#ef5b5b';
+			ctx.lineWidth = 2;
+			ctx.beginPath();
+			curve.forEach((v, i) => i === 0 ? ctx.moveTo(x(i), y(v)) : ctx.lineTo(x(i), y(v)));
+			ctx.stroke();
+		}
+	}
+
+	function drawBars(canvas, items) {
+		// items: [{label, value, color}]
+		const dpr = window.devicePixelRatio || 1;
+		const w = canvas.clientWidth, h = canvas.clientHeight;
+		canvas.width = w * dpr; canvas.height = h * dpr;
+		const ctx = canvas.getContext('2d');
+		ctx.scale(dpr, dpr);
+		const padTop = 18, padBottom = 22, padX = 6;
+		const maxAbs = Math.max(1, ...items.map(i => Math.abs(i.value)));
+		const hasNeg = items.some(i => i.value < 0);
+		const baseline = hasNeg ? padTop + (h - padTop - padBottom) / 2 : h - padBottom;
+		const usableH = hasNeg ? (h - padTop - padBottom) / 2 : (h - padTop - padBottom);
+		const bw = (w - padX * 2) / items.length;
+		ctx.font = '10px -apple-system,sans-serif';
+		ctx.textAlign = 'center';
+		items.forEach((it, i) => {
+			const bh = maxAbs ? (Math.abs(it.value) / maxAbs) * usableH : 0;
+			const x = padX + i * bw + bw * 0.18;
+			const bwv = bw * 0.64;
+			const y = it.value >= 0 ? baseline - bh : baseline;
+			ctx.fillStyle = it.color || (it.value >= 0 ? '#3ecf8e' : '#ef5b5b');
+			ctx.fillRect(x, y, bwv, Math.max(bh, 1));
+			ctx.fillStyle = '#e6e8ee';
+			ctx.fillText(it.valueLabel || fmtMoney(it.value).replace(/&mdash;/, '0').replace(/[$,-]/g, m => m), x + bwv / 2, it.value >= 0 ? Math.max(y - 4, 10) : y + bh + 12);
+			ctx.fillStyle = '#8b93a7';
+			ctx.fillText(it.label, x + bwv / 2, h - 7);
+		});
+		if (hasNeg) {
+			ctx.strokeStyle = '#232838';
+			ctx.beginPath(); ctx.moveTo(padX, baseline); ctx.lineTo(w - padX, baseline); ctx.stroke();
+		}
+	}
+
+	function drawGroupedBars(canvas, categories, seriesA, seriesB, colorA, colorB) {
+		// seriesA/B: arrays of counts aligned with categories
+		const dpr = window.devicePixelRatio || 1;
+		const w = canvas.clientWidth, h = canvas.clientHeight;
+		canvas.width = w * dpr; canvas.height = h * dpr;
+		const ctx = canvas.getContext('2d');
+		ctx.scale(dpr, dpr);
+		const padTop = 16, padBottom = 20, padX = 6;
+		const maxV = Math.max(1, ...seriesA, ...seriesB);
+		const usableH = h - padTop - padBottom;
+		const groupW = (w - padX * 2) / categories.length;
+		ctx.font = '10px -apple-system,sans-serif';
+		ctx.textAlign = 'center';
+		categories.forEach((cat, i) => {
+			const gx = padX + i * groupW;
+			const bw = groupW * 0.32;
+			const aH = (seriesA[i] / maxV) * usableH;
+			const bH = (seriesB[i] / maxV) * usableH;
+			const ax = gx + groupW * 0.14;
+			const bx = gx + groupW * 0.54;
+			ctx.fillStyle = colorB;
+			ctx.fillRect(bx, h - padBottom - bH, bw, Math.max(bH, 1));
+			ctx.fillStyle = '#e6e8ee';
+			ctx.fillText(String(seriesB[i]), bx + bw / 2, h - padBottom - bH - 4);
+			ctx.fillStyle = colorA;
+			ctx.fillRect(ax, h - padBottom - aH, bw, Math.max(aH, 1));
+			ctx.fillStyle = '#e6e8ee';
+			ctx.fillText(String(seriesA[i]), ax + bw / 2, h - padBottom - aH - 4);
+			ctx.fillStyle = '#8b93a7';
+			ctx.fillText(cat, gx + groupW / 2, h - 6);
+		});
+	}
+
+	function drawPie(canvas, segments) {
+		// segments: [{label, value, color}]
+		const dpr = window.devicePixelRatio || 1;
+		const w = canvas.clientWidth, h = canvas.clientHeight;
+		canvas.width = w * dpr; canvas.height = h * dpr;
+		const ctx = canvas.getContext('2d');
+		ctx.scale(dpr, dpr);
+		const total = sum(segments.map(s => s.value)) || 1;
+		const cx = w / 2, cy = h / 2, r = Math.min(w, h) / 2 - 4;
+		let start = -Math.PI / 2;
+		segments.forEach(s => {
+			const angle = (s.value / total) * Math.PI * 2;
+			ctx.beginPath();
+			ctx.moveTo(cx, cy);
+			ctx.arc(cx, cy, r, start, start + angle);
+			ctx.closePath();
+			ctx.fillStyle = s.color;
+			ctx.fill();
+			start += angle;
+		});
+	}
+
+	function tradesTable(trades, columns) {
+		const rows = trades.map(t => {
+			const cells = columns.map(c => `<td class="${c.num ? 'num' : ''}">${c.render(t)}</td>`).join('');
+			const isMismatch = t.notes && t.notes.includes('MISMATCH');
+			return `<tr class="${isMismatch ? 'mismatch-row' : ''}">${cells}</tr>`;
+		}).join('');
+		const head = columns.map(c => `<th>${c.label}</th>`).join('');
+		return `<table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table>`;
+	}
+
+	// ---- Dashboard (mirrors a typical options trade-journal layout) ----
+
+	const CAPITAL_TIERS = [2500, 5000, 7500, 10000, 15000];
+	const DOW_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+	function computeDashboardStats(trades) {
+		const sorted = [...trades].sort((a, b) => a.entry_date.localeCompare(b.entry_date));
+		const pnls = sorted.map(t => t.pnl);
+		const wins = pnls.filter(p => p > 0);
+		const losses = pnls.filter(p => p < 0);
+		const totalPnl = sum(pnls);
+		const winRate = pnls.length ? wins.length / pnls.length : 0;
+		const avgWin = wins.length ? sum(wins) / wins.length : 0;
+		const avgLoss = losses.length ? sum(losses) / losses.length : 0;
+		const lossSum = sum(losses);
+		const profitFactor = lossSum < 0 ? Math.abs(sum(wins) / lossSum) : null;
+
+		let curWin = 0, curLoss = 0, maxWinStreak = 0, maxLossStreak = 0;
+		sorted.forEach(t => {
+			if (t.pnl > 0) { curWin++; curLoss = 0; }
+			else if (t.pnl < 0) { curLoss++; curWin = 0; }
+			else { curWin = 0; curLoss = 0; }
+			maxWinStreak = Math.max(maxWinStreak, curWin);
+			maxLossStreak = Math.max(maxLossStreak, curLoss);
+		});
+
+		// Per-day aggregation (a "trading day" may hold multiple trades)
+		const dayMap = new Map();
+		sorted.forEach(t => dayMap.set(t.entry_date, (dayMap.get(t.entry_date) || 0) + t.pnl));
+		const days = [...dayMap.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+		const winningDays = days.filter(([, p]) => p > 0).length;
+		const losingDays = days.filter(([, p]) => p < 0).length;
+
+		// Monthly P&L
+		const monthMap = new Map();
+		sorted.forEach(t => {
+			const d = new Date(t.entry_date + 'T00:00:00Z');
+			const key = d.toLocaleString('en-US', { month: 'short', year: '2-digit', timeZone: 'UTC' });
+			monthMap.set(key, (monthMap.get(key) || 0) + t.pnl);
+		});
+
+		// Day-of-week P&L / win-loss counts
+		const dowMap = new Map();
+		sorted.forEach(t => {
+			const d = new Date(t.entry_date + 'T00:00:00Z');
+			const idx = d.getUTCDay();
+			if (!dowMap.has(idx)) dowMap.set(idx, { pnl: 0, wins: 0, losses: 0 });
+			const e = dowMap.get(idx);
+			e.pnl += t.pnl;
+			if (t.pnl > 0) e.wins++; else if (t.pnl < 0) e.losses++;
+		});
+		const weekdayIdx = [1, 2, 3, 4, 5]; // Mon-Fri
+
+		// Strategy distribution (stand-in for call/put mode -- this dataset only labels IRON_CONDOR/VERTICAL)
+		const stratMap = new Map();
+		sorted.forEach(t => stratMap.set(t.strategy, (stratMap.get(t.strategy) || 0) + 1));
+
+		// Calendar sequence grouped by month, most recent first
+		const calMonths = new Map();
+		days.forEach(([date, pnl]) => {
+			const d = new Date(date + 'T00:00:00Z');
+			const key = d.toLocaleString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+			if (!calMonths.has(key)) calMonths.set(key, []);
+			calMonths.get(key).push({ date, pnl });
+		});
+		const calMonthEntries = [...calMonths.entries()].reverse();
+
+		// Weekday x month heatmap
+		const monthKeys = [...monthMap.keys()];
+		const heat = new Map();
+		sorted.forEach(t => {
+			const d = new Date(t.entry_date + 'T00:00:00Z');
+			const dow = d.getUTCDay();
+			if (dow === 0 || dow === 6) return;
+			const monthKey = d.toLocaleString('en-US', { month: 'short', year: '2-digit', timeZone: 'UTC' });
+			const k = dow + '|' + monthKey;
+			if (!heat.has(k)) heat.set(k, { sum: 0, count: 0 });
+			const e = heat.get(k);
+			e.sum += t.pnl; e.count++;
+		});
+
+		return {
+			totalPnl, winRate, avgWin, avgLoss, profitFactor,
+			trades: sorted.length, tradingDays: days.length, winningDays, losingDays,
+			maxWinStreak, maxLossStreak,
+			monthMap, dowMap, weekdayIdx, stratMap, calMonthEntries, heat, monthKeys,
+		};
+	}
+
+	function capitalRiskTable(maxDrawdown) {
+		const dd = Math.abs(maxDrawdown || 0);
+		const rows = CAPITAL_TIERS.map(cap => {
+			const pct = dd / cap;
+			let tier, cls;
+			if (pct > 1) { tier = 'Scarce'; cls = 'risk-scarce'; }
+			else if (pct > 0.5) { tier = 'Tight'; cls = 'risk-tight'; }
+			else { tier = 'Robust'; cls = 'risk-robust'; }
+			return `<tr>
+				<td>${fmtMoney(cap)}</td>
+				<td class="num">${(pct * 100).toFixed(0)}%</td>
+				<td><span class="risk-pill ${cls}">${tier}</span></td>
+			</tr>`;
+		}).join('');
+		return `<table class="capital-table"><tbody>${rows}</tbody></table>
+			<div style="font-size:0.68rem;color:var(--text-dim);margin-top:0.4rem;">
+				Max drawdown (${fmtMoney(maxDrawdown)}) as a share of hypothetical account size &mdash; not a live capital balance.
+			</div>`;
+	}
+
+	function renderDashboard(real) {
+		const d = computeDashboardStats(real.trades);
+		const heroClass = d.totalPnl >= 0 ? 'pnl-hero' : 'pnl-hero neg';
+		const projectedDD = (real.overall.max_drawdown || 0) * 1.2;
+
+		const monthItems = [...d.monthMap.entries()].map(([label, value]) => ({ label, value }));
+		const dowItems = d.weekdayIdx.map(i => ({ label: DOW_NAMES[i], value: (d.dowMap.get(i) || { pnl: 0 }).pnl }));
+		const winsByDow = d.weekdayIdx.map(i => (d.dowMap.get(i) || { wins: 0 }).wins);
+		const lossesByDow = d.weekdayIdx.map(i => (d.dowMap.get(i) || { losses: 0 }).losses);
+
+		const stratColors = ['#5b8cff', '#f0a63c', '#3ecf8e', '#ef5b5b'];
+		const stratSegments = [...d.stratMap.entries()].map(([label, value], i) => ({ label, value, color: stratColors[i % stratColors.length] }));
+		const stratTotal = sum(stratSegments.map(s => s.value)) || 1;
+
+		const calendarHtml = d.calMonthEntries.map(([month, dayList]) => `
+			<div class="cal-month">
+				<div class="cal-month-label">${month}</div>
+				<div class="cal-row">
+					${dayList.map(dd2 => `<div class="cal-cell ${dd2.pnl >= 0 ? 'win' : 'loss'}" title="${dd2.date}: ${fmtMoney(dd2.pnl)}"></div>`).join('')}
+				</div>
+			</div>`).join('');
+
+		const heatHead = `<tr><th></th>${d.monthKeys.map(m => `<th>${m}</th>`).join('')}</tr>`;
+		const heatBody = d.weekdayIdx.map(dow => {
+			const cells = d.monthKeys.map(m => {
+				const e = d.heat.get(dow + '|' + m);
+				if (!e) return `<td class="heat-cell-empty">&mdash;</td>`;
+				const avg = e.sum / e.count;
+				const bg = avg >= 0 ? 'rgba(62,207,142,' + Math.min(0.85, 0.25 + Math.abs(avg) / 1500) + ')' : 'rgba(239,91,91,' + Math.min(0.85, 0.25 + Math.abs(avg) / 1500) + ')';
+				return `<td style="background:${bg};color:#0b0e14;font-weight:600;">${fmtMoney(Math.round(avg))}</td>`;
+			}).join('');
+			return `<tr><th>${DOW_NAMES[dow]}</th>${cells}</tr>`;
+		}).join('');
+
+		const draw = () => {
+			drawBars(document.getElementById('dash-monthly'), monthItems);
+			drawEquityCurve(document.getElementById('dash-equity'), real.overall.equity_curve, true);
+			drawBars(document.getElementById('dash-dow'), dowItems);
+			drawGroupedBars(document.getElementById('dash-winloss'), d.weekdayIdx.map(i => DOW_NAMES[i]), winsByDow, lossesByDow, '#3ecf8e', '#ef5b5b');
+			drawPie(document.getElementById('dash-pie'), stratSegments);
+		};
+
+		const html = `
+		<div class="dash-grid">
+			<div class="dash-sidebar">
+				<div class="${heroClass}">
+					<div class="label">Total P&amp;L</div>
+					<div class="value ${cls(d.totalPnl)}">${fmtMoney(d.totalPnl)}</div>
+				</div>
+				<div class="dash-panel">
+					<h4>Summary</h4>
+					<div class="dash-summary-list">
+						<div class="row"><span>Trades</span><b>${d.trades}</b></div>
+						<div class="row"><span>Trading days</span><b>${d.tradingDays}</b></div>
+						<div class="row"><span>Winning days</span><b class="pos">${d.winningDays}</b></div>
+						<div class="row"><span>Losing days</span><b class="neg">${d.losingDays}</b></div>
+						<div class="row"><span>Win rate (trades)</span><b>${fmtPct(d.winRate)}</b></div>
+						<div class="row"><span>Max winning streak</span><b class="pos">${d.maxWinStreak}</b></div>
+						<div class="row"><span>Max losing streak</span><b class="neg">${d.maxLossStreak}</b></div>
+						<div class="row"><span>Avg profit</span><b class="pos">${fmtMoney(d.avgWin)}</b></div>
+						<div class="row"><span>Avg loss</span><b class="neg">${fmtMoney(d.avgLoss)}</b></div>
+						<div class="row"><span>Profit factor</span><b>${d.profitFactor == null ? '&mdash;' : d.profitFactor.toFixed(2)}</b></div>
+						<div class="row"><span>Max drawdown</span><b class="neg">${fmtMoney(real.overall.max_drawdown)}</b></div>
+						<div class="row"><span>Projected DD (1.2&times;)</span><b class="neg">${fmtMoney(projectedDD)}</b></div>
+					</div>
+				</div>
+				<div class="dash-panel">
+					<h4>Available Capital</h4>
+					${capitalRiskTable(real.overall.max_drawdown)}
+				</div>
+			</div>
+
+			<div class="dash-main">
+				<div class="dash-row-2">
+					<div class="dash-panel">
+						<h4>Profit by Month</h4>
+						<canvas class="dash-canvas" id="dash-monthly"></canvas>
+					</div>
+					<div class="dash-panel">
+						<h4>Daily P&amp;L Evolution</h4>
+						<canvas class="dash-canvas" id="dash-equity"></canvas>
+					</div>
+				</div>
+
+				<div class="dash-row-4">
+					<div class="dash-panel">
+						<h4>P&amp;L by Day of Week</h4>
+						<canvas class="dash-canvas short" id="dash-dow"></canvas>
+					</div>
+					<div class="dash-panel">
+						<h4>Distribution &middot; Strategy Mix</h4>
+						<div class="pie-wrap">
+							<canvas id="dash-pie"></canvas>
+							<div class="pie-legend">
+								${stratSegments.map(s => `<div><span class="dot" style="background:${s.color}"></span>${s.label.replace(/_/g, ' ')} &mdash; ${(s.value / stratTotal * 100).toFixed(1)}%</div>`).join('')}
+							</div>
+						</div>
+					</div>
+					<div class="dash-panel">
+						<h4>Winners vs Losers by Day</h4>
+						<canvas class="dash-canvas short" id="dash-winloss"></canvas>
+					</div>
+					<div class="dash-panel">
+						<h4>Average Profit vs Loss</h4>
+						<div class="avgpl-bars">
+							<div class="bar-col">
+								<div class="bar" style="height:${Math.max(20, Math.min(110, Math.abs(d.avgWin) / Math.max(Math.abs(d.avgWin), Math.abs(d.avgLoss), 1) * 110))}px;background:var(--green);"></div>
+								<span class="pos">${fmtMoney(d.avgWin)}</span>
+								<span style="color:var(--text-dim);font-size:0.72rem;">Avg profit</span>
+							</div>
+							<div class="bar-col">
+								<div class="bar" style="height:${Math.max(20, Math.min(110, Math.abs(d.avgLoss) / Math.max(Math.abs(d.avgWin), Math.abs(d.avgLoss), 1) * 110))}px;background:var(--red);"></div>
+								<span class="neg">${fmtMoney(d.avgLoss)}</span>
+								<span style="color:var(--text-dim);font-size:0.72rem;">Avg loss</span>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="dash-row-2">
+					<div class="dash-panel">
+						<h4>Daily Results Sequence</h4>
+						${calendarHtml || '<div style="color:var(--text-dim);font-size:0.8rem;">No trades.</div>'}
+					</div>
+					<div class="dash-panel" style="overflow-x:auto;">
+						<h4>Average P&amp;L by Day &times; Month</h4>
+						<table class="heat-table">
+							<thead>${heatHead}</thead>
+							<tbody>${heatBody}</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>`;
+
+		return { html, draw };
+	}
+
+	function renderReal(real) {
+		let html = `<h2>Real Trade Log <span class="badge real">36 trades, from signals-service export</span></h2>
+			<div class="caveat">${real.caveat}</div>`;
+
+		if (real.mismatches.length) {
+			html += `<div class="caveat">${real.mismatches.length} trade(s) where the sheet's W/L label disagreed with the computed settlement outcome (highlighted below).</div>`;
+		}
+
+		html += '<h3>By strategy</h3>';
+		real.by_strategy.forEach((s, i) => {
+			html += `<div class="strategy-block">
+				<h4>${s.name.replace(/_/g, ' ')}</h4>
+				${statGrid(s.stats)}
+				<div class="panel"><canvas id="real-curve-${i}"></canvas></div>
+			</div>`;
+		});
+
+		html += `<details><summary>Show all ${real.trades.length} real trades</summary>
+			${tradesTable(real.trades, [
+				{ label: 'Entry', render: t => t.entry_date },
+				{ label: 'Strategy', render: t => t.strategy },
+				{ label: 'Status', render: t => t.status },
+				{ label: 'P&amp;L', num: true, render: t => `<span class="${cls(t.pnl)}">${fmtMoney(t.pnl)}</span>` },
+				{ label: 'Notes', render: t => t.notes },
+			])}
+		</details>`;
+		return html;
+	}
+
+	function renderSynthetic(synthetic) {
+		const [from, to] = synthetic.price_series_range;
+		let html = `<h2>Synthetic Demo Backtest <span class="badge demo">Illustrative only</span></h2>
+			<div class="caveat">${synthetic.caveat} Price series: ${from} &rarr; ${to}.</div>`;
+
+		synthetic.strategies.forEach((s, i) => {
+			html += `<div class="strategy-block">
+				<h3>${s.name.replace(/_/g, ' ')}</h3>
+				${statGrid(s.stats)}
+				<div class="panel"><canvas id="synth-curve-${i}"></canvas></div>
+				<details><summary>Show ${s.trades.length} trade(s)</summary>
+					${tradesTable(s.trades, [
+						{ label: 'Entry', render: t => t.entry_date },
+						{ label: 'Exit', render: t => t.exit_date || '&mdash;' },
+						{ label: 'Status', render: t => t.status },
+						{ label: 'Legs', render: t => t.legs.join(', ') },
+						{ label: 'Credit', num: true, render: t => fmtNum(t.entry_credit) },
+						{ label: 'P&amp;L', num: true, render: t => `<span class="${cls(t.pnl)}">${fmtMoney(t.pnl)}</span>` },
+					])}
+				</details>
+			</div>`;
+		});
+		return html;
+	}
+
+	fetch('/data/results.json')
+		.then(r => { if (!r.ok) throw new Error('results.json ' + r.status); return r.json(); })
+		.then(data => {
+			document.getElementById('generated-at').textContent = 'Last regenerated: ' + data.generated_at;
+			const app = document.getElementById('app');
+			const dashboard = renderDashboard(data.real);
+			app.innerHTML = dashboard.html + renderReal(data.real) + renderSynthetic(data.synthetic);
+			dashboard.draw();
+
+			data.real.by_strategy.forEach((s, i) => drawEquityCurve(document.getElementById(`real-curve-${i}`), s.stats.equity_curve));
+			data.synthetic.strategies.forEach((s, i) => drawEquityCurve(document.getElementById(`synth-curve-${i}`), s.equity_curve));
+		})
+		.catch(err => {
+			document.getElementById('error').textContent = 'Failed to load results: ' + err.message;
+			document.getElementById('generated-at').textContent = '';
+		});
+	</script>
+
+	<script>
+	// 0DTE Strike Calculator -- mirrors strategy_logic/direction_matrix.py,
+	// gex_walls.py (placement rule only), and strike_selector.py (P&L math).
+	// See strategy_logic/README_STRATEGY_LOGIC.md for course-section citations.
+
+	function calcClassifyGap(open, priorClose) {
+		if (open > priorClose) return 'BULLISH';
+		if (open < priorClose) return 'BEARISH';
+		return 'FLAT';
+	}
+
+	function calcReadDirection(open, priorClose, price, vwap) {
+		const gap = calcClassifyGap(open, priorClose);
+		const vwapPos = price >= vwap ? 'ABOVE' : 'BELOW';
+		let signal = 'WAIT';
+		if (gap === 'BULLISH' && vwapPos === 'ABOVE') signal = 'BULLISH_CONFIRMED';
+		else if (gap === 'BEARISH' && vwapPos === 'BELOW') signal = 'BEARISH_CONFIRMED';
+		return { gap, vwapPos, signal, gapPoints: open - priorClose, distToVwap: price - vwap };
+	}
+
+	function calcSpreadPnl(width, credit) {
+		const maxSpreadValue = width * 100;
+		const maxProfit = credit;
+		const maxLoss = Math.max(maxSpreadValue - credit, 0);
+		const totalAtRisk = maxProfit + maxLoss;
+		const breakevenWinRate = totalAtRisk > 0 ? maxLoss / totalAtRisk : null;
+		return { maxSpreadValue, maxProfit, maxLoss, ratio: maxLoss > 0 ? maxProfit / maxLoss : null, breakevenWinRate };
+	}
+
+	function runStrikeCalculator() {
+		const priorClose = parseFloat(document.getElementById('calc-priorClose').value);
+		const todayOpen = parseFloat(document.getElementById('calc-todayOpen').value);
+		const currentPrice = parseFloat(document.getElementById('calc-currentPrice').value);
+		const vwap = parseFloat(document.getElementById('calc-vwap').value);
+		const putWall = parseFloat(document.getElementById('calc-putWall').value);
+		const callWall = parseFloat(document.getElementById('calc-callWall').value);
+		const shortStrike = parseFloat(document.getElementById('calc-shortStrike').value);
+		const width = parseFloat(document.getElementById('calc-width').value);
+		const credit = parseFloat(document.getElementById('calc-credit').value);
+
+		const dir = calcReadDirection(todayOpen, priorClose, currentPrice, vwap);
+		const pnl = calcSpreadPnl(width, credit);
+
+		let placementNote = '';
+		let placementOk = null;
+		if (dir.signal === 'BULLISH_CONFIRMED') {
+			placementOk = shortStrike <= putWall;
+			placementNote = `Bull Put rule (Class #05): short strike should be &le; Put Wall (${putWall}). Your short strike ${shortStrike} is ${placementOk ? '' : 'NOT '}beyond the wall.`;
+		} else if (dir.signal === 'BEARISH_CONFIRMED') {
+			placementOk = shortStrike >= callWall;
+			placementNote = `Bear Call rule (Class #05): short strike should be &ge; Call Wall (${callWall}). Your short strike ${shortStrike} is ${placementOk ? '' : 'NOT '}beyond the wall.`;
+		} else {
+			placementNote = 'Direction signal is WAIT &mdash; course says do not force a trade (Class #02/#04).';
+		}
+
+		const signalClass = dir.signal === 'BULLISH_CONFIRMED' ? 'pos' : dir.signal === 'BEARISH_CONFIRMED' ? 'neg' : '';
+		const placementColor = placementOk === null ? 'var(--text-dim)' : placementOk ? 'var(--green)' : 'var(--red)';
+		const bewr = pnl.breakevenWinRate;
+		const bewrClass = bewr === null ? '' : bewr > 0.65 ? 'neg' : bewr <= 0.5 ? 'pos' : '';
+
+		document.getElementById('calc-output').innerHTML = `
+			<div class="stat-grid">
+				${statCard('Direction signal', dir.signal.replace('_', ' '), signalClass)}
+				${statCard('Gap / VWAP', `${dir.gap} / ${dir.vwapPos}`)}
+				${statCard('Max profit', fmtMoney(pnl.maxProfit), 'pos')}
+				${statCard('Max loss', fmtMoney(pnl.maxLoss), 'neg')}
+				${statCard('Breakeven win %', fmtPct(bewr), bewrClass)}
+			</div>
+			<div class="caveat" style="border-left-color:${placementColor};">
+				${placementNote}<br>
+				Credit/risk ratio: ${pnl.ratio !== null ? pnl.ratio.toFixed(3) : 'n/a'} &middot;
+				Spread width: ${width} pts &middot; Max spread value: ${fmtMoney(pnl.maxSpreadValue)}<br>
+				Breakeven win %: this trade needs to win at least ${fmtPct(bewr)} of the time (maxLoss &divide; (maxProfit + maxLoss)) just to break even before costs.
+			</div>
+		`;
+	}
+
+	function fetchLiveMarketData() {
+		const btn = document.getElementById('calc-fetch-live');
+		const status = document.getElementById('calc-live-status');
+		btn.disabled = true;
+		status.style.color = 'var(--text-dim)';
+		status.innerHTML = 'Fetching&hellip;';
+
+		fetch('/api/market-data')
+			.then(r => r.json().then(data => ({ ok: r.ok, data })))
+			.then(({ ok, data }) => {
+				if (!ok || data.error) throw new Error(data.error || 'Failed to fetch market data.');
+				document.getElementById('calc-priorClose').value = data.priorClose.toFixed(2);
+				document.getElementById('calc-todayOpen').value = data.todayOpen.toFixed(2);
+				document.getElementById('calc-currentPrice').value = data.currentPrice.toFixed(2);
+				document.getElementById('calc-vwap').value = data.vwap.toFixed(2);
+				const asOf = new Date(data.asOf);
+				const asOfStr = Number.isNaN(asOf.getTime()) ? data.asOf : asOf.toLocaleString();
+				status.style.color = 'var(--green)';
+				status.innerHTML = `Live as of ${asOfStr} &middot; approximated from ${data.proxySymbol} &times; ${data.multiplier} (SPX index data needs a paid Twelve Data plan).`;
+				runStrikeCalculator();
+			})
+			.catch(err => {
+				status.style.color = 'var(--red)';
+				status.textContent = err.message;
+			})
+			.finally(() => { btn.disabled = false; });
+	}
+
+	document.getElementById('calc-run').addEventListener('click', runStrikeCalculator);
+	document.getElementById('calc-fetch-live').addEventListener('click', fetchLiveMarketData);
+	runStrikeCalculator();
+	</script>
+</body>
+</html>
