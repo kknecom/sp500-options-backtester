@@ -152,13 +152,24 @@
 		}
 		.clock-box .clock-row { display: flex; justify-content: flex-end; gap: 0.4rem; }
 		.clock-box .clock-tz { font-weight: 700; color: var(--text); }
+
+		/* Header eagle mark */
+		.brand-row { display: flex; align-items: center; gap: 0.75rem; }
+		.brand-mark {
+			width: 44px; height: 44px; border-radius: 50%; object-fit: cover;
+			border: 1px solid var(--panel-border); flex-shrink: 0;
+			box-shadow: 0 0 0 3px rgba(91,140,255,0.12);
+		}
 	</style>
 </head>
 <body>
 	<main>
 		<div class="page-header">
 			<div class="header-titles">
-				<h1>SPX Credit Spread Backtester</h1>
+				<div class="brand-row">
+					<img src="/eagle-logo.jpg" alt="" class="brand-mark">
+					<h1>SPX Credit Spread Backtester</h1>
+				</div>
 				<p class="subtitle" id="generated-at">Loading results&hellip;</p>
 			</div>
 			<div class="clock-box" id="live-clock">
