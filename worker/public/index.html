@@ -142,12 +142,30 @@
 		.heat-table td { text-align: center; font-size: 0.72rem; border-radius: 4px; padding: 0.4rem 0.3rem; border-bottom: none; }
 		.heat-table th { font-size: 0.65rem; text-align: center; }
 		.heat-cell-empty { color: var(--text-dim); background: rgba(255,255,255,0.02); }
+
+		/* Live clock (top right) */
+		.page-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
+		.header-titles { flex: 1 1 auto; min-width: 220px; }
+		.clock-box {
+			text-align: right; font-size: 0.78rem; color: var(--text-dim);
+			font-variant-numeric: tabular-nums; line-height: 1.6; white-space: nowrap; padding-top: 0.15rem;
+		}
+		.clock-box .clock-row { display: flex; justify-content: flex-end; gap: 0.4rem; }
+		.clock-box .clock-tz { font-weight: 700; color: var(--text); }
 	</style>
 </head>
 <body>
 	<main>
-		<h1>SPX Credit Spread Backtester</h1>
-		<p class="subtitle" id="generated-at">Loading results&hellip;</p>
+		<div class="page-header">
+			<div class="header-titles">
+				<h1>SPX Credit Spread Backtester</h1>
+				<p class="subtitle" id="generated-at">Loading results&hellip;</p>
+			</div>
+			<div class="clock-box" id="live-clock">
+				<div class="clock-row"><span class="clock-tz">SGT</span><span id="clock-sgt">&mdash;</span></div>
+				<div class="clock-row"><span class="clock-tz">ET</span><span id="clock-et">&mdash;</span></div>
+			</div>
+		</div>
 		<div id="error"></div>
 
 		<div class="tabs">
@@ -219,6 +237,21 @@
 			document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
 		});
 	});
+	</script>
+
+	<script>
+	// Live clock: Singapore + US Eastern, updates every second, DST-aware via IANA tz data
+	function updateClocks() {
+		const now = new Date();
+		const fmt = (tz) => new Intl.DateTimeFormat('en-US', {
+			timeZone: tz, month: 'short', day: 'numeric',
+			hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+		}).format(now);
+		document.getElementById('clock-sgt').textContent = fmt('Asia/Singapore');
+		document.getElementById('clock-et').textContent = fmt('America/New_York');
+	}
+	updateClocks();
+	setInterval(updateClocks, 1000);
 	</script>
 
 	<script>
