@@ -209,7 +209,16 @@ def fetch_underlying_bars(symbol: str = "SPY", start: str = None, end: str = Non
     as the historical-close proxy instead -- consistent with the
     project's existing sample CSV, which is also SPY-derived per
     run_backtest.py's docstring.
+
+    IMPORTANT #2: passing end=None does NOT mean "through today" --
+    confirmed live, moomoo silently caps it at start + 1 year (e.g.
+    start='2023-09-01', end=None returned only 251 rows through
+    2024-08-30, while passing an explicit end=<today> returned the full
+    751 rows through today). This function defaults end to today itself
+    to avoid that footgun; pass an explicit end if you want otherwise.
     """
+    if end is None:
+        end = date.today().isoformat()
     with get_quote_context() as ctx:
         ret, data, _ = ctx.request_history_kline(
             _underlying_code(symbol), start=start, end=end, ktype=ft.KLType.K_DAY,

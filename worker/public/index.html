@@ -35,6 +35,7 @@
 		}
 		.badge.real { background: rgba(62,207,142,0.15); color: var(--green); }
 		.badge.demo { background: rgba(239,91,91,0.15); color: var(--red); }
+		.badge.live { background: rgba(91,140,255,0.15); color: var(--accent); }
 		.caveat {
 			background: var(--panel); border: 1px solid var(--panel-border); border-left: 3px solid var(--accent);
 			border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1.25rem;
@@ -704,16 +705,16 @@
 		return html;
 	}
 
-	function renderSynthetic(synthetic) {
-		const [from, to] = synthetic.price_series_range;
-		let html = `<h2>Synthetic Demo Backtest <span class="badge demo">Illustrative only</span></h2>
-			<div class="caveat">${synthetic.caveat} Price series: ${from} &rarr; ${to}.</div>`;
+	function renderBacktestSection(data, { heading, badgeClass, badgeText, idPrefix }) {
+		const [from, to] = data.price_series_range;
+		let html = `<h2>${heading} <span class="badge ${badgeClass}">${badgeText}</span></h2>
+			<div class="caveat">${data.caveat} Price series: ${from} &rarr; ${to}.</div>`;
 
-		synthetic.strategies.forEach((s, i) => {
+		data.strategies.forEach((s, i) => {
 			html += `<div class="strategy-block">
 				<h3>${s.name.replace(/_/g, ' ')}</h3>
 				${statGrid(s.stats)}
-				<div class="panel"><canvas id="synth-curve-${i}"></canvas></div>
+				<div class="panel"><canvas id="${idPrefix}-curve-${i}"></canvas></div>
 				<details><summary>Show ${s.trades.length} trade(s)</summary>
 					${tradesTable(s.trades, [
 						{ label: 'Entry', render: t => t.entry_date },
@@ -735,10 +736,19 @@
 			document.getElementById('generated-at').textContent = 'Last regenerated: ' + data.generated_at;
 			const app = document.getElementById('app');
 			const dashboard = renderDashboard(data.real);
-			app.innerHTML = dashboard.html + renderReal(data.real) + renderSynthetic(data.synthetic);
+			const moomooHtml = data.moomoo ? renderBacktestSection(data.moomoo, {
+				heading: 'Live moomoo Backtest', badgeClass: 'live',
+				badgeText: 'Real SPY closes, synthetic option chain', idPrefix: 'moomoo',
+			}) : '';
+			const synthHtml = renderBacktestSection(data.synthetic, {
+				heading: 'Synthetic Demo Backtest', badgeClass: 'demo',
+				badgeText: 'Illustrative only', idPrefix: 'synth',
+			});
+			app.innerHTML = dashboard.html + renderReal(data.real) + moomooHtml + synthHtml;
 			dashboard.draw();
 
 			data.real.by_strategy.forEach((s, i) => drawEquityCurve(document.getElementById(`real-curve-${i}`), s.stats.equity_curve));
+			if (data.moomoo) data.moomoo.strategies.forEach((s, i) => drawEquityCurve(document.getElementById(`moomoo-curve-${i}`), s.equity_curve));
 			data.synthetic.strategies.forEach((s, i) => drawEquityCurve(document.getElementById(`synth-curve-${i}`), s.equity_curve));
 		})
 		.catch(err => {
