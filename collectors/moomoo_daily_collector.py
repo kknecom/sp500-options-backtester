@@ -53,9 +53,15 @@ from moomoo_client import get_quote_context
 
 # Indices use moomoo's MARKET..CODE form (double dot), unlike stock-rooted
 # options ('US.AAPL'). Extend this map if other underlyings are added.
+# NOTE: SPX/VIX resolve fine for get_option_chain/get_option_expiration_date
+# (confirmed live), but request_history_kline rejects both with "US stock
+# indices are not supported" -- see fetch_underlying_bars. SPY is mapped
+# here as the practical historical-close proxy (same one the bundled
+# sample CSV already uses, per run_backtest.py's docstring).
 UNDERLYING_CODE_MAP = {
     "SPX": "US..SPX",
     "VIX": "US..VIX",
+    "SPY": "US.SPY",
 }
 
 # Reverse-engineered from live examples: 'US.SPX261016C200000' ->
@@ -189,13 +195,20 @@ def fetch_option_day_bars(codes: list[str], start: str = None, end: str = None) 
     return bars
 
 
-def fetch_underlying_bars(symbol: str = "SPX", start: str = None, end: str = None):
+def fetch_underlying_bars(symbol: str = "SPY", start: str = None, end: str = None):
     """
-    Daily underlying/index bars (SPX, or VIX for a real IV proxy), via
-    request_history_kline. Counts against the same shared history quota
-    as option bars (unconfirmed whether moomoo splits quota by asset
-    type the way Tiger's docstring claims Tiger does) -- don't assume
-    this is free.
+    Daily underlying bars via request_history_kline. Counts against the
+    same shared history quota as option bars (unconfirmed whether moomoo
+    splits quota by asset type the way Tiger's docstring claims Tiger
+    does) -- don't assume this is free.
+
+    IMPORTANT: 'SPX' and 'VIX' raise here -- confirmed live, moomoo's
+    request_history_kline rejects US indices outright ("US stock indices
+    are not supported"), even though they work fine for
+    fetch_option_expirations/fetch_option_chain. Use 'SPY' (the default)
+    as the historical-close proxy instead -- consistent with the
+    project's existing sample CSV, which is also SPY-derived per
+    run_backtest.py's docstring.
     """
     with get_quote_context() as ctx:
         ret, data, _ = ctx.request_history_kline(
