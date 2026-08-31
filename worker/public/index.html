@@ -182,7 +182,7 @@
 
 		<div class="tabs">
 			<button class="tab-btn active" data-tab="backtest">Backtesting</button>
-			<button class="tab-btn" data-tab="calc">0DTE Strike Calculator</button>
+			<button class="tab-btn" data-tab="calc">Strike Calculator</button>
 		</div>
 
 		<div id="tab-backtest" class="tab-content active">
@@ -191,11 +191,15 @@
 
 		<div id="tab-calc" class="tab-content">
 			<div class="caveat">
-				Implements the formulas actually specified across Classes #01&ndash;#05 of the course this strategy
-				is based on: the gap&times;VWAP direction matrix (Class #02), the wall-placement rule for short
-				strikes (Class #05), and the credit-spread P&amp;L math (Classes #03/#04). Put Wall / Call Wall are
-				entered manually &mdash; the course reads these off a GEX chart rather than computing them, and this
-				page has no live options-chain feed. Runs entirely in your browser.
+				At 0 DTE, implements the formulas actually specified across Classes #01&ndash;#05 of the course this
+				strategy is based on: the gap&times;VWAP direction matrix (Class #02), the wall-placement rule for
+				short strikes (Class #05), and the credit-spread P&amp;L math (Classes #03/#04). Put Wall / Call Wall
+				are entered manually &mdash; the course reads these off a GEX chart rather than computing them. At a
+				DTE &gt; 0 (e.g. 30, 45), the gap/VWAP signal and wall-placement rule don't apply (they're 0DTE/
+				intraday-specific) &mdash; instead, pick a direction and this estimates a delta-targeted entry credit
+				via the same synthetic Black-Scholes chain <code>pricing/black_scholes.py</code> uses (real moomoo
+				chain data isn't reachable from this live page -- OpenD is local-only, see README). Either way, the
+				P&amp;L math below runs entirely in your browser.
 			</div>
 			<div class="panel">
 				<div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;margin-bottom:1rem;">
@@ -203,14 +207,20 @@
 					<span id="calc-live-status" style="font-size:0.78rem;color:var(--text-dim);"></span>
 				</div>
 				<div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
+					<label class="calc-field">Days to expiration (DTE)
+						<input type="number" id="calc-dte" value="0" min="0" step="1">
+					</label>
+					<label class="calc-field">Current SPX price
+						<input type="number" id="calc-currentPrice" value="7728">
+					</label>
+				</div>
+
+				<div id="calc-0dte-fields" class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));margin-top:0.75rem;">
 					<label class="calc-field">Prior close
 						<input type="number" id="calc-priorClose" value="7700">
 					</label>
 					<label class="calc-field">Today's open
 						<input type="number" id="calc-todayOpen" value="7712">
-					</label>
-					<label class="calc-field">Current SPX price
-						<input type="number" id="calc-currentPrice" value="7728">
 					</label>
 					<label class="calc-field">Current VWAP
 						<input type="number" id="calc-vwap" value="7718">
@@ -221,6 +231,25 @@
 					<label class="calc-field">Call Wall / resistance
 						<input type="number" id="calc-callWall" value="7780">
 					</label>
+				</div>
+
+				<div id="calc-swing-fields" class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));margin-top:0.75rem;display:none;">
+					<label class="calc-field">Direction
+						<select id="calc-direction">
+							<option value="BULL_PUT">Bull Put Spread</option>
+							<option value="BEAR_CALL">Bear Call Spread</option>
+						</select>
+					</label>
+					<label class="calc-field">Est. volatility (IV, annualized)
+						<input type="number" id="calc-iv" value="0.15" min="0.01" step="0.01">
+					</label>
+				</div>
+				<div id="calc-estimate-row" style="display:none;margin-top:0.75rem;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+					<button id="calc-estimate" type="button" style="background:none;border:1px solid var(--accent);color:var(--accent);padding:0.5rem 0.9rem;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;">Estimate entry (synthetic BSM)</button>
+					<span id="calc-estimate-status" style="font-size:0.78rem;color:var(--text-dim);"></span>
+				</div>
+
+				<div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));margin-top:0.75rem;">
 					<label class="calc-field">Proposed short strike
 						<input type="number" id="calc-shortStrike" value="7700">
 					</label>
@@ -758,9 +787,93 @@
 	</script>
 
 	<script>
-	// 0DTE Strike Calculator -- mirrors strategy_logic/direction_matrix.py,
-	// gex_walls.py (placement rule only), and strike_selector.py (P&L math).
-	// See strategy_logic/README_STRATEGY_LOGIC.md for course-section citations.
+	// Strike Calculator. At DTE=0, mirrors strategy_logic/direction_matrix.py,
+	// gex_walls.py (placement rule only), and strike_selector.py (P&L math) --
+	// see strategy_logic/README_STRATEGY_LOGIC.md for course-section citations.
+	// At DTE>0, the entry-price estimator below is a client-side port of
+	// pricing/black_scholes.py's price_option/find_strike_by_delta (synthetic
+	// BSM, no real quotes -- this page has no live options-chain feed).
+
+	// Mirrors config.py -- keep in sync if those change.
+	const SYNTHETIC_R = 0.045;             // config.RISK_FREE_RATE
+	const SYNTHETIC_Q = 0.013;             // config.DIVIDEND_YIELD
+	const SYNTHETIC_STRIKE_INCREMENT = 5;  // config.STRIKE_INCREMENT
+	const SYNTHETIC_SHORT_DELTA = 0.30;    // config.SHORT_LEG_TARGET_DELTA
+	const SYNTHETIC_LONG_DELTA = 0.10;     // config.LONG_LEG_TARGET_DELTA
+
+	function erfApprox(x) {
+		// Abramowitz & Stegun 7.1.26 -- same accuracy class as math.erf for this use.
+		const sign = x < 0 ? -1 : 1;
+		x = Math.abs(x);
+		const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+		const t = 1 / (1 + p * x);
+		const y = 1 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+		return sign * y;
+	}
+	const normCdf = x => 0.5 * (1 + erfApprox(x / Math.SQRT2));
+
+	function bsmPrice(S, K, T, r, q, sigma, right) {
+		// Port of pricing/black_scholes.py::price_option -- price + delta only (all this needs).
+		const sqrtT = Math.sqrt(T);
+		const d1 = (Math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / (sigma * sqrtT);
+		const d2 = d1 - sigma * sqrtT;
+		const discQ = Math.exp(-q * T), discR = Math.exp(-r * T);
+		if (right === 'C') {
+			return { price: Math.max(S * discQ * normCdf(d1) - K * discR * normCdf(d2), 0), delta: discQ * normCdf(d1) };
+		}
+		return { price: Math.max(K * discR * normCdf(-d2) - S * discQ * normCdf(-d1), 0), delta: -discQ * normCdf(-d1) };
+	}
+
+	function pickStrikeByDelta(S, T, r, q, sigma, right, targetAbsDelta) {
+		// Port of pricing/black_scholes.py::find_strike_by_delta, scanning a
+		// +/-15% strike grid (matches build_synthetic_chain's default width_pct)
+		// instead of requiring a pre-built chain.
+		let best = null, bestDiff = Infinity;
+		const low = S * 0.85, high = S * 1.15;
+		const k0 = Math.floor(low / SYNTHETIC_STRIKE_INCREMENT) * SYNTHETIC_STRIKE_INCREMENT;
+		for (let K = k0; K <= high; K += SYNTHETIC_STRIKE_INCREMENT) {
+			const diff = Math.abs(Math.abs(bsmPrice(S, K, T, r, q, sigma, right).delta) - targetAbsDelta);
+			if (diff < bestDiff) { bestDiff = diff; best = K; }
+		}
+		return best;
+	}
+
+	function estimateEntryPrice() {
+		const S = parseFloat(document.getElementById('calc-currentPrice').value);
+		const dte = parseFloat(document.getElementById('calc-dte').value);
+		const sigma = parseFloat(document.getElementById('calc-iv').value);
+		const direction = document.getElementById('calc-direction').value;
+		const status = document.getElementById('calc-estimate-status');
+		if (!(dte > 0) || !(sigma > 0) || !(S > 0)) {
+			status.style.color = 'var(--red)';
+			status.textContent = 'Need DTE > 0, a positive current price, and a positive IV to estimate.';
+			return;
+		}
+		const T = dte / 365;
+		const right = direction === 'BULL_PUT' ? 'P' : 'C';
+
+		const shortK = pickStrikeByDelta(S, T, SYNTHETIC_R, SYNTHETIC_Q, sigma, right, SYNTHETIC_SHORT_DELTA);
+		const longK = pickStrikeByDelta(S, T, SYNTHETIC_R, SYNTHETIC_Q, sigma, right, SYNTHETIC_LONG_DELTA);
+		const shortQ = bsmPrice(S, shortK, T, SYNTHETIC_R, SYNTHETIC_Q, sigma, right);
+		const longQ = bsmPrice(S, longK, T, SYNTHETIC_R, SYNTHETIC_Q, sigma, right);
+		const credit = (shortQ.price - longQ.price) * 100; // $/contract (100x multiplier, matches the manual-entry convention below)
+		const width = Math.abs(shortK - longK);
+
+		document.getElementById('calc-shortStrike').value = shortK;
+		document.getElementById('calc-width').value = width;
+		document.getElementById('calc-credit').value = credit.toFixed(2);
+		status.style.color = 'var(--accent)';
+		status.innerHTML = `Synthetic BSM: short ${right}${shortK} (&Delta;&asymp;${shortQ.delta.toFixed(2)}) / ` +
+			`long ${right}${longK} (&Delta;&asymp;${longQ.delta.toFixed(2)}) at ${dte} DTE, IV ${(sigma * 100).toFixed(0)}%. Not a real quote.`;
+		runStrikeCalculator();
+	}
+
+	function toggleDteMode() {
+		const isSwing = parseFloat(document.getElementById('calc-dte').value) > 0;
+		document.getElementById('calc-0dte-fields').style.display = isSwing ? 'none' : '';
+		document.getElementById('calc-swing-fields').style.display = isSwing ? '' : 'none';
+		document.getElementById('calc-estimate-row').style.display = isSwing ? 'flex' : 'none';
+	}
 
 	function calcClassifyGap(open, priorClose) {
 		if (open > priorClose) return 'BULLISH';
@@ -787,46 +900,72 @@
 	}
 
 	function runStrikeCalculator() {
-		const priorClose = parseFloat(document.getElementById('calc-priorClose').value);
-		const todayOpen = parseFloat(document.getElementById('calc-todayOpen').value);
+		const dte = parseFloat(document.getElementById('calc-dte').value);
 		const currentPrice = parseFloat(document.getElementById('calc-currentPrice').value);
-		const vwap = parseFloat(document.getElementById('calc-vwap').value);
-		const putWall = parseFloat(document.getElementById('calc-putWall').value);
-		const callWall = parseFloat(document.getElementById('calc-callWall').value);
 		const shortStrike = parseFloat(document.getElementById('calc-shortStrike').value);
 		const width = parseFloat(document.getElementById('calc-width').value);
 		const credit = parseFloat(document.getElementById('calc-credit').value);
-
-		const dir = calcReadDirection(todayOpen, priorClose, currentPrice, vwap);
 		const pnl = calcSpreadPnl(width, credit);
-
-		let placementNote = '';
-		let placementOk = null;
-		if (dir.signal === 'BULLISH_CONFIRMED') {
-			placementOk = shortStrike <= putWall;
-			placementNote = `Bull Put rule (Class #05): short strike should be &le; Put Wall (${putWall}). Your short strike ${shortStrike} is ${placementOk ? '' : 'NOT '}beyond the wall.`;
-		} else if (dir.signal === 'BEARISH_CONFIRMED') {
-			placementOk = shortStrike >= callWall;
-			placementNote = `Bear Call rule (Class #05): short strike should be &ge; Call Wall (${callWall}). Your short strike ${shortStrike} is ${placementOk ? '' : 'NOT '}beyond the wall.`;
-		} else {
-			placementNote = 'Direction signal is WAIT &mdash; course says do not force a trade (Class #02/#04).';
-		}
-
-		const signalClass = dir.signal === 'BULLISH_CONFIRMED' ? 'pos' : dir.signal === 'BEARISH_CONFIRMED' ? 'neg' : '';
-		const placementColor = placementOk === null ? 'var(--text-dim)' : placementOk ? 'var(--green)' : 'var(--red)';
 		const bewr = pnl.breakevenWinRate;
 		const bewrClass = bewr === null ? '' : bewr > 0.65 ? 'neg' : bewr <= 0.5 ? 'pos' : '';
 
+		if (!(dte > 0)) {
+			// 0DTE mode: full gap/VWAP direction signal + wall-placement rule (Classes #02/#05).
+			const priorClose = parseFloat(document.getElementById('calc-priorClose').value);
+			const todayOpen = parseFloat(document.getElementById('calc-todayOpen').value);
+			const vwap = parseFloat(document.getElementById('calc-vwap').value);
+			const putWall = parseFloat(document.getElementById('calc-putWall').value);
+			const callWall = parseFloat(document.getElementById('calc-callWall').value);
+
+			const dir = calcReadDirection(todayOpen, priorClose, currentPrice, vwap);
+
+			let placementNote = '';
+			let placementOk = null;
+			if (dir.signal === 'BULLISH_CONFIRMED') {
+				placementOk = shortStrike <= putWall;
+				placementNote = `Bull Put rule (Class #05): short strike should be &le; Put Wall (${putWall}). Your short strike ${shortStrike} is ${placementOk ? '' : 'NOT '}beyond the wall.`;
+			} else if (dir.signal === 'BEARISH_CONFIRMED') {
+				placementOk = shortStrike >= callWall;
+				placementNote = `Bear Call rule (Class #05): short strike should be &ge; Call Wall (${callWall}). Your short strike ${shortStrike} is ${placementOk ? '' : 'NOT '}beyond the wall.`;
+			} else {
+				placementNote = 'Direction signal is WAIT &mdash; course says do not force a trade (Class #02/#04).';
+			}
+
+			const signalClass = dir.signal === 'BULLISH_CONFIRMED' ? 'pos' : dir.signal === 'BEARISH_CONFIRMED' ? 'neg' : '';
+			const placementColor = placementOk === null ? 'var(--text-dim)' : placementOk ? 'var(--green)' : 'var(--red)';
+
+			document.getElementById('calc-output').innerHTML = `
+				<div class="stat-grid">
+					${statCard('Direction signal', dir.signal.replace('_', ' '), signalClass)}
+					${statCard('Gap / VWAP', `${dir.gap} / ${dir.vwapPos}`)}
+					${statCard('Max profit', fmtMoney(pnl.maxProfit), 'pos')}
+					${statCard('Max loss', fmtMoney(pnl.maxLoss), 'neg')}
+					${statCard('Breakeven win %', fmtPct(bewr), bewrClass)}
+				</div>
+				<div class="caveat" style="border-left-color:${placementColor};">
+					${placementNote}<br>
+					Credit/risk ratio: ${pnl.ratio !== null ? pnl.ratio.toFixed(3) : 'n/a'} &middot;
+					Spread width: ${width} pts &middot; Max spread value: ${fmtMoney(pnl.maxSpreadValue)}<br>
+					Breakeven win %: this trade needs to win at least ${fmtPct(bewr)} of the time (maxLoss &divide; (maxProfit + maxLoss)) just to break even before costs.
+				</div>
+			`;
+			return;
+		}
+
+		// Swing mode (DTE > 0): no gap/VWAP signal or GEX wall rule (0DTE/intraday-only) --
+		// just the P&L math, against whatever's in shortStrike/width/credit (manually
+		// entered, or filled by "Estimate entry" above).
 		document.getElementById('calc-output').innerHTML = `
 			<div class="stat-grid">
-				${statCard('Direction signal', dir.signal.replace('_', ' '), signalClass)}
-				${statCard('Gap / VWAP', `${dir.gap} / ${dir.vwapPos}`)}
+				${statCard('DTE', dte, '')}
+				${statCard('Short strike', shortStrike, '')}
 				${statCard('Max profit', fmtMoney(pnl.maxProfit), 'pos')}
 				${statCard('Max loss', fmtMoney(pnl.maxLoss), 'neg')}
 				${statCard('Breakeven win %', fmtPct(bewr), bewrClass)}
 			</div>
-			<div class="caveat" style="border-left-color:${placementColor};">
-				${placementNote}<br>
+			<div class="caveat">
+				No gap/VWAP direction signal or GEX wall-placement rule at DTE &gt; 0 (Class #02/#05 are 0DTE/
+				intraday-specific) &mdash; pick direction/strikes yourself, or use "Estimate entry" above.<br>
 				Credit/risk ratio: ${pnl.ratio !== null ? pnl.ratio.toFixed(3) : 'n/a'} &middot;
 				Spread width: ${width} pts &middot; Max spread value: ${fmtMoney(pnl.maxSpreadValue)}<br>
 				Breakeven win %: this trade needs to win at least ${fmtPct(bewr)} of the time (maxLoss &divide; (maxProfit + maxLoss)) just to break even before costs.
@@ -864,6 +1003,9 @@
 
 	document.getElementById('calc-run').addEventListener('click', runStrikeCalculator);
 	document.getElementById('calc-fetch-live').addEventListener('click', fetchLiveMarketData);
+	document.getElementById('calc-dte').addEventListener('input', () => { toggleDteMode(); runStrikeCalculator(); });
+	document.getElementById('calc-estimate').addEventListener('click', estimateEntryPrice);
+	toggleDteMode();
 	runStrikeCalculator();
 	</script>
 </body>

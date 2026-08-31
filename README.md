@@ -221,3 +221,37 @@ any effect that looks promising against the credit-spread strategies --
 e.g. does the OPEX week or Sell-in-May window correlate with lower
 realized volatility, which would favor iron condors specifically over
 verticals.
+
+## Live dashboard (worker/)
+
+`worker/` is a small Cloudflare Worker serving a static dashboard
+(`worker/public/index.html`) plus one API route
+(`/api/market-data`, a live SPY&times;10 SPX-proxy quote via Twelve Data).
+Two tabs:
+- **Backtesting:** real trade log, live moomoo-sourced backtest (real
+  SPY closes, synthetic option chain -- see "Two-track data plan"
+  above), and the synthetic CSV demo, side by side. This is a static
+  snapshot (`worker/public/data/results.json`), not live -- see below.
+- **Strike Calculator:** at DTE=0, the full course-formula calculator
+  (gap&times;VWAP direction signal, GEX wall-placement rule, P&amp;L
+  math -- Classes #01-#05, see `strategy_logic/`). At DTE&gt;0 (e.g. 30,
+  45), the direction signal and wall rule don't apply (they're
+  0DTE/intraday-specific) -- instead it estimates a delta-targeted entry
+  credit via a client-side port of the synthetic Black-Scholes pricer
+  (`pricing/black_scholes.py`). Real moomoo chain data isn't reachable
+  from this live page at all -- OpenD only accepts local connections, so
+  there's no way for a public Worker to reach it.
+
+**Updating the dashboard is a manual, on-demand action, not automatic**
+-- there's no cron/live-refresh loop (OpenD, and therefore moomoo data,
+only exists on your local machine, not Cloudflare's). Run:
+
+```bash
+./update_dashboard.sh
+```
+
+which bundles the two steps (`python export_results.py` to regenerate
+`results.json`, then `wrangler deploy` from `worker/`) into one command.
+Needs OpenD running for the moomoo section (falls back gracefully and
+skips it, with a console message, if OpenD isn't reachable) and
+`wrangler` authenticated against your Cloudflare account.
