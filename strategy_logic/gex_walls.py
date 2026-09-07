@@ -139,3 +139,42 @@ def find_gamma_flip(rows: list[StrikeGex]) -> float | None:
             frac = -a.net_gex / (b.net_gex - a.net_gex)
             return a.strike + frac * (b.strike - a.strike)
     return None
+
+
+def compute_gex_from_contracts(spot: float, contracts: list[dict]) -> list[StrikeGex]:
+    """
+    Same GEX formula/sign convention as compute_gex_by_strike, but fed by
+    REAL per-contract data instead of BSM-estimated gamma + estimate_oi_proxy().
+
+    contracts: list of {"strike": float, "right": "C"/"P", "oi": float, "gamma": float}
+    -- e.g. from collectors/moomoo_daily_collector.chain_df_to_gex_contracts(),
+    which reads real open_interest and real (chain-quoted) gamma off a live
+    get_market_snapshot merge. No synthetic OI, no BSM gamma re-derivation.
+
+    Grouping is by strike: each strike accumulates call_oi/put_oi separately
+    and keeps whichever gamma value moomoo reported for that side (gamma is
+    per-contract, not summed across OI the way notional GEX is).
+    """
+    by_strike: dict[float, dict] = {}
+    for c in contracts:
+        row = by_strike.setdefault(
+            c["strike"], {"call_oi": 0.0, "put_oi": 0.0, "call_gamma": 0.0, "put_gamma": 0.0}
+        )
+        if c["right"] == "C":
+            row["call_oi"] += c.get("oi") or 0.0
+            row["call_gamma"] = c.get("gamma") or 0.0
+        elif c["right"] == "P":
+            row["put_oi"] += c.get("oi") or 0.0
+            row["put_gamma"] = c.get("gamma") or 0.0
+
+    rows = []
+    for K in sorted(by_strike):
+        r = by_strike[K]
+        call_gex = r["call_oi"] * r["call_gamma"] * (spot ** 2) * 0.01 * CONTRACT_MULTIPLIER
+        put_gex = r["put_oi"] * r["put_gamma"] * (spot ** 2) * 0.01 * CONTRACT_MULTIPLIER
+        rows.append(StrikeGex(
+            strike=K, call_oi=r["call_oi"], put_oi=r["put_oi"],
+            call_gamma=r["call_gamma"], put_gamma=r["put_gamma"],
+            call_gex=call_gex, put_gex=put_gex, net_gex=call_gex - put_gex,
+        ))
+    return rows

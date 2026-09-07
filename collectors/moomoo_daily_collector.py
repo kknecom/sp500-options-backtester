@@ -123,6 +123,20 @@ def pick_expiration_near_dte(expirations: list[date], target_dte: int = None, as
     return min(expirations, key=lambda d: abs((d - target_date).days))
 
 
+def fetch_spot(underlying: str = "SPX") -> float:
+    """
+    Current underlying price via get_market_snapshot on the index/stock
+    code itself (not an option code), e.g. 'US..SPX'. Used as the real
+    spot input for GEX/wall/strike-selection calculations instead of a
+    hand-typed number.
+    """
+    with get_quote_context() as ctx:
+        ret, snap = ctx.get_market_snapshot([_underlying_code(underlying)])
+        if ret != ft.RET_OK:
+            raise RuntimeError(f"get_market_snapshot failed for {underlying}: {snap}")
+    return float(snap.iloc[0]["last_price"])
+
+
 def fetch_option_chain(underlying: str, expiry: date, snapshot_batch_size: int = 200):
     """
     Full option chain (both rights, all strikes) for one expiration, with
@@ -226,6 +240,66 @@ def fetch_underlying_bars(symbol: str = "SPY", start: str = None, end: str = Non
         if ret != ft.RET_OK:
             raise RuntimeError(f"request_history_kline failed for {symbol}: {data}")
         return data
+
+
+def chain_df_to_quotes(chain_df) -> list:
+    """
+    Convert a real moomoo chain (from fetch_option_chain -- already merged
+    with get_market_snapshot greeks/quotes) into the list[OptionQuote]
+    shape strategy_logic/strike_selector.py expects, so real strikes get
+    picked by real delta/price instead of the synthetic BSM chain.
+
+    Strike/right are re-derived from each row's 'code' via
+    _parse_option_code (confirmed-working parsing, see module docstring)
+    rather than trusted from get_option_chain's own strike/type columns,
+    since those haven't been individually spot-checked.
+
+    Price = mid of bid/ask; falls back to last_price when bid/ask are
+    missing or non-positive (illiquid deep-OTM strikes commonly quote
+    zero bid).
+    """
+    from pricing.black_scholes import OptionQuote
+
+    quotes = []
+    for _, row in chain_df.iterrows():
+        parsed = _parse_option_code(str(row["code"]))
+        if parsed is None:
+            continue
+        _underlying, _expiration, strike, right = parsed
+        bid, ask = row.get("bid_price"), row.get("ask_price")
+        if bid and ask and bid > 0 and ask > 0:
+            price = (float(bid) + float(ask)) / 2.0
+        else:
+            price = float(row.get("last_price") or 0.0)
+        quotes.append(OptionQuote(
+            strike=strike, right=right, price=price,
+            delta=float(row.get("option_delta") or 0.0),
+            gamma=float(row.get("option_gamma") or 0.0),
+            theta=float(row.get("option_theta") or 0.0),
+            vega=float(row.get("option_vega") or 0.0),
+        ))
+    return quotes
+
+
+def chain_df_to_gex_contracts(chain_df) -> list[dict]:
+    """
+    Convert a real moomoo chain into the {strike, right, oi, gamma}
+    contract list strategy_logic.gex_walls.compute_gex_from_contracts
+    expects -- real open interest and real gamma, no BSM re-derivation
+    and no estimate_oi_proxy() involved.
+    """
+    contracts = []
+    for _, row in chain_df.iterrows():
+        parsed = _parse_option_code(str(row["code"]))
+        if parsed is None:
+            continue
+        _underlying, _expiration, strike, right = parsed
+        contracts.append({
+            "strike": strike, "right": right,
+            "oi": float(row.get("option_open_interest") or 0.0),
+            "gamma": float(row.get("option_gamma") or 0.0),
+        })
+    return contracts
 
 
 def write_option_bars(bars: list[OptionBar], db_path: str = config.DB_PATH) -> int:
