@@ -49,6 +49,36 @@ def _trailing_realized_vol(closes: list[float], window: int) -> float:
     return daily_sigma * math.sqrt(config.TRADING_DAYS_PER_YEAR)
 
 
+def _dynamic_width_pct(sigma: float, T: float, min_width_pct: float = 0.15, max_width_pct: float = 0.90) -> float:
+    """
+    How far build_synthetic_chain's strike grid needs to extend (as a
+    fraction of spot) to reliably reach the ~0.10-delta long leg, given
+    today's sigma and time to expiration -- instead of a width_pct fixed
+    at 0.15 regardless of volatility.
+
+    CONFIRMED LIVE BUG this fixes: with real VIX driving sigma (see
+    run_backtest()'s vix_series), the March 2020 COVID vol spike
+    (sigma ~0.80) at 45 DTE produced a chain whose highest strike still
+    had a 0.365 delta -- nowhere near the 0.10 target. find_strike_by_delta
+    then silently returned that SAME boundary strike for both the short
+    (0.30 target) and long (0.10 target) legs, collapsing a Bear Call
+    Spread to a zero-width, $0-credit "trade".
+
+    Derived from the Black-Scholes ~5-delta boundary: for an OTM option,
+    |ln(K/S)| ~= z * sigma * sqrt(T) where z ~= 1.645 (N(-1.645) = 0.05).
+    A 1.5x safety margin covers the 0.10 target with room to spare.
+    Capped at max_width_pct because width_pct >= 1.0 pushes the low strike
+    to zero or negative, which build_synthetic_chain cannot price (log of
+    zero/negative) -- realistic historical VIX has never sustained past
+    ~0.89 (2008), so this cap is not expected to bind in practice; the
+    zero-credit guard in run_backtest() below is the backstop if it ever
+    does.
+    """
+    z = 1.645
+    needed = math.exp(1.5 * z * sigma * math.sqrt(T)) - 1
+    return min(max(min_width_pct, needed), max_width_pct)
+
+
 def run_backtest(strategy: Strategy, price_series: list[tuple[date, float]],
                   vix_series: list[tuple[date, float]] | None = None) -> list[Trade]:
     """
@@ -87,8 +117,9 @@ def run_backtest(strategy: Strategy, price_series: list[tuple[date, float]],
                 open_trade = None
             else:
                 T = max(dte, 1) / 365.0
+                width_pct = _dynamic_width_pct(sigma, T)
                 chain = build_synthetic_chain(S, T, cfg.RISK_FREE_RATE, cfg.DIVIDEND_YIELD,
-                                               sigma, cfg.STRIKE_INCREMENT)
+                                               sigma, cfg.STRIKE_INCREMENT, width_pct=width_pct)
                 debit = Strategy.mark_to_market(open_trade, chain)
                 pnl_if_closed = (open_trade.entry_credit - debit) * 100 * open_trade.contracts
 
@@ -114,10 +145,20 @@ def run_backtest(strategy: Strategy, price_series: list[tuple[date, float]],
             if days_since_last_entry >= cfg.ENTRY_FREQUENCY_DAYS:
                 expiration = as_of + timedelta(days=cfg.TARGET_DTE)
                 T = cfg.TARGET_DTE / 365.0
+                width_pct = _dynamic_width_pct(sigma, T)
                 chain = build_synthetic_chain(S, T, cfg.RISK_FREE_RATE, cfg.DIVIDEND_YIELD,
-                                               sigma, cfg.STRIKE_INCREMENT)
-                open_trade = strategy.open_trade(as_of, expiration, S, chain)
-                days_since_last_entry = 0
+                                               sigma, cfg.STRIKE_INCREMENT, width_pct=width_pct)
+                candidate = strategy.open_trade(as_of, expiration, S, chain)
+                # Defensive backstop: a real spread can never have zero/negative
+                # credit -- if strike selection ever collapses both legs onto the
+                # same strike (confirmed live at extreme sigma before the
+                # _dynamic_width_pct fix above), skip it rather than silently
+                # recording a fabricated trade. Try again next eligible entry day.
+                if candidate.entry_credit > 0:
+                    open_trade = candidate
+                    days_since_last_entry = 0
+                else:
+                    days_since_last_entry = cfg.ENTRY_FREQUENCY_DAYS  # retry next day
 
     # if a trade is still open at the end of the series, mark it (not settled)
     if open_trade is not None:
