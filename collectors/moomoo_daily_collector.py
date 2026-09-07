@@ -50,6 +50,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 import config
 import moomoo as ft
 from moomoo_client import get_quote_context
+from strategy_logic.direction_matrix import compute_vwap
 
 # Indices use moomoo's MARKET..CODE form (double dot), unlike stock-rooted
 # options ('US.AAPL'). Extend this map if other underlyings are added.
@@ -262,6 +263,87 @@ def fetch_underlying_bars(symbol: str = "SPY", start: str = None, end: str = Non
         if ret != ft.RET_OK:
             raise RuntimeError(f"request_history_kline failed for {symbol}: {data}")
         return data
+
+
+def fetch_real_direction_inputs(proxy_symbol: str = None, num_bars: int = None):
+    """
+    Real (proxy) inputs for strategy_logic.direction_matrix's gap x VWAP
+    matrix: (today_open, prior_close, current_price, vwap), all real
+    numbers pulled live from moomoo -- replaces the hand-typed placeholder
+    bars run_strike_selector.py's --source real path used before this.
+
+    WHY SPY, NOT SPX
+    -----------------
+    moomoo's intraday kline (get_cur_kline) needs an explicit subscribe()
+    first, and -- consistent with get_market_snapshot and
+    request_history_kline both rejecting US index codes outright (see
+    fetch_spot / fetch_underlying_bars docstrings) -- there's no reason to
+    expect SPX intraday kline/subscribe to behave differently (not
+    separately confirmed live, since this sandbox has no OpenD route, but
+    the pattern of "chain/expiration endpoints accept indices, quote/kline
+    endpoints don't" has held for every other endpoint tried). SPY is used
+    instead, matching the existing SPY-proxy convention already used for
+    daily bars (fetch_underlying_bars) and the GEX dashboard's fallback
+    spot. This is safe specifically because gap DIRECTION (bullish/
+    bearish/flat) and VWAP POSITION (above/below) are both scale-invariant
+    -- SPY moves at ~1/10th SPX's points but >99% correlated intraday, so
+    the classification this feeds (direction_matrix.read_direction) comes
+    out the same whether measured in SPX or SPY points. Only a dollar
+    figure would need the x10 scaling GEX proxy paths use elsewhere.
+
+    Returns (today_open, prior_close, current_price, vwap) as floats.
+    Raises RuntimeError if OpenD can't supply today's intraday bars (e.g.
+    market not yet open, no kline subscription entitlement) -- callers
+    should catch this and fall back to a placeholder/skip, same pattern
+    as every other real-data path in this project.
+    """
+    proxy_symbol = proxy_symbol or config.DIRECTION_PROXY_SYMBOL
+    num_bars = num_bars or config.DIRECTION_INTRADAY_BARS
+    code = _underlying_code(proxy_symbol)
+    today = date.today()
+
+    with get_quote_context() as ctx:
+        ret_sub, err = ctx.subscribe([code], [ft.SubType.K_1M])
+        if ret_sub != ft.RET_OK:
+            raise RuntimeError(f"subscribe failed for {code}: {err}")
+        try:
+            ret, bars = ctx.get_cur_kline(code, num_bars, ft.KLType.K_1M, ft.AuType.QFQ)
+            if ret != ft.RET_OK:
+                raise RuntimeError(f"get_cur_kline failed for {code}: {bars}")
+        finally:
+            ctx.unsubscribe([code], [ft.SubType.K_1M])
+
+    if bars is None or bars.empty:
+        raise RuntimeError(f"get_cur_kline returned no bars for {code}")
+
+    bars = bars.copy()
+    bars["trade_date"] = bars["time_key"].astype(str).str[:10]
+    todays = bars[bars["trade_date"] == today.isoformat()]
+    if todays.empty:
+        raise RuntimeError(
+            f"No {proxy_symbol} intraday bars for today ({today.isoformat()}) yet -- "
+            f"market may not be open, or OpenD's kline buffer only has prior-session bars."
+        )
+
+    prior = bars[bars["trade_date"] < today.isoformat()]
+    if not prior.empty:
+        prior_close = float(prior.iloc[-1]["close"])
+    else:
+        # Today is the only session in the buffer (e.g. num_bars too small) --
+        # fall back to the daily-bar path for a real prior close instead of guessing.
+        daily = fetch_underlying_bars(proxy_symbol, start=(today - timedelta(days=10)).isoformat(),
+                                       end=(today - timedelta(days=1)).isoformat())
+        if daily is None or daily.empty:
+            raise RuntimeError(f"Could not determine prior close for {proxy_symbol}")
+        prior_close = float(daily.iloc[-1]["close"])
+
+    today_open = float(todays.iloc[0]["open"])
+    current_price = float(todays.iloc[-1]["close"])
+    prices = todays["close"].astype(float).tolist()
+    volumes = todays["volume"].astype(float).tolist()
+    vwap = compute_vwap(prices, volumes) if any(v > 0 for v in volumes) else sum(prices) / len(prices)
+
+    return today_open, prior_close, current_price, vwap
 
 
 def estimate_spot_from_chain(quotes: list) -> float:

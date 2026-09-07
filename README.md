@@ -222,6 +222,44 @@ e.g. does the OPEX week or Sell-in-May window correlate with lower
 realized volatility, which would favor iron condors specifically over
 verticals.
 
+## Go/No-Go event gate + real intraday direction (new)
+
+Two pieces of the project brief's "prime signal" requirement, both real
+data, no proxy:
+
+**Go/No-Go gate** (`strategy_logic/gate.py` + `strategy_logic/event_calendar.py`)
+-- blocks trading on/around scheduled high-impact macro events (FOMC,
+CPI, NFP) using a maintained calendar (`data/calendar/economic_calendar_2026.json`,
+sourced from federalreserve.gov and BLS's published schedules -- see
+that file's `_readme` for how to keep it current, especially NFP dates,
+which BLS has been publishing irregularly). This is a known, fixed
+schedule, not a live news feed -- unscheduled events (Fed speakers,
+geopolitical shocks) still need the trader's own judgment, same as
+`checklist.py`'s other discretionary fields. The gate now feeds
+`DiscretionaryChecklist.event_risk_clear` automatically instead of
+leaving it `None`. Wired into `run_strike_selector.py` (both
+`--source synthetic` and `--source real` print the gate before the
+direction read) and `export_results.py` (a `gate` section in
+`results.json`, rendered as a banner across every dashboard tab).
+
+```bash
+python run_strike_selector.py --source real   # gate + real direction print first
+```
+
+**Real intraday direction inputs** (`collectors/moomoo_daily_collector
+.fetch_real_direction_inputs`) -- `--source real` used to compute the
+BULLISH/BEARISH/WAIT call from hand-typed placeholder bars even though
+the walls/GEX above it were real. This now pulls real 1-minute intraday
+bars via moomoo (`get_cur_kline`, real open/close/volume) for gap
+direction and VWAP position. SPX/VIX reject moomoo's intraday kline the
+same way they reject `get_market_snapshot`/`request_history_kline` (see
+those functions' docstrings), so SPY is used as the proxy -- consistent
+with the SPY-proxy convention already used elsewhere in this project.
+Gap direction and VWAP position are scale-invariant, so a 1/10th-scale,
+>99%-correlated proxy gives the same classification SPX itself would.
+Falls back to a flat placeholder (with a printed warning) if intraday
+bars aren't available yet (e.g. market not open).
+
 ## Live dashboard (worker/)
 
 `worker/` is a small Cloudflare Worker serving a static dashboard

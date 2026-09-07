@@ -36,6 +36,12 @@
 		.badge.real { background: rgba(62,207,142,0.15); color: var(--green); }
 		.badge.demo { background: rgba(239,91,91,0.15); color: var(--red); }
 		.badge.live { background: rgba(91,140,255,0.15); color: var(--accent); }
+		.gate-banner { border-radius: 10px; padding: 0.85rem 1.1rem; margin: 0 0 1rem; font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.35rem; }
+		.gate-banner.go { background: rgba(62,207,142,0.12); border: 1px solid rgba(62,207,142,0.35); }
+		.gate-banner.nogo { background: rgba(239,91,91,0.12); border: 1px solid rgba(239,91,91,0.35); }
+		.gate-banner .gate-title { font-weight: 700; font-size: 0.95rem; }
+		.gate-banner ul { margin: 0; padding-left: 1.2rem; }
+		.gate-banner .gate-upcoming { color: var(--text-dim); font-size: 0.78rem; }
 		.caveat {
 			background: var(--panel); border: 1px solid var(--panel-border); border-left: 3px solid var(--accent);
 			border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1.25rem;
@@ -179,6 +185,7 @@
 			</div>
 		</div>
 		<div id="error"></div>
+		<div id="gate-banner"></div>
 
 		<div class="tabs">
 			<button class="tab-btn active" data-tab="backtest">Backtesting</button>
@@ -837,6 +844,20 @@
 		return html;
 	}
 
+	function renderGate(gate) {
+		const isGo = gate.decision === 'GO';
+		const reasonsHtml = gate.reasons.length
+			? `<ul>${gate.reasons.map(r => `<li>${r}</li>`).join('')}</ul>`
+			: '<div>No blocking scheduled events.</div>';
+		const upcoming = gate.upcoming_events.slice(0, 5).map(e => `${e.date} &mdash; ${e.event}`).join(' &nbsp;|&nbsp; ');
+		return `<div class="gate-banner ${isGo ? 'go' : 'nogo'}">
+			<div class="gate-title">Go/No-Go gate: ${gate.decision} <span class="badge ${isGo ? 'real' : 'demo'}">as of ${gate.as_of}</span></div>
+			${reasonsHtml}
+			${upcoming ? `<div class="gate-upcoming">Next 14 days: ${upcoming}</div>` : ''}
+			<div class="gate-upcoming">${gate.caveat}</div>
+		</div>`;
+	}
+
 	function renderGex(gex) {
 		const nearestStrike = (target) => gex.by_strike.reduce((best, r) =>
 			Math.abs(r.strike - target) < Math.abs(best.strike - target) ? r : best, gex.by_strike[0]).strike;
@@ -876,6 +897,7 @@
 		.then(r => { if (!r.ok) throw new Error('results.json ' + r.status); return r.json(); })
 		.then(data => {
 			document.getElementById('generated-at').textContent = 'Last regenerated: ' + data.generated_at;
+			document.getElementById('gate-banner').innerHTML = data.gate ? renderGate(data.gate) : '';
 			const app = document.getElementById('app');
 			const dashboard = renderDashboard(data.real);
 			const yfinanceHtml = data.yfinance ? renderBacktestSection(data.yfinance, {

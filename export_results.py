@@ -27,6 +27,8 @@ from backtest.engine import _trailing_realized_vol
 from strategy_logic.gex_walls import (
     compute_gex_by_strike, compute_gex_from_contracts, find_walls, find_gamma_flip, estimate_oi_proxy,
 )
+from strategy_logic.event_calendar import load_calendar, upcoming_events
+from strategy_logic.gate import evaluate_gate
 
 OUT_PATH = Path(__file__).parent / "worker" / "public" / "data" / "results.json"
 
@@ -320,12 +322,45 @@ def export_gex_snapshot(width_pct: float = 0.03) -> dict:
     return result
 
 
+GATE_CAVEAT = (
+    "Go/No-Go gate is event-only here (no VIX passed in) -- blocks same-day/next-day "
+    "high-impact scheduled macro events (FOMC, CPI, NFP) from a maintained calendar "
+    "(data/calendar/, see strategy_logic/event_calendar.py). This is NOT live news -- "
+    "unscheduled events (Fed speakers, geopolitical shocks) are not covered. See README."
+)
+
+
+def export_gate() -> dict:
+    """Today's Go/No-Go read plus the next 14 days of scheduled high-impact events,
+    for the dashboard. Pure calendar lookup -- no network/broker dependency, so this
+    should never need a try/except fallback the way the moomoo/yfinance sections do."""
+    today = date.today()
+    calendar = load_calendar()
+    gate = evaluate_gate(today, calendar)
+    upcoming = upcoming_events(today, calendar, within_days=14)
+    return {
+        "caveat": GATE_CAVEAT,
+        "as_of": today,
+        "decision": gate.decision,
+        "event_risk_clear": gate.event_risk_clear,
+        "reasons": gate.reasons,
+        "upcoming_events": [
+            {"date": e.event_date, "event": e.name, "impact": e.impact}
+            for e in upcoming
+        ],
+    }
+
+
 def main():
     result = {
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "synthetic": export_synthetic(),
         "real": export_real(),
     }
+    try:
+        result["gate"] = export_gate()
+    except Exception as e:
+        print(f"Skipping gate section (errored): {e}")
     try:
         result["moomoo"] = export_moomoo()
     except Exception as e:

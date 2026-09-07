@@ -32,3 +32,18 @@ IV_SKEW_ADJUSTMENT = 0.0     # placeholder: add a constant vol bump for OTM puts
 
 # --- Database ---
 DB_PATH = "db/backtester.db"
+
+# --- Go/No-Go event gate (strategy_logic/gate.py) ---
+EVENT_BLACKOUT_LOOKAHEAD_DAYS = 1   # block today's trade if a high-impact event lands today or tomorrow
+EVENT_BLACKOUT_LOOKBACK_DAYS = 0    # also block for N days AFTER an event has already passed (0 = off)
+VIX_MAX_FOR_ENTRY = 35.0         # crisis-regime vol -- gate flags it, does not hard-block by itself
+VIX_MIN_FOR_ENTRY = 10.0         # complacency floor -- premium likely too thin to be worth the risk
+
+# --- Real intraday direction inputs (strategy_logic/direction_matrix.py via
+# collectors/moomoo_daily_collector.fetch_real_direction_inputs) ---
+DIRECTION_PROXY_SYMBOL = "SPY"   # SPX/VIX reject moomoo's intraday kline the same way they reject
+                                  # get_market_snapshot/request_history_kline (see moomoo_daily_collector.py) --
+                                  # SPY is the same practical proxy already used for daily bars/GEX-spot elsewhere
+                                  # in this project. Gap direction and VWAP-position are scale-invariant, so a
+                                  # 1/10th-scale, near-perfectly-correlated proxy gives the same signal for free.
+DIRECTION_INTRADAY_BARS = 390    # ~1 full regular session of 1-minute bars

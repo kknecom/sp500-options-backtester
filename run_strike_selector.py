@@ -13,11 +13,12 @@ Black-Scholes chain + estimate_oi_proxy() placeholder OI used by
 --source synthetic (the default, still useful for smoke-testing the
 pipeline without a live connection).
 
-NOTE: even in --source real mode, the direction signal (compute_vwap /
-read_direction) still runs on hand-typed placeholder intraday bars --
-wiring real intraday price/volume is a separate, not-yet-done step. So
-today, --source real gives you real walls/GEX/strikes; the BULLISH/
-BEARISH/WAIT call above them is still a demo value.
+NOTE: --source real now also pulls a real Go/No-Go gate (scheduled
+macro-event blackout, see strategy_logic/gate.py) and real intraday
+direction inputs (gap/VWAP, via a real SPY proxy -- see
+collectors/moomoo_daily_collector.fetch_real_direction_inputs) instead
+of hand-typed placeholders. --source synthetic still uses fixed demo
+numbers throughout, for network-free smoke testing.
 """
 from __future__ import annotations
 import argparse
@@ -31,9 +32,16 @@ from strategy_logic.gex_walls import (
 )
 from strategy_logic.strike_selector import select_bull_put_strike, select_bear_call_strike
 from strategy_logic.checklist import DiscretionaryChecklist
+from strategy_logic.event_calendar import load_calendar
+from strategy_logic.gate import evaluate_gate
 
 
-def _print_direction_and_pick(direction, walls, chain, spot):
+def _print_direction_and_pick(direction, walls, chain, spot, gate=None):
+    if gate is not None:
+        print("=== Go/No-Go gate (scheduled macro events) ===")
+        print(gate)
+        print()
+
     print("=== Direction (Class #02 matrix) ===")
     print(direction)
 
@@ -51,6 +59,9 @@ def _print_direction_and_pick(direction, walls, chain, spot):
         cand = None
         print("\nDirection signal is WAIT -- course says do not force a trade.")
 
+    if gate is not None and gate.decision == "NO-GO":
+        print("\n*** Gate is NO-GO -- course discipline says skip today regardless of the read below. ***")
+
     if cand:
         print(f"Short strike: {cand.short_strike}  |  Long strike: {cand.long_strike}")
         print(f"Credit: ${cand.credit * 100:.2f}  |  Width: {cand.width} pts")
@@ -65,6 +76,7 @@ def _print_direction_and_pick(direction, walls, chain, spot):
         resistance_or_support_clear=True if cand else None,
         premium_worth_the_risk=None,
         timing_confirmed=None,
+        event_risk_clear=gate.event_risk_clear if gate is not None else None,
     )
     confirmed, assessed = checklist.score()
     print(f"Assessed {assessed} of {len(checklist.__dataclass_fields__)} items, {confirmed} confirmed.")
@@ -72,6 +84,8 @@ def _print_direction_and_pick(direction, walls, chain, spot):
 
 
 def run_synthetic():
+    from datetime import date as _date
+
     prior_close = 7700.0
     today_open = 7712.0
     spot = 7728.0
@@ -83,6 +97,9 @@ def run_synthetic():
     vwap = compute_vwap(prices, volumes)
     direction = read_direction(today_open, prior_close, spot, vwap)
 
+    calendar = load_calendar()
+    gate = evaluate_gate(_date.today(), calendar)
+
     strikes = [spot - spot % config.STRIKE_INCREMENT + config.STRIKE_INCREMENT * i
                for i in range(-30, 31)]
     call_oi, put_oi = estimate_oi_proxy(strikes, spot)
@@ -93,7 +110,7 @@ def run_synthetic():
 
     chain = build_synthetic_chain(spot, T, config.RISK_FREE_RATE, config.DIVIDEND_YIELD,
                                    sigma, config.STRIKE_INCREMENT)
-    _print_direction_and_pick(direction, walls, chain, spot)
+    _print_direction_and_pick(direction, walls, chain, spot, gate=gate)
 
 
 def run_real(underlying: str = "SPX"):
@@ -126,14 +143,27 @@ def run_real(underlying: str = "SPX"):
     print("(REAL open interest + REAL gamma from moomoo -- no proxy, no BSM re-derivation)")
     print(f"Gamma flip: {gamma_flip}\n")
 
-    # Direction signal still runs on placeholder intraday bars -- see module
-    # docstring. Real walls/strikes above are usable now regardless.
-    prices = [spot - 4, spot - 2, spot - 1, spot, spot + 1, spot]
-    volumes = [1.0, 1.2, 0.9, 1.1, 1.3, 1.0]
-    vwap = compute_vwap(prices, volumes)
-    direction = read_direction(prices[0], prices[0], spot, vwap)
+    from datetime import date as _date
+    from collectors.moomoo_daily_collector import fetch_real_direction_inputs
 
-    _print_direction_and_pick(direction, walls, quotes, spot)
+    calendar = load_calendar()
+    gate = evaluate_gate(_date.today(), calendar)
+
+    try:
+        today_open, prior_close, current_price, vwap = fetch_real_direction_inputs()
+        direction = read_direction(today_open, prior_close, current_price, vwap)
+        print(f"(Real {config.DIRECTION_PROXY_SYMBOL} intraday bars -- "
+              f"open {today_open:.2f}, prior close {prior_close:.2f}, "
+              f"current {current_price:.2f}, VWAP {vwap:.2f})\n")
+    except Exception as e:
+        print(f"Real intraday direction inputs unavailable ({e}); "
+              f"falling back to a flat placeholder (WAIT-biased, no real signal).\n")
+        prices = [spot - 4, spot - 2, spot - 1, spot, spot + 1, spot]
+        volumes = [1.0, 1.2, 0.9, 1.1, 1.3, 1.0]
+        vwap = compute_vwap(prices, volumes)
+        direction = read_direction(prices[0], prices[0], spot, vwap)
+
+    _print_direction_and_pick(direction, walls, quotes, spot, gate=gate)
 
 
 def main():
