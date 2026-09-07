@@ -98,16 +98,15 @@ def run_synthetic():
 
 def run_real(underlying: str = "SPX"):
     from collectors.moomoo_daily_collector import (
-        fetch_spot, fetch_option_expirations, pick_expiration_near_dte,
-        fetch_option_chain, chain_df_to_quotes, chain_df_to_gex_contracts,
+        fetch_option_expirations, pick_expiration_near_dte, fetch_option_chain,
+        chain_df_to_quotes, chain_df_to_gex_contracts, estimate_spot_from_chain,
     )
 
     print(f"Connecting to OpenD for a real {underlying} chain "
           f"(OpenD must already be running and logged in)...\n")
-    spot = fetch_spot(underlying)
     expirations = fetch_option_expirations(underlying)
     expiry = pick_expiration_near_dte(expirations)
-    print(f"Spot: {spot}  |  Expiry (nearest to {config.TARGET_DTE} DTE): {expiry}\n")
+    print(f"Expiry (nearest to {config.TARGET_DTE} DTE): {expiry}")
 
     chain_df = fetch_option_chain(underlying, expiry)
     if chain_df.empty:
@@ -115,6 +114,11 @@ def run_real(underlying: str = "SPX"):
         return
 
     quotes = chain_df_to_quotes(chain_df)
+    # get_market_snapshot rejects US index codes ("US stock indices are not
+    # supported" -- confirmed live), so spot is backed out of this same
+    # chain via put-call parity instead of a separate snapshot call.
+    spot = estimate_spot_from_chain(quotes)
+    print(f"Spot (parity-estimated from chain): {spot:.2f}\n")
     contracts = chain_df_to_gex_contracts(chain_df)
     gex_rows = compute_gex_from_contracts(spot, contracts)
     walls = find_walls(gex_rows, spot)

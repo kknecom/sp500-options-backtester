@@ -242,6 +242,46 @@ def fetch_underlying_bars(symbol: str = "SPY", start: str = None, end: str = Non
         return data
 
 
+def estimate_spot_from_chain(quotes: list) -> float:
+    """
+    Back out the underlying spot from put-call parity on the chain
+    itself, instead of a separate get_market_snapshot call.
+
+    CONFIRMED LIVE (2026-09-07): get_market_snapshot rejects US index
+    codes outright ("US stock indices are not supported") -- the same
+    restriction request_history_kline has (see fetch_underlying_bars),
+    even though get_option_chain/get_option_expiration_date accept
+    'US..SPX' fine. So for SPX there is no direct snapshot spot to pull;
+    parity gives an exact-enough answer for free using data we already
+    fetched for this expiration.
+
+    Put-call parity (ignoring the small dividend/discount term, which is
+    negligible for short-dated SPX): S ~= K + call_mid - put_mid for any
+    strike. Computes that per strike that has both a call and a put
+    quote and returns the median across strikes -- median is robust to
+    the wide bid/ask spreads on deep OTM strikes that would otherwise
+    skew a mean.
+
+    `quotes` is a list[OptionQuote] for ONE expiration, both rights --
+    e.g. straight from chain_df_to_quotes().
+    """
+    import statistics
+
+    by_strike: dict[float, dict] = {}
+    for q in quotes:
+        by_strike.setdefault(q.strike, {})[q.right] = q.price
+    estimates = [
+        K + sides["C"] - sides["P"]
+        for K, sides in by_strike.items()
+        if "C" in sides and "P" in sides
+    ]
+    if not estimates:
+        raise RuntimeError(
+            "Could not estimate spot from chain -- no strike had both a call and put quote."
+        )
+    return statistics.median(estimates)
+
+
 def chain_df_to_quotes(chain_df) -> list:
     """
     Convert a real moomoo chain (from fetch_option_chain -- already merged
