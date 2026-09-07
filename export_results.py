@@ -20,6 +20,8 @@ from strategies.bull_put_spread import BullPutSpread
 from strategies.bear_call_spread import BearCallSpread
 from strategies.iron_condor import IronCondor
 from run_backtest import load_price_series, load_price_series_from_moomoo
+from backtest.engine import _trailing_realized_vol
+from strategy_logic.gex_walls import compute_gex_by_strike, find_walls, find_gamma_flip, estimate_oi_proxy
 
 OUT_PATH = Path(__file__).parent / "worker" / "public" / "data" / "results.json"
 
@@ -35,6 +37,17 @@ REAL_CAVEAT = (
     "sheet's W/L label -- rows where the label disagreed with the computed outcome "
     "are flagged below."
 )
+GEX_CAVEAT = (
+    "GEX-by-strike, walls, and gamma flip use estimate_oi_proxy() -- a crude "
+    "placeholder open-interest curve concentrated near the money and round "
+    "numbers, NOT real chain data. With this proxy, walls often land right at "
+    "spot (real OI has actual strike-specific clustering the proxy can't fake). "
+    "Do not use these levels for real trading decisions until "
+    "collectors/tiger_daily_collector.py is wired to live OI. Modeled at a "
+    "0DTE-style horizon (T=1/365), matching the strike-selection rules in "
+    "strategy_logic/, not the 45-DTE backtest track above."
+)
+
 MOOMOO_LOOKBACK_DAYS = 3 * 365
 MOOMOO_CAVEAT = (
     "Underlying prices are REAL SPY daily closes pulled live via the moomoo OpenAPI "
@@ -149,6 +162,65 @@ def export_real() -> dict:
     }
 
 
+def export_gex_snapshot(width_pct: float = 0.03) -> dict:
+    """
+    Point-in-time GEX-by-strike + wall/gamma-flip levels around the latest
+    known spot. Prefers a real recent SPY close (via moomoo) for spot and
+    trailing realized vol, scaled to an SPX-proxy level like the rest of
+    this dashboard; falls back to the bundled synthetic sample if moomoo
+    (OpenD) isn't reachable. See GEX_CAVEAT -- OI itself is still a
+    placeholder regardless of which spot source is used.
+    """
+    try:
+        start = (date.today() - timedelta(days=90)).isoformat()
+        price_series = load_price_series_from_moomoo("SPY", start, None)
+        spot_source = "moomoo:SPY x10"
+        closes = [p * 10 for _, p in price_series]
+    except Exception:
+        price_series = load_price_series("data/sample/spx_proxy_sample.csv")
+        spot_source = "synthetic sample"
+        closes = [p for _, p in price_series]
+
+    spot = closes[-1]
+    sigma = _trailing_realized_vol(closes, config.REALIZED_VOL_WINDOW)
+
+    low = round((spot * (1 - width_pct)) / config.STRIKE_INCREMENT) * config.STRIKE_INCREMENT
+    high = round((spot * (1 + width_pct)) / config.STRIKE_INCREMENT) * config.STRIKE_INCREMENT
+    strikes = [low + i * config.STRIKE_INCREMENT for i in range(int((high - low) / config.STRIKE_INCREMENT) + 1)]
+
+    call_oi, put_oi = estimate_oi_proxy(strikes, spot)
+    rows = compute_gex_by_strike(spot, 1 / 365, config.RISK_FREE_RATE, config.DIVIDEND_YIELD,
+                                  sigma, strikes, call_oi, put_oi)
+    walls = find_walls(rows, spot)
+    gamma_flip = find_gamma_flip(rows)
+
+    positive_gex = sum(r.call_gex for r in rows)
+    negative_gex = sum(r.put_gex for r in rows)  # magnitude; displayed negated (dealer short-gamma side)
+
+    return {
+        "caveat": GEX_CAVEAT,
+        "spot": round(spot, 2),
+        "spot_source": spot_source,
+        "sigma": round(sigma, 4),
+        "put_wall": walls.put_wall,
+        "call_wall": walls.call_wall,
+        "gamma_flip": round(gamma_flip, 2) if gamma_flip is not None else None,
+        "positive_gex": round(positive_gex, 2),
+        "negative_gex": round(-negative_gex, 2),
+        "net_gex": round(positive_gex - negative_gex, 2),
+        "gross_gex": round(positive_gex + negative_gex, 2),
+        "by_strike": [
+            {
+                "strike": r.strike,
+                "positive_gex": round(r.call_gex, 2),
+                "negative_gex": round(-r.put_gex, 2),
+                "net_gex": round(r.net_gex, 2),
+            }
+            for r in rows
+        ],
+    }
+
+
 def main():
     result = {
         "generated_at": datetime.now().isoformat(timespec="seconds"),
@@ -159,6 +231,10 @@ def main():
         result["moomoo"] = export_moomoo()
     except Exception as e:
         print(f"Skipping moomoo section (OpenD not reachable, or errored): {e}")
+    try:
+        result["gex"] = export_gex_snapshot()
+    except Exception as e:
+        print(f"Skipping gex section (errored): {e}")
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(result, indent=2, default=json_default))
     print(f"Wrote {OUT_PATH}")

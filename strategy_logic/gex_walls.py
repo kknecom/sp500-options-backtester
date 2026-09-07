@@ -120,3 +120,22 @@ def estimate_oi_proxy(strikes: list[float], spot: float,
         call_oi[K] = base * (1.15 if K >= spot else 0.85)
         put_oi[K] = base * (1.15 if K <= spot else 0.85)
     return call_oi, put_oi
+
+
+def find_gamma_flip(rows: list[StrikeGex]) -> float | None:
+    """
+    Strike where net GEX crosses from negative to positive (or vice
+    versa), linearly interpolated between the two bracketing strikes.
+    This is the standard "gamma flip point" -- dealer hedging flips from
+    stabilizing (long gamma, above flip) to destabilizing (short gamma,
+    below flip). Returns None if net GEX never changes sign across the
+    strikes provided (all one side).
+    """
+    ordered = sorted(rows, key=lambda r: r.strike)
+    for a, b in zip(ordered, ordered[1:]):
+        if (a.net_gex < 0) != (b.net_gex < 0):
+            if b.net_gex == a.net_gex:
+                return a.strike
+            frac = -a.net_gex / (b.net_gex - a.net_gex)
+            return a.strike + frac * (b.strike - a.strike)
+    return None
