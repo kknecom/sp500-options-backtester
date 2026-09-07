@@ -63,14 +63,69 @@
 		}
 		canvas { width: 100%; height: 180px; display: block; }
 		table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-		th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--panel-border); }
-		th { color: var(--text-dim); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; }
+		th, td { text-align: left; padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--panel-border); }
+		th { color: var(--text-dim); font-weight: 700; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em;
+			position: sticky; top: 0; background: var(--panel); }
 		td.num { text-align: right; font-variant-numeric: tabular-nums; }
-		.strategy-block { margin-bottom: 1.5rem; }
-		.strategy-block h3 { font-size: 0.95rem; margin: 1rem 0 0.5rem; color: var(--text); }
+		.table-scroll { max-height: 420px; overflow-y: auto; border: 1px solid var(--panel-border); border-radius: 8px; }
+		.table-scroll table { font-size: 0.8rem; }
+		.table-scroll tbody tr:nth-child(even) { background: rgba(255,255,255,0.018); }
+		.table-scroll tbody tr:hover { background: rgba(91,140,255,0.06); }
 		details { margin-top: 0.5rem; }
-		summary { cursor: pointer; color: var(--accent); font-size: 0.85rem; }
-		.mismatch-row { color: var(--red); }
+		summary { cursor: pointer; color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+		summary:hover { color: #7ba2ff; }
+		.mismatch-row { background: rgba(239,91,91,0.06) !important; }
+
+		/* Pills (win-rate, P&L direction, trade status) */
+		.pill {
+			display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px;
+			font-size: 0.7rem; font-weight: 700; letter-spacing: 0.01em; white-space: nowrap;
+		}
+		.pill.pos { background: rgba(62,207,142,0.15); color: var(--green); }
+		.pill.neg { background: rgba(239,91,91,0.15); color: var(--red); }
+		.pill.neutral { background: rgba(139,147,167,0.15); color: var(--text-dim); }
+		.status-pill { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.14rem 0.55rem; border-radius: 999px; font-size: 0.68rem; font-weight: 700; white-space: nowrap; }
+		.status-pill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+		.status-pill.st-open { background: rgba(91,140,255,0.14); color: var(--accent); }
+		.status-pill.st-profit { background: rgba(62,207,142,0.14); color: var(--green); }
+		.status-pill.st-stop { background: rgba(239,91,91,0.14); color: var(--red); }
+		.status-pill.st-dte { background: rgba(240,166,60,0.14); color: var(--orange); }
+		.status-pill.st-expiry { background: rgba(139,147,167,0.16); color: var(--text-dim); }
+
+		/* Strategy comparison strip (leaderboard above the detailed cards) */
+		.compare-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.9rem; margin-bottom: 1.75rem; }
+		.compare-card {
+			background: linear-gradient(160deg, var(--panel), rgba(255,255,255,0.015));
+			border: 1px solid var(--panel-border); border-left: 4px solid var(--strat-color, var(--accent));
+			border-radius: 10px; padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.55rem;
+		}
+		.compare-card .compare-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+		.compare-card .compare-name { font-weight: 700; font-size: 0.88rem; }
+		.compare-card .compare-pnl { font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+		.compare-card .compare-meta { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-dim); }
+		.compare-card .compare-meta b { color: var(--text); font-variant-numeric: tabular-nums; }
+		.winrate-track { height: 6px; border-radius: 999px; background: rgba(255,255,255,0.07); overflow: hidden; }
+		.winrate-fill { display: block; height: 100%; background: var(--green); border-radius: 999px; }
+		.compare-spark { height: 40px; }
+
+		/* Per-strategy detail cards */
+		.strategy-card {
+			background: var(--panel); border: 1px solid var(--panel-border); border-radius: 12px;
+			padding: 1.15rem 1.25rem 1.4rem; margin-bottom: 1.75rem; border-top: 3px solid var(--strat-color, var(--accent));
+			box-shadow: 0 8px 24px -18px rgba(0,0,0,0.6);
+		}
+		.strategy-card-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1rem; }
+		.strategy-card-head .title-group { display: flex; align-items: center; gap: 0.65rem; }
+		.strategy-icon {
+			width: 30px; height: 30px; border-radius: 8px; flex: none; display: inline-flex; align-items: center;
+			justify-content: center; font-size: 0.78rem; font-weight: 800; color: #0b0e14; background: var(--strat-color, var(--accent));
+		}
+		.strategy-card-head h3 { margin: 0; font-size: 1.05rem; }
+		.strategy-card-head .sub { font-size: 0.72rem; color: var(--text-dim); margin-top: 0.1rem; }
+		.strategy-card-head .badges { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+		.equity-panel-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; font-size: 0.72rem; color: var(--text-dim); }
+		.equity-panel-head .final { font-variant-numeric: tabular-nums; font-weight: 700; }
+		.section-summary { color: var(--text-dim); font-size: 0.85rem; margin: -0.75rem 0 1.5rem; }
 		.footer-note { color: var(--text-dim); font-size: 0.75rem; margin-top: 3rem; text-align: center; }
 		#error { color: var(--red); }
 		.calc-field { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.03em; }
@@ -78,6 +133,22 @@
 			background: var(--bg); border: 1px solid var(--panel-border); color: var(--text);
 			border-radius: 6px; padding: 0.45rem 0.5rem; font-size: 0.95rem; font-family: inherit;
 		}
+		.calc-field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(91,140,255,0.15); }
+		.btn-outline {
+			background: none; border: 1px solid var(--accent); color: var(--accent); padding: 0.5rem 0.9rem;
+			border-radius: 6px; font-weight: 600; cursor: pointer; font-family: inherit; font-size: 0.85rem;
+			transition: background 0.15s ease;
+		}
+		.btn-outline:hover:not(:disabled) { background: rgba(91,140,255,0.1); }
+		.btn-outline:disabled { opacity: 0.5; cursor: not-allowed; }
+		.signal-banner {
+			border-radius: 10px; padding: 0.9rem 1.1rem; margin-bottom: 1rem; display: flex;
+			align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;
+		}
+		.signal-banner .signal-name { font-size: 1.1rem; font-weight: 700; }
+		.signal-banner.bullish { background: rgba(62,207,142,0.12); border: 1px solid rgba(62,207,142,0.35); }
+		.signal-banner.bearish { background: rgba(239,91,91,0.12); border: 1px solid rgba(239,91,91,0.35); }
+		.signal-banner.wait { background: rgba(139,147,167,0.1); border: 1px solid rgba(139,147,167,0.3); }
 
 		/* Tabs */
 		.tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--panel-border); margin-bottom: 1.75rem; }
@@ -211,7 +282,7 @@
 			</div>
 			<div class="panel">
 				<div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;margin-bottom:1rem;">
-					<button id="calc-fetch-live" type="button" style="background:none;border:1px solid var(--accent);color:var(--accent);padding:0.5rem 0.9rem;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;">Fetch live SPX price / VWAP</button>
+					<button id="calc-fetch-live" type="button" class="btn-outline">Fetch live SPX price / VWAP</button>
 					<span id="calc-live-status" style="font-size:0.78rem;color:var(--text-dim);"></span>
 				</div>
 				<div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
@@ -332,17 +403,59 @@
 		return `<div class="stat-card"><div class="label">${label}</div><div class="value ${valueClass || ''}">${value}</div></div>`;
 	}
 
-	function statGrid(stats) {
+	function statGrid(stats, extra) {
 		if (!stats.trades) return '<div class="panel">No closed trades.</div>';
+		const e = extra || {};
 		return `<div class="stat-grid">
 			${statCard('Trades', stats.trades)}
 			${statCard('Win rate', fmtPct(stats.win_rate))}
 			${statCard('Total P&amp;L', fmtMoney(stats.total_pnl), cls(stats.total_pnl))}
 			${statCard('Avg P&amp;L / trade', fmtMoney(stats.avg_pnl_per_trade), cls(stats.avg_pnl_per_trade))}
 			${statCard('Avg win / loss', `${fmtMoney(stats.avg_win)} / ${fmtMoney(stats.avg_loss)}`)}
+			${statCard('Profit factor', e.profitFactor != null ? e.profitFactor.toFixed(2) : '&mdash;')}
 			${statCard('Sharpe (per-trade)', fmtNum(stats.sharpe_per_trade))}
 			${statCard('Max drawdown', fmtMoney(stats.max_drawdown), 'neg')}
+			${statCard('Best / worst streak', e.maxWinStreak != null ? `${e.maxWinStreak}W / ${e.maxLossStreak}L` : '&mdash;')}
+			${statCard('Final equity', fmtMoney(stats.final_equity), cls(stats.final_equity))}
 		</div>`;
+	}
+
+	// Deterministic per-strategy accent so the same strategy always renders the same
+	// color/initial across the comparison strip, detail cards, and the pie chart.
+	const STRATEGY_COLORS = { bull_put_spread: '#3ecf8e', bear_call_spread: '#ef5b5b', iron_condor: '#5b8cff' };
+	function strategyColor(name) { return STRATEGY_COLORS[name] || '#f0a63c'; }
+	function strategyInitials(name) {
+		return name.split('_').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+	}
+	function strategyLabel(name) { return name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
+
+	// Client-side extras metrics.py doesn't compute (profit factor needs the
+	// full win/loss sums, not just the averages; streaks need trade order).
+	function computeStrategyExtras(trades) {
+		const closed = trades.filter(t => t.pnl != null);
+		const pnls = closed.map(t => t.pnl);
+		const winSum = sum(pnls.filter(p => p > 0));
+		const lossSum = sum(pnls.filter(p => p < 0));
+		const profitFactor = lossSum < 0 ? Math.abs(winSum / lossSum) : (winSum > 0 ? Infinity : null);
+		let curWin = 0, curLoss = 0, maxWinStreak = 0, maxLossStreak = 0;
+		pnls.forEach(p => {
+			if (p > 0) { curWin++; curLoss = 0; } else if (p < 0) { curLoss++; curWin = 0; } else { curWin = 0; curLoss = 0; }
+			maxWinStreak = Math.max(maxWinStreak, curWin);
+			maxLossStreak = Math.max(maxLossStreak, curLoss);
+		});
+		return { profitFactor: Number.isFinite(profitFactor) ? profitFactor : null, maxWinStreak, maxLossStreak };
+	}
+
+	const STATUS_META = {
+		OPEN: { cls: 'st-open', label: 'Open' },
+		CLOSED_PROFIT: { cls: 'st-profit', label: 'Profit target' },
+		CLOSED_STOP: { cls: 'st-stop', label: 'Stop loss' },
+		CLOSED_DTE: { cls: 'st-dte', label: 'DTE exit' },
+		CLOSED_EXPIRY: { cls: 'st-expiry', label: 'Expired' },
+	};
+	function statusPill(status) {
+		const meta = STATUS_META[status] || { cls: 'st-expiry', label: status || '&mdash;' };
+		return `<span class="status-pill ${meta.cls}">${meta.label}</span>`;
 	}
 
 	function drawEquityCurve(canvas, curve, segmentColor) {
@@ -352,18 +465,41 @@
 		canvas.width = w * dpr; canvas.height = h * dpr;
 		const ctx = canvas.getContext('2d');
 		ctx.scale(dpr, dpr);
-		const pad = 8;
+		const padL = 8, padR = 8, padTop = 14, padBottom = 8;
 		const min = Math.min(0, ...curve), max = Math.max(0, ...curve);
 		const range = (max - min) || 1;
-		const x = (i) => pad + (i / (curve.length - 1)) * (w - pad * 2);
-		const y = (v) => h - pad - ((v - min) / range) * (h - pad * 2);
+		const x = (i) => padL + (i / (curve.length - 1)) * (w - padL - padR);
+		const y = (v) => h - padBottom - ((v - min) / range) * (h - padTop - padBottom);
+		const positive = curve[curve.length - 1] >= 0;
+		const lineColor = positive ? '#3ecf8e' : '#ef5b5b';
 
-		ctx.strokeStyle = '#232838';
+		// Faint horizontal gridlines (quartile levels) for scale reference.
+		ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+		ctx.lineWidth = 1;
+		for (let g = 1; g <= 3; g++) {
+			const gy = padTop + ((h - padTop - padBottom) / 4) * g;
+			ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(w - padR, gy); ctx.stroke();
+		}
+
+		// Zero line, slightly bolder than the gridlines
+		ctx.strokeStyle = '#2c3245';
 		ctx.lineWidth = 1;
 		ctx.beginPath();
-		ctx.moveTo(pad, y(0));
-		ctx.lineTo(w - pad, y(0));
+		ctx.moveTo(padL, y(0));
+		ctx.lineTo(w - padR, y(0));
 		ctx.stroke();
+
+		// Soft fill under the line for depth, matching the line's polarity.
+		ctx.beginPath();
+		curve.forEach((v, i) => i === 0 ? ctx.moveTo(x(i), y(v)) : ctx.lineTo(x(i), y(v)));
+		ctx.lineTo(x(curve.length - 1), y(0));
+		ctx.lineTo(x(0), y(0));
+		ctx.closePath();
+		const grad = ctx.createLinearGradient(0, padTop, 0, h - padBottom);
+		grad.addColorStop(0, positive ? 'rgba(62,207,142,0.22)' : 'rgba(239,91,91,0.22)');
+		grad.addColorStop(1, 'rgba(62,207,142,0)');
+		ctx.fillStyle = grad;
+		ctx.fill();
 
 		if (segmentColor) {
 			// color each segment by whether it rose or fell, like a per-day P&L evolution chart
@@ -376,13 +512,49 @@
 				ctx.stroke();
 			}
 		} else {
-			const positive = curve[curve.length - 1] >= 0;
-			ctx.strokeStyle = positive ? '#3ecf8e' : '#ef5b5b';
+			ctx.strokeStyle = lineColor;
 			ctx.lineWidth = 2;
 			ctx.beginPath();
 			curve.forEach((v, i) => i === 0 ? ctx.moveTo(x(i), y(v)) : ctx.lineTo(x(i), y(v)));
 			ctx.stroke();
+
+			// Peak marker -- the high-water mark, useful alongside the max-drawdown stat.
+			let peakIdx = 0;
+			curve.forEach((v, i) => { if (v > curve[peakIdx]) peakIdx = i; });
+			ctx.fillStyle = lineColor;
+			ctx.beginPath();
+			ctx.arc(x(peakIdx), y(curve[peakIdx]), 2.5, 0, Math.PI * 2);
+			ctx.fill();
 		}
+
+		// End-of-curve dot, marking the final equity value.
+		ctx.fillStyle = lineColor;
+		ctx.beginPath();
+		ctx.arc(x(curve.length - 1), y(curve[curve.length - 1]), 3, 0, Math.PI * 2);
+		ctx.fill();
+	}
+
+	function drawSparkline(canvas, curve, color) {
+		if (!canvas || !curve || curve.length < 2) return;
+		const dpr = window.devicePixelRatio || 1;
+		const w = canvas.clientWidth, h = canvas.clientHeight;
+		canvas.width = w * dpr; canvas.height = h * dpr;
+		const ctx = canvas.getContext('2d');
+		ctx.scale(dpr, dpr);
+		const pad = 2;
+		const min = Math.min(...curve), max = Math.max(...curve);
+		const range = (max - min) || 1;
+		const x = (i) => pad + (i / (curve.length - 1)) * (w - pad * 2);
+		const y = (v) => h - pad - ((v - min) / range) * (h - pad * 2);
+		ctx.strokeStyle = color;
+		ctx.lineWidth = 1.5;
+		ctx.beginPath();
+		curve.forEach((v, i) => i === 0 ? ctx.moveTo(x(i), y(v)) : ctx.lineTo(x(i), y(v)));
+		ctx.stroke();
+		ctx.fillStyle = color;
+		ctx.beginPath();
+		ctx.arc(x(curve.length - 1), y(curve[curve.length - 1]), 2, 0, Math.PI * 2);
+		ctx.fill();
 	}
 
 	function drawBars(canvas, items) {
@@ -540,7 +712,7 @@
 			return `<tr class="${isMismatch ? 'mismatch-row' : ''}">${cells}</tr>`;
 		}).join('');
 		const head = columns.map(c => `<th>${c.label}</th>`).join('');
-		return `<table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table>`;
+		return `<div class="table-scroll"><table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
 	}
 
 	// ---- Dashboard (mirrors a typical options trade-journal layout) ----
@@ -821,19 +993,73 @@
 
 	function renderBacktestSection(data, { heading, badgeClass, badgeText, idPrefix }) {
 		const [from, to] = data.price_series_range;
+		const withTrades = data.strategies.filter(s => s.stats.trades);
+		const combinedPnl = sum(withTrades.map(s => s.stats.total_pnl));
+		const combinedTrades = sum(withTrades.map(s => s.stats.trades));
+		const best = withTrades.length ? withTrades.reduce((a, b) => a.stats.total_pnl >= b.stats.total_pnl ? a : b) : null;
+
 		let html = `<h2>${heading} <span class="badge ${badgeClass}">${badgeText}</span></h2>
 			<div class="caveat">${data.caveat} Price series: ${from} &rarr; ${to}.</div>`;
 
+		if (withTrades.length) {
+			html += `<div class="section-summary">${combinedTrades} trades across ${withTrades.length} strategy variant(s) &middot; combined ${fmtMoney(combinedPnl)} &middot; best performer: <b style="color:var(--text)">${strategyLabel(best.name)}</b></div>`;
+
+			// Leaderboard strip: one glance at all strategies before reading the detail cards below.
+			html += `<div class="compare-strip">`;
+			data.strategies.forEach((s, i) => {
+				const color = strategyColor(s.name);
+				if (!s.stats.trades) {
+					html += `<div class="compare-card" style="--strat-color:${color};opacity:0.6;">
+						<div class="compare-head"><span class="compare-name">${strategyLabel(s.name)}</span></div>
+						<div style="font-size:0.78rem;color:var(--text-dim)">No closed trades.</div>
+					</div>`;
+					return;
+				}
+				html += `<div class="compare-card" style="--strat-color:${color};">
+					<div class="compare-head">
+						<span class="compare-name">${strategyLabel(s.name)}</span>
+						<span class="pill ${cls(s.stats.total_pnl)}">${fmtPct(s.stats.win_rate)} win</span>
+					</div>
+					<div class="compare-pnl ${cls(s.stats.total_pnl)}">${fmtMoney(s.stats.total_pnl)}</div>
+					<div class="winrate-track"><span class="winrate-fill" style="width:${Math.round((s.stats.win_rate || 0) * 100)}%;background:${color};"></span></div>
+					<div class="compare-meta"><span>Trades</span><b>${s.stats.trades}</b></div>
+					<div class="compare-meta"><span>Avg / trade</span><b>${fmtMoney(s.stats.avg_pnl_per_trade)}</b></div>
+					<canvas class="compare-spark" id="${idPrefix}-spark-${i}"></canvas>
+				</div>`;
+			});
+			html += `</div>`;
+		}
+
 		data.strategies.forEach((s, i) => {
-			html += `<div class="strategy-block">
-				<h3>${s.name.replace(/_/g, ' ')}</h3>
-				${statGrid(s.stats)}
-				<div class="panel"><canvas id="${idPrefix}-curve-${i}"></canvas></div>
+			const color = strategyColor(s.name);
+			const extras = computeStrategyExtras(s.trades);
+			html += `<div class="strategy-card" style="--strat-color:${color};">
+				<div class="strategy-card-head">
+					<div class="title-group">
+						<span class="strategy-icon" style="--strat-color:${color};">${strategyInitials(s.name)}</span>
+						<div>
+							<h3>${strategyLabel(s.name)}</h3>
+							<div class="sub">${s.trades.length} trade(s) recorded</div>
+						</div>
+					</div>
+					<div class="badges">
+						${s.stats.trades ? `<span class="pill ${cls(s.stats.total_pnl)}">${fmtMoney(s.stats.total_pnl)}</span>` : ''}
+						${s.stats.trades ? `<span class="pill neutral">${fmtPct(s.stats.win_rate)} win rate</span>` : ''}
+					</div>
+				</div>
+				${statGrid(s.stats, extras)}
+				<div class="panel">
+					<div class="equity-panel-head">
+						<span>Equity curve</span>
+						${s.stats.trades ? `<span class="final ${cls(s.stats.final_equity)}">${fmtMoney(s.stats.final_equity)}</span>` : ''}
+					</div>
+					<canvas id="${idPrefix}-curve-${i}"></canvas>
+				</div>
 				<details><summary>Show ${s.trades.length} trade(s)</summary>
 					${tradesTable(s.trades, [
 						{ label: 'Entry', render: t => t.entry_date },
 						{ label: 'Exit', render: t => t.exit_date || '&mdash;' },
-						{ label: 'Status', render: t => t.status },
+						{ label: 'Status', render: t => statusPill(t.status) },
 						{ label: 'Legs', render: t => t.legs.join(', ') },
 						{ label: 'Credit', num: true, render: t => fmtNum(t.entry_credit) },
 						{ label: 'P&amp;L', num: true, render: t => `<span class="${cls(t.pnl)}">${fmtMoney(t.pnl)}</span>` },
@@ -866,29 +1092,51 @@
 			gamma_flip_strike: gex.gamma_flip != null ? nearestStrike(gex.gamma_flip) : null,
 			spot_strike: nearestStrike(gex.spot),
 		};
-		const html = `<h2>GEX / Walls <span class="badge demo">0DTE-style, model-estimated OI</span></h2>
+		const isRealChain = /real chain/i.test(gex.spot_source || '');
+		const pctFromSpot = (level) => level == null ? null : ((level - gex.spot) / gex.spot) * 100;
+		const distLabel = (level) => {
+			const pct = pctFromSpot(level);
+			return pct == null ? '' : ` (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)`;
+		};
+		const regime = gex.net_gex >= 0
+			? { label: 'Positive gamma regime', cls: 'pos', note: 'Dealers are net long gamma -- hedging flows tend to dampen moves (pinning behavior around walls).' }
+			: { label: 'Negative gamma regime', cls: 'neg', note: 'Dealers are net short gamma -- hedging flows tend to amplify moves (faster, larger swings).' };
+
+		const html = `<h2>GEX / Walls <span class="badge ${isRealChain ? 'real' : 'demo'}">${isRealChain ? 'Real chain' : '0DTE-style, model-estimated OI'}</span></h2>
 			<div class="caveat">${gex.caveat}</div>
+			<div class="gate-banner ${regime.cls === 'pos' ? 'go' : 'nogo'}" style="margin-bottom:1.25rem;">
+				<div class="gate-title">${regime.label} <span class="pill ${regime.cls}">Net GEX ${fmtMoneyCompact(gex.net_gex)}</span></div>
+				<div class="gate-upcoming">${regime.note}</div>
+			</div>
 			<div class="stat-grid">
-				${statCard('Model Spot', fmtNum(gex.spot))}
+				${statCard('Spot', fmtNum(gex.spot))}
 				${statCard('Spot Source', gex.spot_source)}
-				${statCard('Put Wall', gex.put_wall != null ? fmtNum(gex.put_wall) : '&mdash;')}
-				${statCard('Call Wall', gex.call_wall != null ? fmtNum(gex.call_wall) : '&mdash;')}
-				${statCard('Gamma Flip', gex.gamma_flip != null ? fmtNum(gex.gamma_flip) : '&mdash;')}
+				${statCard('Put Wall', gex.put_wall != null ? fmtNum(gex.put_wall) + distLabel(gex.put_wall) : '&mdash;')}
+				${statCard('Call Wall', gex.call_wall != null ? fmtNum(gex.call_wall) + distLabel(gex.call_wall) : '&mdash;')}
+				${statCard('Gamma Flip', gex.gamma_flip != null ? fmtNum(gex.gamma_flip) + distLabel(gex.gamma_flip) : '&mdash;')}
 				${statCard('Positive GEX', fmtMoneyCompact(gex.positive_gex), 'pos')}
 				${statCard('Negative GEX', fmtMoneyCompact(gex.negative_gex), 'neg')}
 				${statCard('Net GEX', fmtMoneyCompact(gex.net_gex), cls(gex.net_gex))}
 				${statCard('Gross GEX', fmtMoneyCompact(gex.gross_gex))}
 			</div>
-			<div class="panel"><canvas class="dash-canvas" id="gex-bars"></canvas></div>
-			<details><summary>Show all ${gex.by_strike.length} strikes</summary>
-				<div style="max-height:360px;overflow-y:auto;">
-					${tradesTable(gex.by_strike, [
-						{ label: 'Strike', render: r => fmtNum(r.strike) },
-						{ label: 'Positive GEX', num: true, render: r => `<span class="pos">${fmtMoney(r.positive_gex)}</span>` },
-						{ label: 'Negative GEX', num: true, render: r => `<span class="neg">${fmtMoney(r.negative_gex)}</span>` },
-						{ label: 'Net GEX', num: true, render: r => `<span class="${cls(r.net_gex)}">${fmtMoney(r.net_gex)}</span>` },
-					])}
+			<div class="panel">
+				<div class="equity-panel-head"><span>GEX by strike</span></div>
+				<canvas class="dash-canvas" id="gex-bars"></canvas>
+				<div style="display:flex;gap:1.25rem;flex-wrap:wrap;margin-top:0.6rem;font-size:0.72rem;color:var(--text-dim);">
+					<span><span class="winrate-fill" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#3ecf8e;margin-right:0.35rem;"></span>Positive (call-side) GEX</span>
+					<span><span class="winrate-fill" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#ef5b5b;margin-right:0.35rem;"></span>Negative (put-side) GEX</span>
+					<span><span style="display:inline-block;width:9px;border-top:2px dashed #f0a63c;margin-right:0.35rem;"></span>Put Wall</span>
+					<span><span style="display:inline-block;width:9px;border-top:2px dashed #5b8cff;margin-right:0.35rem;"></span>Call Wall</span>
+					<span><span style="display:inline-block;width:9px;border-top:2px dashed #e6e8ee;margin-right:0.35rem;"></span>Gamma Flip</span>
 				</div>
+			</div>
+			<details><summary>Show all ${gex.by_strike.length} strikes</summary>
+				${tradesTable(gex.by_strike, [
+					{ label: 'Strike', render: r => fmtNum(r.strike) },
+					{ label: 'Positive GEX', num: true, render: r => `<span class="pos">${fmtMoney(r.positive_gex)}</span>` },
+					{ label: 'Negative GEX', num: true, render: r => `<span class="neg">${fmtMoney(r.negative_gex)}</span>` },
+					{ label: 'Net GEX', num: true, render: r => `<span class="${cls(r.net_gex)}">${fmtMoney(r.net_gex)}</span>` },
+				])}
 			</details>`;
 		return { html, walls };
 	}
@@ -916,9 +1164,14 @@
 			dashboard.draw();
 
 			data.real.by_strategy.forEach((s, i) => drawEquityCurve(document.getElementById(`real-curve-${i}`), s.stats.equity_curve));
-			if (data.yfinance) data.yfinance.strategies.forEach((s, i) => drawEquityCurve(document.getElementById(`yfinance-curve-${i}`), s.equity_curve));
-			if (data.moomoo) data.moomoo.strategies.forEach((s, i) => drawEquityCurve(document.getElementById(`moomoo-curve-${i}`), s.equity_curve));
-			data.synthetic.strategies.forEach((s, i) => drawEquityCurve(document.getElementById(`synth-curve-${i}`), s.equity_curve));
+			const drawBacktestCanvases = (section, idPrefix) => section.strategies.forEach((s, i) => {
+				drawEquityCurve(document.getElementById(`${idPrefix}-curve-${i}`), s.equity_curve);
+				const spark = document.getElementById(`${idPrefix}-spark-${i}`);
+				if (spark) drawSparkline(spark, s.equity_curve, strategyColor(s.name));
+			});
+			if (data.yfinance) drawBacktestCanvases(data.yfinance, 'yfinance');
+			if (data.moomoo) drawBacktestCanvases(data.moomoo, 'moomoo');
+			drawBacktestCanvases(data.synthetic, 'synth');
 
 			if (data.gex) {
 				const gexResult = renderGex(data.gex);
@@ -1081,20 +1334,22 @@
 				placementNote = 'Direction signal is WAIT &mdash; course says do not force a trade (Class #02/#04).';
 			}
 
-			const signalClass = dir.signal === 'BULLISH_CONFIRMED' ? 'pos' : dir.signal === 'BEARISH_CONFIRMED' ? 'neg' : '';
+			const bannerCls = dir.signal === 'BULLISH_CONFIRMED' ? 'bullish' : dir.signal === 'BEARISH_CONFIRMED' ? 'bearish' : 'wait';
 			const placementColor = placementOk === null ? 'var(--text-dim)' : placementOk ? 'var(--green)' : 'var(--red)';
 
 			document.getElementById('calc-output').innerHTML = `
+				<div class="signal-banner ${bannerCls}">
+					<span class="signal-name">${dir.signal.replace('_', ' ')}</span>
+					<span style="font-size:0.8rem;color:var(--text-dim);">Gap: <b style="color:var(--text)">${dir.gap}</b> &middot; VWAP position: <b style="color:var(--text)">${dir.vwapPos}</b></span>
+				</div>
 				<div class="stat-grid">
-					${statCard('Direction signal', dir.signal.replace('_', ' '), signalClass)}
-					${statCard('Gap / VWAP', `${dir.gap} / ${dir.vwapPos}`)}
 					${statCard('Max profit', fmtMoney(pnl.maxProfit), 'pos')}
 					${statCard('Max loss', fmtMoney(pnl.maxLoss), 'neg')}
+					${statCard('Credit/risk ratio', pnl.ratio !== null ? pnl.ratio.toFixed(3) : 'n/a')}
 					${statCard('Breakeven win %', fmtPct(bewr), bewrClass)}
 				</div>
 				<div class="caveat" style="border-left-color:${placementColor};">
 					${placementNote}<br>
-					Credit/risk ratio: ${pnl.ratio !== null ? pnl.ratio.toFixed(3) : 'n/a'} &middot;
 					Spread width: ${width} pts &middot; Max spread value: ${fmtMoney(pnl.maxSpreadValue)}<br>
 					Breakeven win %: this trade needs to win at least ${fmtPct(bewr)} of the time (maxLoss &divide; (maxProfit + maxLoss)) just to break even before costs.
 				</div>
