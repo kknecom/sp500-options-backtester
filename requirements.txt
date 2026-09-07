@@ -3,3 +3,4 @@ scipy
 pandas
 openpyxl
 moomoo-api
+yfinance

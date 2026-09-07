@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-07T03:00:05",
+  "generated_at": "2026-09-07T03:14:21",
   "synthetic": {
     "caveat": "Demo run over ~50 trading days of SPY-derived SPX-proxy closes with a synthetic Black-Scholes options chain (no real quotes, no skew). Too short and too calm a window to validate a strategy -- shown only to prove the engine runs end-to-end. See README for details.",
     "price_series_range": [

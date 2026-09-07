@@ -19,7 +19,10 @@ from backtest.replay import load_trades
 from strategies.bull_put_spread import BullPutSpread
 from strategies.bear_call_spread import BearCallSpread
 from strategies.iron_condor import IronCondor
-from run_backtest import load_price_series, load_price_series_from_moomoo
+from run_backtest import (
+    load_price_series, load_price_series_from_moomoo,
+    load_price_series_from_yfinance, load_vix_series_from_yfinance,
+)
 from backtest.engine import _trailing_realized_vol
 from strategy_logic.gex_walls import (
     compute_gex_by_strike, compute_gex_from_contracts, find_walls, find_gamma_flip, estimate_oi_proxy,
@@ -60,6 +63,19 @@ GEX_CAVEAT_REAL = (
     "not the full chain. No proxy, no BSM re-derivation."
 )
 
+YFINANCE_LOOKBACK_DAYS = 5 * 365
+YFINANCE_CAVEAT = (
+    "Both the underlying price series (real SPX index, ^GSPC) AND the "
+    "volatility input (real historical VIX, ^VIX) are real market data "
+    "pulled live via Yahoo Finance (yfinance) -- no proxy scaling, no "
+    "trailing-realized-vol substitute. This is the most realistic of the "
+    "backtest tracks on this dashboard for underlying price and volatility "
+    "level, but the option chain itself is STILL the synthetic Black-Scholes "
+    "chain in pricing/black_scholes.py -- no real skew, no real bid/ask, no "
+    "real strikes/OI. VIX is a ~30-day implied-vol figure applied flat "
+    "regardless of the trade's actual DTE (no term structure). See README."
+)
+
 MOOMOO_LOOKBACK_DAYS = 3 * 365
 MOOMOO_CAVEAT = (
     "Underlying prices are REAL SPY daily closes pulled live via the moomoo OpenAPI "
@@ -90,12 +106,13 @@ def equity_curve(pnls: list[float]) -> list[float]:
     return out
 
 
-def _run_strategies_export(price_series: list[tuple[date, float]], caveat: str) -> dict:
+def _run_strategies_export(price_series: list[tuple[date, float]], caveat: str,
+                            vix_series: list[tuple[date, float]] | None = None) -> dict:
     strategies = [BullPutSpread(config), BearCallSpread(config), IronCondor(config)]
 
     out_strategies = []
     for strat in strategies:
-        trades = run_backtest(strat, price_series)
+        trades = run_backtest(strat, price_series, vix_series=vix_series)
         stats = summarize(trades)
         closed = [t for t in trades if t.realized_pnl is not None]
         out_strategies.append({
@@ -137,6 +154,22 @@ def export_moomoo() -> dict:
     start = (date.today() - timedelta(days=MOOMOO_LOOKBACK_DAYS)).isoformat()
     price_series = load_price_series_from_moomoo("SPY", start, None)
     return _run_strategies_export(price_series, MOOMOO_CAVEAT)
+
+
+def export_yfinance() -> dict:
+    """
+    Same engine/strategies as export_synthetic, but fed REAL SPX (^GSPC)
+    closes AND REAL VIX (both via Yahoo Finance/yfinance) instead of the
+    static sample CSV or the SPY-scaled moomoo proxy -- see
+    backtest/engine.py's vix_series docstring for why real VIX matters
+    (variance risk premium). Raises if yfinance can't reach Yahoo (no
+    network, rate-limited, etc.) -- caller should catch and skip this
+    section rather than fail the whole export (see main()).
+    """
+    start = (date.today() - timedelta(days=YFINANCE_LOOKBACK_DAYS)).isoformat()
+    price_series = load_price_series_from_yfinance("^GSPC", start, None)
+    vix_series = load_vix_series_from_yfinance(start, None)
+    return _run_strategies_export(price_series, YFINANCE_CAVEAT, vix_series=vix_series)
 
 
 def export_real() -> dict:
@@ -297,6 +330,10 @@ def main():
         result["moomoo"] = export_moomoo()
     except Exception as e:
         print(f"Skipping moomoo section (OpenD not reachable, or errored): {e}")
+    try:
+        result["yfinance"] = export_yfinance()
+    except Exception as e:
+        print(f"Skipping yfinance section (network unreachable, or errored): {e}")
     try:
         result["gex"] = export_gex_snapshot()
     except Exception as e:

@@ -878,6 +878,10 @@
 			document.getElementById('generated-at').textContent = 'Last regenerated: ' + data.generated_at;
 			const app = document.getElementById('app');
 			const dashboard = renderDashboard(data.real);
+			const yfinanceHtml = data.yfinance ? renderBacktestSection(data.yfinance, {
+				heading: 'Real SPX + Real VIX Backtest', badgeClass: 'live',
+				badgeText: 'Real SPX (^GSPC) + real VIX, synthetic option chain', idPrefix: 'yfinance',
+			}) : '';
 			const moomooHtml = data.moomoo ? renderBacktestSection(data.moomoo, {
 				heading: 'Live moomoo Backtest', badgeClass: 'live',
 				badgeText: 'Real SPY closes, synthetic option chain', idPrefix: 'moomoo',
@@ -886,10 +890,11 @@
 				heading: 'Synthetic Demo Backtest', badgeClass: 'demo',
 				badgeText: 'Illustrative only', idPrefix: 'synth',
 			});
-			app.innerHTML = dashboard.html + renderReal(data.real) + moomooHtml + synthHtml;
+			app.innerHTML = dashboard.html + renderReal(data.real) + yfinanceHtml + moomooHtml + synthHtml;
 			dashboard.draw();
 
 			data.real.by_strategy.forEach((s, i) => drawEquityCurve(document.getElementById(`real-curve-${i}`), s.stats.equity_curve));
+			if (data.yfinance) data.yfinance.strategies.forEach((s, i) => drawEquityCurve(document.getElementById(`yfinance-curve-${i}`), s.equity_curve));
 			if (data.moomoo) data.moomoo.strategies.forEach((s, i) => drawEquityCurve(document.getElementById(`moomoo-curve-${i}`), s.equity_curve));
 			data.synthetic.strategies.forEach((s, i) => drawEquityCurve(document.getElementById(`synth-curve-${i}`), s.equity_curve));
 
