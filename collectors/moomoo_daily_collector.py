@@ -123,6 +123,23 @@ def pick_expiration_near_dte(expirations: list[date], target_dte: int = None, as
     return min(expirations, key=lambda d: abs((d - target_date).days))
 
 
+def _safe_float(val, default: float = 0.0) -> float:
+    """
+    float(val), but treats None AND NaN as `default` -- plain `float(x or
+    default)` does NOT catch NaN (NaN is truthy in Python: `float('nan')
+    or 0.0` returns nan, not 0.0). Real chain rows for deep/illiquid
+    strikes commonly come back with NaN greeks/OI from moomoo, and that
+    NaN silently propagating into GEX math produced a phantom gamma-flip
+    strike far from spot -- see conversation. Use this everywhere a
+    chain value is converted to float.
+    """
+    try:
+        f = float(val)
+    except (TypeError, ValueError):
+        return default
+    return default if f != f else f  # f != f is True only for NaN
+
+
 def fetch_spot(underlying: str = "SPX") -> float:
     """
     Current underlying price via get_market_snapshot on the index/stock
@@ -310,13 +327,13 @@ def chain_df_to_quotes(chain_df) -> list:
         if bid and ask and bid > 0 and ask > 0:
             price = (float(bid) + float(ask)) / 2.0
         else:
-            price = float(row.get("last_price") or 0.0)
+            price = _safe_float(row.get("last_price"))
         quotes.append(OptionQuote(
             strike=strike, right=right, price=price,
-            delta=float(row.get("option_delta") or 0.0),
-            gamma=float(row.get("option_gamma") or 0.0),
-            theta=float(row.get("option_theta") or 0.0),
-            vega=float(row.get("option_vega") or 0.0),
+            delta=_safe_float(row.get("option_delta")),
+            gamma=_safe_float(row.get("option_gamma")),
+            theta=_safe_float(row.get("option_theta")),
+            vega=_safe_float(row.get("option_vega")),
         ))
     return quotes
 
@@ -336,8 +353,8 @@ def chain_df_to_gex_contracts(chain_df) -> list[dict]:
         _underlying, _expiration, strike, right = parsed
         contracts.append({
             "strike": strike, "right": right,
-            "oi": float(row.get("option_open_interest") or 0.0),
-            "gamma": float(row.get("option_gamma") or 0.0),
+            "oi": _safe_float(row.get("option_open_interest")),
+            "gamma": _safe_float(row.get("option_gamma")),
         })
     return contracts
 

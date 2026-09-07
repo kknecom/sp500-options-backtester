@@ -130,8 +130,19 @@ def find_gamma_flip(rows: list[StrikeGex]) -> float | None:
     stabilizing (long gamma, above flip) to destabilizing (short gamma,
     below flip). Returns None if net GEX never changes sign across the
     strikes provided (all one side).
+
+    Strikes with zero open interest on BOTH sides are excluded before
+    scanning. Those have net_gex == 0.0 not because dealer positioning is
+    neutral there, but because there's no real OI data at all -- a real
+    chain has long stretches of these at deep/illiquid strikes (unlike
+    the synthetic proxy OI path, which never produces an exact zero).
+    Confirmed live: a real SPX chain reported a false "flip" at a
+    no-OI strike ~49% below spot, right at the boundary where real OI
+    began, because 0.0 doesn't satisfy `< 0` and so looked like a sign
+    change against the first real (negative) strike next to it.
     """
-    ordered = sorted(rows, key=lambda r: r.strike)
+    populated = [r for r in rows if r.call_oi != 0 or r.put_oi != 0]
+    ordered = sorted(populated, key=lambda r: r.strike)
     for a, b in zip(ordered, ordered[1:]):
         if (a.net_gex < 0) != (b.net_gex < 0):
             if b.net_gex == a.net_gex:
