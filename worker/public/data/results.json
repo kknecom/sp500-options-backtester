@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-07T01:19:19",
+  "generated_at": "2026-09-07T03:00:05",
   "synthetic": {
     "caveat": "Demo run over ~50 trading days of SPY-derived SPX-proxy closes with a synthetic Black-Scholes options chain (no real quotes, no skew). Too short and too calm a window to validate a strategy -- shown only to prove the engine runs end-to-end. See README for details.",
     "price_series_range": [
@@ -570,9 +570,9 @@
     ]
   },
   "gex": {
-    "caveat": "GEX-by-strike, walls, and gamma flip use estimate_oi_proxy() -- a crude placeholder open-interest curve concentrated near the money and round numbers, NOT real chain data. With this proxy, walls often land right at spot (real OI has actual strike-specific clustering the proxy can't fake). Do not use these levels for real trading decisions until collectors/tiger_daily_collector.py is wired to live OI. Modeled at a 0DTE-style horizon (T=1/365), matching the strike-selection rules in strategy_logic/, not the 45-DTE backtest track above.",
+    "caveat": "FALLBACK PATH -- moomoo/OpenD wasn't reachable when this was generated, so GEX-by-strike, walls, and gamma flip use estimate_oi_proxy() -- a crude placeholder open-interest curve concentrated near the money and round numbers, NOT real chain data. With this proxy, walls often land right at spot (real OI has actual strike-specific clustering the proxy can't fake). Do not use these levels for real trading decisions. Modeled at a 0DTE-style horizon (T=1/365), matching the strike-selection rules in strategy_logic/, not the 45-DTE backtest track above.",
     "spot": 7657.2,
-    "spot_source": "synthetic sample",
+    "spot_source": "synthetic sample (proxy OI)",
     "sigma": 0.1281,
     "put_wall": 7650,
     "call_wall": 7700,

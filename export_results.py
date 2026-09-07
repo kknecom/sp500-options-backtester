@@ -21,7 +21,9 @@ from strategies.bear_call_spread import BearCallSpread
 from strategies.iron_condor import IronCondor
 from run_backtest import load_price_series, load_price_series_from_moomoo
 from backtest.engine import _trailing_realized_vol
-from strategy_logic.gex_walls import compute_gex_by_strike, find_walls, find_gamma_flip, estimate_oi_proxy
+from strategy_logic.gex_walls import (
+    compute_gex_by_strike, compute_gex_from_contracts, find_walls, find_gamma_flip, estimate_oi_proxy,
+)
 
 OUT_PATH = Path(__file__).parent / "worker" / "public" / "data" / "results.json"
 
@@ -37,15 +39,25 @@ REAL_CAVEAT = (
     "sheet's W/L label -- rows where the label disagreed with the computed outcome "
     "are flagged below."
 )
-GEX_CAVEAT = (
+GEX_CAVEAT_PROXY = (
+    "FALLBACK PATH -- moomoo/OpenD wasn't reachable when this was generated, so "
     "GEX-by-strike, walls, and gamma flip use estimate_oi_proxy() -- a crude "
     "placeholder open-interest curve concentrated near the money and round "
     "numbers, NOT real chain data. With this proxy, walls often land right at "
     "spot (real OI has actual strike-specific clustering the proxy can't fake). "
-    "Do not use these levels for real trading decisions until "
-    "collectors/tiger_daily_collector.py is wired to live OI. Modeled at a "
-    "0DTE-style horizon (T=1/365), matching the strike-selection rules in "
-    "strategy_logic/, not the 45-DTE backtest track above."
+    "Do not use these levels for real trading decisions. Modeled at a 0DTE-style "
+    "horizon (T=1/365), matching the strike-selection rules in strategy_logic/, "
+    "not the 45-DTE backtest track above."
+)
+GEX_CAVEAT_REAL = (
+    "REAL chain -- open interest and gamma are pulled live from moomoo/OpenD "
+    "(get_option_chain + get_market_snapshot) for the nearest-to-0DTE SPX "
+    "expiration, matching the strike-selection rules in strategy_logic/ (not "
+    "the 45-DTE backtest track above). Spot is derived from this same chain "
+    "via put-call parity (get_market_snapshot rejects SPX/VIX index codes "
+    "directly). Still restricted to strikes within the dashboard's +/- window "
+    "around spot, same as the fallback path, for a consistent chart scale -- "
+    "not the full chain. No proxy, no BSM re-derivation."
 )
 
 MOOMOO_LOOKBACK_DAYS = 3 * 365
@@ -162,23 +174,55 @@ def export_real() -> dict:
     }
 
 
-def export_gex_snapshot(width_pct: float = 0.03) -> dict:
+def _export_gex_real(width_pct: float) -> dict:
     """
-    Point-in-time GEX-by-strike + wall/gamma-flip levels around the latest
-    known spot. Prefers a real recent SPY close (via moomoo) for spot and
-    trailing realized vol, scaled to an SPX-proxy level like the rest of
-    this dashboard; falls back to the bundled synthetic sample if moomoo
-    (OpenD) isn't reachable. See GEX_CAVEAT -- OI itself is still a
-    placeholder regardless of which spot source is used.
+    Real path: live SPX chain via moomoo/OpenD, nearest to 0DTE (matching
+    this snapshot's intended horizon -- see GEX_CAVEAT_REAL). Raises if
+    OpenD isn't reachable/logged in or the chain comes back empty --
+    caller falls back to _export_gex_proxy.
     """
+    from collectors.moomoo_daily_collector import (
+        fetch_option_expirations, pick_expiration_near_dte, fetch_option_chain,
+        chain_df_to_quotes, chain_df_to_gex_contracts, estimate_spot_from_chain,
+    )
+
+    expirations = fetch_option_expirations("SPX")
+    expiry = pick_expiration_near_dte(expirations, target_dte=0)
+    chain_df = fetch_option_chain("SPX", expiry)
+    if chain_df.empty:
+        raise RuntimeError("empty chain from moomoo")
+
+    quotes = chain_df_to_quotes(chain_df)
+    spot = estimate_spot_from_chain(quotes)
+    contracts = chain_df_to_gex_contracts(chain_df)
+
+    # Same +/- window as the proxy path, applied to the real contracts before
+    # computing GEX, so both paths produce a comparably-scaled chart/totals
+    # instead of one being a narrow window and the other a 1700+ strike dump.
+    low = round((spot * (1 - width_pct)) / config.STRIKE_INCREMENT) * config.STRIKE_INCREMENT
+    high = round((spot * (1 + width_pct)) / config.STRIKE_INCREMENT) * config.STRIKE_INCREMENT
+    windowed = [c for c in contracts if low <= c["strike"] <= high]
+
+    rows = compute_gex_from_contracts(spot, windowed)
+    return {
+        "caveat": GEX_CAVEAT_REAL,
+        "spot": spot,
+        "spot_source": f"moomoo:SPX real chain ({expiry.isoformat()})",
+        "sigma": None,
+        "rows": rows,
+    }
+
+
+def _export_gex_proxy(width_pct: float) -> dict:
+    """Fallback path: proxy OI + BSM-derived gamma, as before."""
     try:
         start = (date.today() - timedelta(days=90)).isoformat()
         price_series = load_price_series_from_moomoo("SPY", start, None)
-        spot_source = "moomoo:SPY x10"
+        spot_source = "moomoo:SPY x10 (proxy OI)"
         closes = [p * 10 for _, p in price_series]
     except Exception:
         price_series = load_price_series("data/sample/spx_proxy_sample.csv")
-        spot_source = "synthetic sample"
+        spot_source = "synthetic sample (proxy OI)"
         closes = [p for _, p in price_series]
 
     spot = closes[-1]
@@ -191,17 +235,38 @@ def export_gex_snapshot(width_pct: float = 0.03) -> dict:
     call_oi, put_oi = estimate_oi_proxy(strikes, spot)
     rows = compute_gex_by_strike(spot, 1 / 365, config.RISK_FREE_RATE, config.DIVIDEND_YIELD,
                                   sigma, strikes, call_oi, put_oi)
-    walls = find_walls(rows, spot)
+    return {
+        "caveat": GEX_CAVEAT_PROXY,
+        "spot": spot,
+        "spot_source": spot_source,
+        "sigma": sigma,
+        "rows": rows,
+    }
+
+
+def export_gex_snapshot(width_pct: float = 0.03) -> dict:
+    """
+    Point-in-time GEX-by-strike + wall/gamma-flip levels around the latest
+    spot. Prefers a REAL live SPX chain (real OI, real gamma, real spot via
+    put-call parity) via moomoo/OpenD; falls back to the proxy-OI/BSM path
+    if OpenD isn't reachable. See GEX_CAVEAT_REAL / GEX_CAVEAT_PROXY.
+    """
+    try:
+        result = _export_gex_real(width_pct)
+    except Exception as e:
+        print(f"Real chain unavailable for GEX snapshot ({e}); falling back to proxy OI.")
+        result = _export_gex_proxy(width_pct)
+
+    rows = result.pop("rows")
+    walls = find_walls(rows, result["spot"])
     gamma_flip = find_gamma_flip(rows)
 
     positive_gex = sum(r.call_gex for r in rows)
     negative_gex = sum(r.put_gex for r in rows)  # magnitude; displayed negated (dealer short-gamma side)
 
-    return {
-        "caveat": GEX_CAVEAT,
-        "spot": round(spot, 2),
-        "spot_source": spot_source,
-        "sigma": round(sigma, 4),
+    result.update({
+        "spot": round(result["spot"], 2),
+        "sigma": round(result["sigma"], 4) if result["sigma"] is not None else None,
         "put_wall": walls.put_wall,
         "call_wall": walls.call_wall,
         "gamma_flip": round(gamma_flip, 2) if gamma_flip is not None else None,
@@ -218,7 +283,8 @@ def export_gex_snapshot(width_pct: float = 0.03) -> dict:
             }
             for r in rows
         ],
-    }
+    })
+    return result
 
 
 def main():
