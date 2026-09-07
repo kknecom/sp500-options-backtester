@@ -86,6 +86,11 @@ class OptionBar:
     open_interest: int | None
     iv: float | None
     delta: float | None
+    bid: float | None = None
+    ask: float | None = None
+    gamma: float | None = None
+    theta: float | None = None
+    vega: float | None = None
 
 
 def _underlying_code(underlying: str) -> str:
@@ -368,19 +373,93 @@ def write_option_bars(bars: list[OptionBar], db_path: str = config.DB_PATH) -> i
             """
             INSERT OR REPLACE INTO option_daily_bar
                 (trade_date, underlying, expiration, strike, right, open, high, low, close,
-                 volume, open_interest, iv, delta, source)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'moomoo_api')
+                 volume, open_interest, iv, delta, bid, ask, gamma, theta, vega, source)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'moomoo_api')
             """,
             (
                 b.trade_date.isoformat(), b.underlying,
                 b.expiration.isoformat() if b.expiration else None, b.strike, b.right,
                 b.open, b.high, b.low, b.close, b.volume, b.open_interest, b.iv, b.delta,
+                b.bid, b.ask, b.gamma, b.theta, b.vega,
             ),
         )
         n += 1
     conn.commit()
     conn.close()
     return n
+
+
+def write_underlying_bar(trade_date: date, symbol: str, close: float,
+                          db_path: str = config.DB_PATH) -> None:
+    """
+    One row in underlying_daily for `symbol` on `trade_date` -- e.g. the
+    real SPX spot (via estimate_spot_from_chain) captured alongside a
+    daily chain snapshot. Only `close` is populated (a chain snapshot
+    doesn't give a real day's OHLC/volume); INSERT OR REPLACE so re-running
+    collect_daily_snapshot.py the same day overwrites rather than errors.
+    """
+    conn = sqlite3.connect(db_path)
+    conn.execute(
+        "INSERT OR REPLACE INTO underlying_daily (trade_date, symbol, close) VALUES (?, ?, ?)",
+        (trade_date.isoformat(), symbol, close),
+    )
+    conn.commit()
+    conn.close()
+
+
+def fetch_daily_chain_snapshot(underlying: str = "SPX", target_dte: int | None = None) -> tuple[float, list[OptionBar]]:
+    """
+    Full real chain snapshot for one expiration (nearest to target_dte,
+    default config.TARGET_DTE) via get_option_chain + get_market_snapshot
+    -- real bid/ask/OI/greeks for every strike, not just the 2-4 legs of
+    an open trade. Unlike fetch_option_day_bars (historical klines), this
+    is NOT quota-limited the way that endpoint is -- confirmed live
+    pulling a full 1700+ contract SPX chain with real bid/ask and greeks,
+    no funding/entitlement purchase needed (see module docstring).
+
+    Returns (spot, bars) -- spot from estimate_spot_from_chain (put-call
+    parity on this same chain; get_market_snapshot rejects index codes
+    directly, see that function's docstring), bars as one OptionBar per
+    strike/right with today's date, ready for write_option_bars().
+
+    This is the function collect_daily_snapshot.py calls once per day to
+    slowly build a REAL (non-synthetic) options dataset over time -- see
+    that script's docstring for how to schedule it.
+    """
+    expirations = fetch_option_expirations(underlying)
+    target = pick_expiration_near_dte(expirations, target_dte=target_dte)
+    chain_df = fetch_option_chain(underlying, target)
+    if chain_df.empty:
+        raise RuntimeError(f"empty chain for {underlying} expiry {target}")
+
+    quotes = chain_df_to_quotes(chain_df)
+    spot = estimate_spot_from_chain(quotes)
+
+    today = date.today()
+    bars = []
+    for _, row in chain_df.iterrows():
+        parsed = _parse_option_code(str(row["code"]))
+        if parsed is None:
+            continue
+        _underlying, expiration, strike, right = parsed
+        bid, ask = row.get("bid_price"), row.get("ask_price")
+        if bid and ask and bid > 0 and ask > 0:
+            close = (float(bid) + float(ask)) / 2.0
+        else:
+            close = _safe_float(row.get("last_price"))
+        bars.append(OptionBar(
+            trade_date=today, underlying=underlying, expiration=expiration,
+            strike=strike, right=right,
+            open=None, high=None, low=None, close=close, volume=None,
+            open_interest=int(_safe_float(row.get("option_open_interest"))) or None,
+            iv=_safe_float(row.get("option_implied_volatility")) or None,
+            delta=_safe_float(row.get("option_delta")) or None,
+            bid=_safe_float(bid) or None, ask=_safe_float(ask) or None,
+            gamma=_safe_float(row.get("option_gamma")) or None,
+            theta=_safe_float(row.get("option_theta")) or None,
+            vega=_safe_float(row.get("option_vega")) or None,
+        ))
+    return spot, bars
 
 
 def _open_trade_identifiers(db_path: str = config.DB_PATH) -> list[str]:

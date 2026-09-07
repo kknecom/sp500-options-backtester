@@ -1,10 +1,16 @@
-"""Initialize (or re-initialize) the local SQLite database from schema.sql."""
+"""
+Initialize (or re-initialize) the local SQLite database from schema.sql.
+Safe to run against an existing database file: CREATE TABLE IF NOT EXISTS
+leaves existing tables alone, and migrate() (see db/migrate.py) then
+brings any of them that predate a schema change up to date.
+"""
 import sqlite3
 from pathlib import Path
 import sys
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import config
+from db.migrate import migrate
 
 
 def init_db(db_path: str = config.DB_PATH):
@@ -15,6 +21,7 @@ def init_db(db_path: str = config.DB_PATH):
         conn.executescript(f.read())
     conn.commit()
     conn.close()
+    migrate(db_path)
     print(f"Database initialized at {db_path}")
 
 

@@ -4,19 +4,29 @@
 -- Telegram bot phase needs concurrent read/write access.
 
 CREATE TABLE IF NOT EXISTS underlying_daily (
-    trade_date      TEXT PRIMARY KEY,   -- ISO date
+    -- PRIMARY KEY is (trade_date, symbol) so SPX and VIX rows for the same
+    -- day can coexist -- trade_date alone was under-specified for that.
+    trade_date      TEXT NOT NULL,      -- ISO date
     symbol          TEXT NOT NULL,      -- e.g. 'SPX', 'VIX'
     close           REAL NOT NULL,
     open            REAL,
     high            REAL,
     low             REAL,
-    volume          INTEGER
+    volume          INTEGER,
+    PRIMARY KEY (trade_date, symbol)
 );
 
 CREATE TABLE IF NOT EXISTS option_daily_bar (
-    -- One row per option contract per day. This is what the Tiger daily
-    -- collector writes to, and what a bulk historical vendor import would
-    -- also populate if you later add one.
+    -- One row per option contract per day. This is what the Tiger/moomoo
+    -- daily collectors write to, and what a bulk historical vendor import
+    -- would also populate if you later add one.
+    --
+    -- bid/ask/gamma/theta/vega added for the moomoo daily chain-snapshot
+    -- collector (collect_daily_snapshot.py) -- a live snapshot has real
+    -- bid/ask and full greeks, not just a single close+delta. Nullable so
+    -- older sources (e.g. Tiger's OHLCV-only bars) that don't populate
+    -- them keep working unchanged. See db/init_db.py for the migration
+    -- that adds these columns to an existing database file.
     trade_date      TEXT NOT NULL,
     underlying      TEXT NOT NULL,      -- 'SPX'
     expiration      TEXT NOT NULL,      -- ISO date
@@ -30,7 +40,12 @@ CREATE TABLE IF NOT EXISTS option_daily_bar (
     open_interest   INTEGER,
     iv              REAL,               -- implied vol if available from source
     delta           REAL,
-    source          TEXT NOT NULL,      -- 'tiger_api' | 'synthetic' | 'vendor:<name>'
+    bid             REAL,
+    ask             REAL,
+    gamma           REAL,
+    theta           REAL,
+    vega            REAL,
+    source          TEXT NOT NULL,      -- 'tiger_api' | 'moomoo_api' | 'synthetic' | 'vendor:<name>'
     PRIMARY KEY (trade_date, underlying, expiration, strike, right, source)
 );
 
