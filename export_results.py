@@ -29,6 +29,8 @@ from strategy_logic.gex_walls import (
 )
 from strategy_logic.event_calendar import load_calendar, upcoming_events
 from strategy_logic.gate import evaluate_gate
+from collectors.tiger_positions_collector import get_inventory_snapshot
+import sqlite3
 
 OUT_PATH = Path(__file__).parent / "worker" / "public" / "data" / "results.json"
 
@@ -351,6 +353,111 @@ def export_gate() -> dict:
     }
 
 
+INVENTORY_CAVEAT = (
+    "Live snapshot of open option positions in your real Tiger account "
+    "(TradeClient.get_positions(sec_type=OPT)), read-only -- this platform "
+    "never places, modifies, or cancels orders. Requires TIGER_PROPS_PATH "
+    "(or the explicit TIGER_ID/TIGER_ACCOUNT/TIGER_PRIVATE_KEY_PATH trio) "
+    "in .env; see collectors/tiger_trade_history_collector.py's docstring. "
+    "A point-in-time snapshot, not historical -- see the trade journal "
+    "(sourced via tiger_trade_history_collector.py) for closed trades."
+)
+
+
+def export_inventory() -> dict:
+    positions = get_inventory_snapshot()
+    return {
+        "caveat": INVENTORY_CAVEAT,
+        "positions": [
+            {
+                "symbol": p.symbol,
+                "right": p.right,
+                "strike": p.strike,
+                "expiration": p.expiration,
+                "quantity": p.quantity,
+                "average_cost": p.average_cost,
+                "market_price": p.market_price,
+                "market_value": p.market_value,
+                "unrealized_pnl": p.unrealized_pnl,
+                "today_pnl": p.today_pnl,
+            }
+            for p in positions
+        ],
+    }
+
+
+SIGNAL_ACCURACY_CAVEAT = (
+    "Every day's signal is logged by daily_signal_feeder.py regardless of whether a trade was "
+    "actually taken (a WATCH day has no short_strike, so nothing to grade). WIN here means the "
+    "underlying closed on the safe side of the short strike THAT SIGNAL selected (max profit at "
+    "expiry) -- not a generic +/-1sigma-of-entry band, even though expected_move_1sigma is also "
+    "recorded as a diagnostic. Est. P&L is a simplification (full credit if win, full max_loss if "
+    "loss) -- not exact settlement math for a partial-loss outcome. PRIME/VALID/WATCH thresholds "
+    "and the price-action/market-structure heuristics behind them are this platform's own default "
+    "(see strategy_logic/signal_scorer.py's docstring) -- the course never quantifies these, and "
+    "they haven't been validated against enough real outcomes yet to trust blindly. Small samples "
+    "here are not statistically meaningful -- treat any tier's win rate as noise until N is large."
+)
+
+
+def export_signal_accuracy(db_path: str = config.DB_PATH) -> dict:
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+
+    total = conn.execute("SELECT COUNT(*) FROM signal_log").fetchone()[0]
+    open_count = conn.execute(
+        "SELECT COUNT(*) FROM signal_log WHERE short_strike IS NOT NULL AND hold_win IS NULL"
+    ).fetchone()[0]
+    closed_count = conn.execute("SELECT COUNT(*) FROM signal_log WHERE hold_win IS NOT NULL").fetchone()[0]
+
+    by_tier = []
+    for tier in ("PRIME", "VALID", "WATCH"):
+        rows = conn.execute(
+            "SELECT hold_win, credit, max_loss FROM signal_log WHERE tier = ? AND hold_win IS NOT NULL",
+            (tier,),
+        ).fetchall()
+        cells = conn.execute("SELECT COUNT(*) FROM signal_log WHERE tier = ?", (tier,)).fetchone()[0]
+        graded = len(rows)
+        wins = sum(1 for r in rows if r["hold_win"] == 1)
+        win_rate = wins / graded if graded else None
+        pnl = sum((r["credit"] if r["hold_win"] == 1 else -r["max_loss"]) for r in rows if r["credit"] is not None)
+        by_tier.append({
+            "tier": tier, "cells": cells, "graded": graded, "wins": wins,
+            "win_rate": win_rate, "est_pnl": round(pnl, 2) if rows else None,
+        })
+
+    all_graded = conn.execute(
+        "SELECT hold_win, credit, max_loss FROM signal_log WHERE hold_win IS NOT NULL"
+    ).fetchall()
+    overall_wins = sum(1 for r in all_graded if r["hold_win"] == 1)
+    overall_win_rate = overall_wins / len(all_graded) if all_graded else None
+    win_sum = sum(r["credit"] for r in all_graded if r["hold_win"] == 1 and r["credit"] is not None)
+    loss_sum = sum(r["max_loss"] for r in all_graded if r["hold_win"] == 0 and r["max_loss"] is not None)
+    net_pnl = win_sum - loss_sum
+    profit_factor = (win_sum / loss_sum) if loss_sum else None
+
+    recent = conn.execute(
+        """
+        SELECT trade_date, direction, tier, strategy, short_strike, confirmed_count, assessed_count,
+               credit, max_loss, hold_win, settle_price
+        FROM signal_log ORDER BY trade_date DESC LIMIT 60
+        """
+    ).fetchall()
+
+    conn.close()
+    return {
+        "caveat": SIGNAL_ACCURACY_CAVEAT,
+        "total_captured": total,
+        "open": open_count,
+        "closed": closed_count,
+        "win_rate": overall_win_rate,
+        "profit_factor": profit_factor,
+        "net_pnl_est": round(net_pnl, 2) if all_graded else None,
+        "by_tier": by_tier,
+        "recent": [dict(r) for r in recent],
+    }
+
+
 def main():
     result = {
         "generated_at": datetime.now().isoformat(timespec="seconds"),
@@ -373,6 +480,14 @@ def main():
         result["gex"] = export_gex_snapshot()
     except Exception as e:
         print(f"Skipping gex section (errored): {e}")
+    try:
+        result["inventory"] = export_inventory()
+    except Exception as e:
+        print(f"Skipping inventory section (Tiger credentials missing, or errored): {e}")
+    try:
+        result["signal_accuracy"] = export_signal_accuracy()
+    except Exception as e:
+        print(f"Skipping signal_accuracy section (no signal_log data yet, or errored): {e}")
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(result, indent=2, default=json_default))
     print(f"Wrote {OUT_PATH}")

@@ -62,6 +62,55 @@ account lacked US options quote permission with no self-serve way to
 buy it, so the project switched to moomoo. `tiger_client.py` and its
 collector no longer exist in this repo.)
 
+## Signal Accuracy / daily feeder (PRIME / VALID / WATCH)
+
+`strategy_logic/signal_scorer.py` scores each trading day into a PRIME /
+VALID / WATCH tier: two hard gates (direction confirmed via the Class #02
+matrix, and a wall-protected short strike exists per Class #05), then a
+count of 5 automated checklist heuristics (price action, market
+structure, support/resistance clarity, premium-worth-risk, event risk
+via `strategy_logic/gate.py`). These thresholds and heuristics are this
+platform's own default -- the course never quantifies them -- see that
+module's docstring for exactly what's automated vs. still discretionary.
+
+`daily_signal_feeder.py` logs one row per trading day regardless of
+whether you actually traded it, so a track record accumulates.
+`signal_grader.py` fills in the actual outcome once the expiry date's
+close is known (win = closed on the safe side of the short strike, i.e.
+max profit -- not a generic +/-1sigma band). Both write to the new
+`signal_log` table (`db/schema.sql`).
+
+```bash
+python db/init_db.py              # adds signal_log to an existing DB
+python daily_signal_feeder.py     # run once per trading day (cron-able)
+python signal_grader.py           # run after the daily collector has the day's close
+python export_results.py          # rebuilds results.json, including the Signal Accuracy tab
+python -m pytest tests/test_signal_scorer.py tests/test_signal_grader.py -v
+```
+
+Small samples aren't statistically meaningful -- treat any tier's win
+rate as noise until N is large. See the Signal Accuracy tab's own caveat
+text for the full list of simplifications (est. P&L, etc.).
+
+## Live trade journal sync (Tiger Open API)
+
+`collectors/tiger_trade_history_collector.py` pulls your CLOSED trade
+history from Tiger (`TradeClient.get_filled_orders`, read-only -- never
+places/modifies/cancels orders) and writes it into the same
+`trades`/`trade_legs` schema as the xlsx loader, tagged `source='live:tiger'`.
+Combo orders (a spread placed as one order) are grouped cleanly; legs
+filled as separate single-leg orders are grouped by a same-strike-type +
+same-expiration + <5s-apart heuristic, and anything that doesn't resolve
+is left out with a warning rather than guessed at.
+
+Setup (credentials never go in chat or git):
+```bash
+cp .env.example .env        # fill in TIGER_ID, TIGER_ACCOUNT, TIGER_PRIVATE_KEY_PATH
+pip install -r requirements.txt
+python run_trade_history_sync.py --start 2026-06-01 --end 2026-09-27
+python -m pytest tests/test_tiger_trade_history_collector.py -v
+```
+
 ## 0DTE strike-selection logic (Classes #01-#05)
 
 `strategy_logic/` codifies the objectively-computable rules from the

@@ -4,3 +4,5 @@ pandas
 openpyxl
 moomoo-api
 yfinance
+tigeropen
+python-dotenv

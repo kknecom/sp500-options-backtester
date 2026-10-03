@@ -16,3 +16,4 @@ worker/.wrangler/
 secrets/
 *.properties
 *.pem
+.env

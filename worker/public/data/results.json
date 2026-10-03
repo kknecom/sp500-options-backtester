@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-07T11:16:54",
+  "generated_at": "2026-09-27T20:55:25",
   "synthetic": {
     "caveat": "Demo run over ~50 trading days of SPY-derived SPX-proxy closes with a synthetic Black-Scholes options chain (no real quotes, no skew). Too short and too calm a window to validate a strategy -- shown only to prove the engine runs end-to-end. See README for details.",
     "price_series_range": [
@@ -569,225 +569,213 @@
       }
     ]
   },
+  "gate": {
+    "caveat": "Go/No-Go gate is event-only here (no VIX passed in) -- blocks same-day/next-day high-impact scheduled macro events (FOMC, CPI, NFP) from a maintained calendar (data/calendar/, see strategy_logic/event_calendar.py). This is NOT live news -- unscheduled events (Fed speakers, geopolitical shocks) are not covered. See README.",
+    "as_of": "2026-09-27",
+    "decision": "GO",
+    "event_risk_clear": true,
+    "reasons": [],
+    "upcoming_events": [
+      {
+        "date": "2026-10-02",
+        "event": "NFP (Employment Situation, Sep 2026)",
+        "impact": "high"
+      }
+    ]
+  },
   "moomoo": {
     "caveat": "Underlying prices are REAL SPY daily closes pulled live via the moomoo OpenAPI (OpenD) -- SPX/VIX themselves aren't usable here (moomoo's historical-kline endpoint rejects US indices outright), so SPY is the same proxy the synthetic demo below also uses, just over a much longer real window instead of ~50 cherry-picked calm days. Option prices/greeks are still the SYNTHETIC Black-Scholes chain in pricing/black_scholes.py -- real historical SPX option chains (strikes/greeks on the actual days these trades opened) aren't available from any live quote API. This validates strategy rules and P&L accounting against real market moves across a longer window, not real tradable option pricing. See README for details.",
     "price_series_range": [
-      "2023-09-08",
-      "2026-09-04"
+      "2023-09-28",
+      "2026-09-25"
     ],
     "strategies": [
       {
         "name": "bull_put_spread",
         "stats": {
-          "trades": 53,
-          "win_rate": 0.8490566037735849,
-          "total_pnl": 5146.073877580183,
-          "avg_pnl_per_trade": 97.09573353924876,
-          "avg_win": 216.8805933544805,
-          "avg_loss": -576.6941029214299,
-          "stdev_pnl": 345.74637486918175,
-          "sharpe_per_trade": 0.2808293610482145,
-          "max_drawdown": -2262.5285746120053,
-          "final_equity": 5146.073877580183
+          "trades": 49,
+          "win_rate": 0.8571428571428571,
+          "total_pnl": 5094.656520686689,
+          "avg_pnl_per_trade": 103.97258205483037,
+          "avg_win": 215.91301885710504,
+          "avg_loss": -567.6700387588177,
+          "stdev_pnl": 344.4164852245018,
+          "sharpe_per_trade": 0.3018803875983395,
+          "max_drawdown": -2253.5993739816595,
+          "final_equity": 5094.656520686689
         },
         "equity_curve": [
-          176.83,
-          158.37,
-          348.45,
-          627.9,
-          818.14,
-          940.35,
-          1044.19,
-          1170.66,
-          1276.0,
-          1486.35,
-          1704.5,
-          1037.64,
-          1214.57,
-          1363.59,
-          1489.74,
-          1655.88,
-          1774.72,
-          909.39,
-          1182.92,
-          1519.45,
-          1786.66,
-          1959.89,
-          2149.23,
-          2329.94,
-          2433.62,
-          2384.75,
-          2671.52,
-          1644.55,
-          408.99,
-          1207.75,
-          1611.68,
-          1891.43,
-          2163.31,
-          2344.13,
-          2395.24,
-          2563.67,
-          2756.17,
-          2849.83,
-          2443.74,
-          2715.67,
-          3002.52,
-          3226.65,
-          3463.09,
-          3617.0,
-          3654.89,
-          3309.49,
-          3550.67,
-          3968.28,
-          4216.9,
-          4393.93,
-          4531.63,
-          4864.57,
-          5146.07
+          328.38,
+          -150.23,
+          51.78,
+          247.22,
+          391.94,
+          498.05,
+          628.17,
+          840.0,
+          998.37,
+          583.95,
+          730.04,
+          886.92,
+          1023.45,
+          1118.52,
+          1239.98,
+          848.93,
+          1059.58,
+          1404.78,
+          1681.83,
+          1867.7,
+          2065.56,
+          2252.67,
+          2361.31,
+          2304.18,
+          2600.34,
+          1821.69,
+          346.74,
+          1293.0,
+          1754.1,
+          2043.05,
+          2243.97,
+          2430.08,
+          2489.16,
+          2705.26,
+          2871.04,
+          2972.77,
+          3009.64,
+          3147.4,
+          3342.89,
+          3509.57,
+          3541.98,
+          3163.09,
+          3454.56,
+          3814.21,
+          4116.53,
+          4345.46,
+          4454.17,
+          4766.66,
+          5094.66
         ],
         "trades": [
           {
-            "entry_date": "2023-09-08",
-            "exit_date": "2023-09-12",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P420",
-              "LONG P405"
-            ],
-            "entry_credit": 3.21,
-            "pnl": 176.83406628823306
-          },
-          {
-            "entry_date": "2023-09-20",
-            "exit_date": "2023-10-16",
-            "status": "CLOSED_DTE",
-            "legs": [
-              "SHORT P420",
-              "LONG P405"
-            ],
-            "entry_credit": 3.21,
-            "pnl": -18.461932207429754
-          },
-          {
-            "entry_date": "2023-10-24",
-            "exit_date": "2023-11-06",
+            "entry_date": "2023-09-28",
+            "exit_date": "2023-10-02",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P405",
               "LONG P390"
             ],
-            "entry_credit": 3.34,
-            "pnl": 190.07513529945842
+            "entry_credit": 3.28,
+            "pnl": 328.37619647282537
           },
           {
-            "entry_date": "2023-11-14",
-            "exit_date": "2023-11-22",
+            "entry_date": "2023-10-10",
+            "exit_date": "2023-10-26",
+            "status": "CLOSED_STOP",
+            "legs": [
+              "SHORT P410",
+              "LONG P400"
+            ],
+            "entry_credit": 1.81,
+            "pnl": -478.60799717198074
+          },
+          {
+            "entry_date": "2023-11-03",
+            "exit_date": "2023-11-14",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P425",
-              "LONG P405"
+              "SHORT P410",
+              "LONG P395"
             ],
-            "entry_credit": 4.37,
-            "pnl": 279.4507229569408
+            "entry_credit": 3.18,
+            "pnl": 202.0147964774697
           },
           {
-            "entry_date": "2023-12-01",
-            "exit_date": "2023-12-12",
+            "entry_date": "2023-11-22",
+            "exit_date": "2023-12-01",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P430",
+              "LONG P415"
+            ],
+            "entry_credit": 2.8,
+            "pnl": 195.43711127618116
+          },
+          {
+            "entry_date": "2023-12-11",
+            "exit_date": "2023-12-13",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P440",
-              "LONG P425"
+              "LONG P430"
             ],
-            "entry_credit": 2.96,
-            "pnl": 190.23875530610576
+            "entry_credit": 1.75,
+            "pnl": 144.7211834324397
           },
           {
-            "entry_date": "2023-12-20",
-            "exit_date": "2023-12-26",
+            "entry_date": "2023-12-21",
+            "exit_date": "2024-01-12",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P450",
               "LONG P440"
             ],
-            "entry_credit": 2.17,
-            "pnl": 122.21648427042702
+            "entry_credit": 1.68,
+            "pnl": 106.11367615472975
           },
           {
-            "entry_date": "2024-01-04",
-            "exit_date": "2024-01-10",
+            "entry_date": "2024-01-23",
+            "exit_date": "2024-02-06",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P445",
-              "LONG P435"
+              "SHORT P465",
+              "LONG P455"
             ],
-            "entry_credit": 1.7,
-            "pnl": 103.84012764380995
+            "entry_credit": 2.27,
+            "pnl": 130.11812308703588
           },
           {
-            "entry_date": "2024-01-19",
-            "exit_date": "2024-01-25",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P460",
-              "LONG P450"
-            ],
-            "entry_credit": 2.01,
-            "pnl": 126.46980466756102
-          },
-          {
-            "entry_date": "2024-02-02",
-            "exit_date": "2024-02-09",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P470",
-              "LONG P460"
-            ],
-            "entry_credit": 1.93,
-            "pnl": 105.33226165778657
-          },
-          {
-            "entry_date": "2024-02-20",
+            "entry_date": "2024-02-14",
             "exit_date": "2024-02-29",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P475",
               "LONG P460"
             ],
-            "entry_credit": 3.16,
-            "pnl": 210.3591164606156
+            "entry_credit": 3.09,
+            "pnl": 211.8294930014926
           },
           {
             "entry_date": "2024-03-08",
             "exit_date": "2024-03-19",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P490",
-              "LONG P470"
-            ],
-            "entry_credit": 3.98,
-            "pnl": 218.14483070012295
-          },
-          {
-            "entry_date": "2024-03-27",
-            "exit_date": "2024-04-16",
-            "status": "CLOSED_STOP",
-            "legs": [
-              "SHORT P505",
-              "LONG P490"
-            ],
-            "entry_credit": 3.21,
-            "pnl": -666.8629826302919
-          },
-          {
-            "entry_date": "2024-04-24",
-            "exit_date": "2024-05-06",
-            "status": "CLOSED_PROFIT",
-            "legs": [
               "SHORT P485",
               "LONG P470"
             ],
-            "entry_credit": 3.36,
-            "pnl": 176.93463285167928
+            "entry_credit": 2.68,
+            "pnl": 158.36816670171672
+          },
+          {
+            "entry_date": "2024-03-27",
+            "exit_date": "2024-04-15",
+            "status": "CLOSED_STOP",
+            "legs": [
+              "SHORT P500",
+              "LONG P490"
+            ],
+            "entry_credit": 1.89,
+            "pnl": -414.423413362082
+          },
+          {
+            "entry_date": "2024-04-23",
+            "exit_date": "2024-05-06",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P480",
+              "LONG P465"
+            ],
+            "entry_credit": 2.56,
+            "pnl": 146.096365912077
           },
           {
             "entry_date": "2024-05-14",
@@ -797,8 +785,8 @@
               "SHORT P500",
               "LONG P485"
             ],
-            "entry_credit": 2.74,
-            "pnl": 149.01516205639956
+            "entry_credit": 2.99,
+            "pnl": 156.87769588448964
           },
           {
             "entry_date": "2024-05-29",
@@ -808,63 +796,63 @@
               "SHORT P505",
               "LONG P495"
             ],
-            "entry_credit": 1.89,
-            "pnl": 126.15331901389712
+            "entry_credit": 2.11,
+            "pnl": 136.523784947509
           },
           {
             "entry_date": "2024-06-13",
-            "exit_date": "2024-06-26",
+            "exit_date": "2024-06-25",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P525",
+              "SHORT P520",
               "LONG P510"
             ],
-            "entry_credit": 3.04,
-            "pnl": 166.13766056124143
+            "entry_credit": 1.75,
+            "pnl": 95.07456652384008
           },
           {
-            "entry_date": "2024-07-05",
-            "exit_date": "2024-07-10",
+            "entry_date": "2024-07-03",
+            "exit_date": "2024-07-08",
             "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P540",
-              "LONG P530"
-            ],
-            "entry_credit": 2.02,
-            "pnl": 118.83835947091424
-          },
-          {
-            "entry_date": "2024-07-18",
-            "exit_date": "2024-08-05",
-            "status": "CLOSED_STOP",
             "legs": [
               "SHORT P535",
-              "LONG P520"
+              "LONG P525"
             ],
-            "entry_credit": 3.15,
-            "pnl": -865.3298467014743
+            "entry_credit": 2.19,
+            "pnl": 121.46256649716243
           },
           {
-            "entry_date": "2024-08-13",
-            "exit_date": "2024-08-19",
+            "entry_date": "2024-07-16",
+            "exit_date": "2024-07-19",
+            "status": "CLOSED_STOP",
+            "legs": [
+              "SHORT P545",
+              "LONG P535"
+            ],
+            "entry_credit": 1.82,
+            "pnl": -391.0527450244061
+          },
+          {
+            "entry_date": "2024-07-29",
+            "exit_date": "2024-08-21",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P510",
-              "LONG P485"
+              "SHORT P520",
+              "LONG P500"
             ],
-            "entry_credit": 5.07,
-            "pnl": 273.53289659966043
+            "entry_credit": 3.76,
+            "pnl": 210.64681306565484
           },
           {
-            "entry_date": "2024-08-27",
+            "entry_date": "2024-08-29",
             "exit_date": "2024-09-13",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P530",
               "LONG P505"
             ],
-            "entry_credit": 4.99,
-            "pnl": 336.533728251831
+            "entry_credit": 5.43,
+            "pnl": 345.2040631811032
           },
           {
             "entry_date": "2024-09-23",
@@ -874,8 +862,8 @@
               "SHORT P545",
               "LONG P525"
             ],
-            "entry_credit": 3.58,
-            "pnl": 267.20461161888716
+            "entry_credit": 3.85,
+            "pnl": 277.05095020421675
           },
           {
             "entry_date": "2024-10-14",
@@ -885,8 +873,8 @@
               "SHORT P565",
               "LONG P550"
             ],
-            "entry_credit": 2.94,
-            "pnl": 173.22823486253895
+            "entry_credit": 3.24,
+            "pnl": 185.86516543882325
           },
           {
             "entry_date": "2024-11-15",
@@ -896,8 +884,8 @@
               "SHORT P560",
               "LONG P540"
             ],
-            "entry_credit": 3.67,
-            "pnl": 189.3434929186924
+            "entry_credit": 3.93,
+            "pnl": 197.8677814544323
           },
           {
             "entry_date": "2024-12-03",
@@ -907,8 +895,8 @@
               "SHORT P580",
               "LONG P565"
             ],
-            "entry_credit": 2.79,
-            "pnl": 180.71250356134172
+            "entry_credit": 3.04,
+            "pnl": 187.10538183868658
           },
           {
             "entry_date": "2024-12-13",
@@ -918,8 +906,8 @@
               "SHORT P585",
               "LONG P575"
             ],
-            "entry_credit": 1.9,
-            "pnl": 103.68029778794714
+            "entry_credit": 2.15,
+            "pnl": 108.63749432924052
           },
           {
             "entry_date": "2024-12-24",
@@ -927,10 +915,10 @@
             "status": "CLOSED_DTE",
             "legs": [
               "SHORT P580",
-              "LONG P560"
+              "LONG P555"
             ],
-            "entry_credit": 4.22,
-            "pnl": -48.876304446370966
+            "entry_credit": 5.06,
+            "pnl": -57.12443354448595
           },
           {
             "entry_date": "2025-01-28",
@@ -940,19 +928,19 @@
               "SHORT P580",
               "LONG P560"
             ],
-            "entry_credit": 3.9,
-            "pnl": 286.77112038023245
+            "entry_credit": 4.17,
+            "pnl": 296.15938721128305
           },
           {
             "entry_date": "2025-02-24",
             "exit_date": "2025-03-10",
             "status": "CLOSED_STOP",
             "legs": [
-              "SHORT P580",
+              "SHORT P575",
               "LONG P560"
             ],
-            "entry_credit": 4.3,
-            "pnl": -1026.9622392092494
+            "entry_credit": 2.98,
+            "pnl": -778.6560759484203
           },
           {
             "entry_date": "2025-03-18",
@@ -960,32 +948,32 @@
             "status": "CLOSED_STOP",
             "legs": [
               "SHORT P535",
-              "LONG P510"
+              "LONG P505"
             ],
-            "entry_credit": 5.27,
-            "pnl": -1235.5663354027556
+            "entry_credit": 6.1,
+            "pnl": -1474.9432980332394
           },
           {
             "entry_date": "2025-04-14",
-            "exit_date": "2025-05-05",
+            "exit_date": "2025-05-02",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P495",
-              "LONG P450"
+              "LONG P430"
             ],
-            "entry_credit": 12.28,
-            "pnl": 798.7650193991129
+            "entry_credit": 15.68,
+            "pnl": 946.2569488442609
           },
           {
-            "entry_date": "2025-05-13",
+            "entry_date": "2025-05-12",
             "exit_date": "2025-05-19",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P560",
-              "LONG P530"
+              "SHORT P555",
+              "LONG P525"
             ],
             "entry_credit": 6.41,
-            "pnl": 403.92263178324976
+            "pnl": 461.0994722232126
           },
           {
             "entry_date": "2025-05-28",
@@ -995,19 +983,19 @@
               "SHORT P565",
               "LONG P540"
             ],
-            "entry_credit": 5.05,
-            "pnl": 279.7520825675981
+            "entry_credit": 5.35,
+            "pnl": 288.94648304131323
           },
           {
             "entry_date": "2025-06-16",
             "exit_date": "2025-06-25",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P585",
+              "SHORT P580",
               "LONG P565"
             ],
-            "entry_credit": 4.28,
-            "pnl": 271.8807564338265
+            "entry_credit": 2.99,
+            "pnl": 200.92693496080932
           },
           {
             "entry_date": "2025-07-03",
@@ -1017,8 +1005,8 @@
               "SHORT P610",
               "LONG P595"
             ],
-            "entry_credit": 2.97,
-            "pnl": 180.8236479536472
+            "entry_credit": 3.28,
+            "pnl": 186.10806105209258
           },
           {
             "entry_date": "2025-07-25",
@@ -1028,8 +1016,8 @@
               "SHORT P625",
               "LONG P615"
             ],
-            "entry_credit": 1.92,
-            "pnl": 51.11036990806497
+            "entry_credit": 2.23,
+            "pnl": 59.07507061551058
           },
           {
             "entry_date": "2025-08-26",
@@ -1037,21 +1025,21 @@
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P625",
-              "LONG P610"
+              "LONG P605"
             ],
-            "entry_credit": 2.93,
-            "pnl": 168.42445596072366
+            "entry_credit": 3.75,
+            "pnl": 216.1053272119723
           },
           {
             "entry_date": "2025-09-12",
             "exit_date": "2025-09-19",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P645",
-              "LONG P630"
+              "SHORT P640",
+              "LONG P625"
             ],
-            "entry_credit": 3.45,
-            "pnl": 192.50370129300336
+            "entry_credit": 2.73,
+            "pnl": 165.781206448254
           },
           {
             "entry_date": "2025-09-29",
@@ -1061,63 +1049,41 @@
               "SHORT P650",
               "LONG P640"
             ],
-            "entry_credit": 1.72,
-            "pnl": 93.65933230329908
+            "entry_credit": 1.98,
+            "pnl": 101.72666252806657
           },
           {
             "entry_date": "2025-10-09",
-            "exit_date": "2025-10-10",
-            "status": "CLOSED_STOP",
+            "exit_date": "2025-11-03",
+            "status": "CLOSED_DTE",
             "legs": [
               "SHORT P660",
               "LONG P650"
             ],
-            "entry_credit": 1.72,
-            "pnl": -406.0911474363372
+            "entry_credit": 2.03,
+            "pnl": 36.87118175088102
           },
           {
-            "entry_date": "2025-10-20",
-            "exit_date": "2025-10-27",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P655",
-              "LONG P630"
-            ],
-            "entry_credit": 5.22,
-            "pnl": 271.92852244038545
-          },
-          {
-            "entry_date": "2025-11-04",
-            "exit_date": "2025-11-10",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P655",
-              "LONG P630"
-            ],
-            "entry_credit": 5.13,
-            "pnl": 286.8570492791001
-          },
-          {
-            "entry_date": "2025-11-18",
-            "exit_date": "2025-11-26",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P640",
-              "LONG P620"
-            ],
-            "entry_credit": 3.74,
-            "pnl": 224.12731580412418
-          },
-          {
-            "entry_date": "2025-12-05",
-            "exit_date": "2025-12-22",
-            "status": "CLOSED_PROFIT",
+            "entry_date": "2025-11-11",
+            "exit_date": "2025-12-05",
+            "status": "CLOSED_DTE",
             "legs": [
               "SHORT P665",
               "LONG P645"
             ],
-            "entry_credit": 3.97,
-            "pnl": 236.43501173185194
+            "entry_credit": 4.12,
+            "pnl": 137.756116439013
+          },
+          {
+            "entry_date": "2025-12-15",
+            "exit_date": "2025-12-22",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P660",
+              "LONG P640"
+            ],
+            "entry_credit": 3.59,
+            "pnl": 195.49705148231027
           },
           {
             "entry_date": "2025-12-31",
@@ -1127,19 +1093,19 @@
               "SHORT P670",
               "LONG P655"
             ],
-            "entry_credit": 2.88,
-            "pnl": 153.91576297800214
+            "entry_credit": 3.22,
+            "pnl": 166.67821648331937
           },
           {
             "entry_date": "2026-01-14",
             "exit_date": "2026-02-09",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P680",
-              "LONG P665"
+              "SHORT P675",
+              "LONG P660"
             ],
-            "entry_credit": 3.13,
-            "pnl": 37.885539925937906
+            "entry_credit": 2.47,
+            "pnl": 32.40496693807984
           },
           {
             "entry_date": "2026-02-18",
@@ -1149,8 +1115,8 @@
               "SHORT P670",
               "LONG P650"
             ],
-            "entry_credit": 3.9,
-            "pnl": -345.40203533752987
+            "entry_credit": 4.23,
+            "pnl": -378.8823082271094
           },
           {
             "entry_date": "2026-03-24",
@@ -1158,21 +1124,21 @@
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P640",
-              "LONG P620"
+              "LONG P615"
             ],
-            "entry_credit": 4.29,
-            "pnl": 241.18179459903786
+            "entry_credit": 5.19,
+            "pnl": 291.46600671245045
           },
           {
             "entry_date": "2026-04-17",
             "exit_date": "2026-04-27",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P690",
+              "SHORT P685",
               "LONG P655"
             ],
-            "entry_credit": 7.31,
-            "pnl": 417.614821907487
+            "entry_credit": 6.06,
+            "pnl": 359.64937589266805
           },
           {
             "entry_date": "2026-05-05",
@@ -1180,10 +1146,10 @@
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P710",
-              "LONG P690"
+              "LONG P685"
             ],
-            "entry_credit": 4.22,
-            "pnl": 248.61922955695306
+            "entry_credit": 5.15,
+            "pnl": 302.3253471713122
           },
           {
             "entry_date": "2026-05-14",
@@ -1191,32 +1157,32 @@
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P735",
-              "LONG P720"
+              "LONG P715"
             ],
-            "entry_credit": 3.0,
-            "pnl": 177.02803437200208
+            "entry_credit": 3.9,
+            "pnl": 228.9251484792814
           },
           {
             "entry_date": "2026-06-08",
             "exit_date": "2026-07-02",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P725",
+              "SHORT P720",
               "LONG P700"
             ],
-            "entry_credit": 5.11,
-            "pnl": 137.69667943130415
+            "entry_credit": 3.92,
+            "pnl": 108.70531851567193
           },
           {
             "entry_date": "2026-07-13",
             "exit_date": "2026-08-03",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P735",
-              "LONG P710"
+              "SHORT P730",
+              "LONG P705"
             ],
-            "entry_credit": 5.29,
-            "pnl": 332.94011412678464
+            "entry_credit": 4.66,
+            "pnl": 312.49920960186694
           },
           {
             "entry_date": "2026-08-11",
@@ -1224,299 +1190,285 @@
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P755",
-              "LONG P730"
+              "LONG P725"
             ],
-            "entry_credit": 5.17,
-            "pnl": 281.5075020098028
+            "entry_credit": 6.11,
+            "pnl": 327.99192251365594
           }
         ]
       },
       {
         "name": "bear_call_spread",
         "stats": {
-          "trades": 50,
-          "win_rate": 0.72,
-          "total_pnl": 143.44483552885634,
-          "avg_pnl_per_trade": 2.868896710577126,
-          "avg_win": 212.5628992338663,
-          "avg_loss": -536.3442526350236,
-          "stdev_pnl": 371.38080530609363,
-          "sharpe_per_trade": 0.007724946118883471,
-          "max_drawdown": -2645.803606882279,
-          "final_equity": 143.44483552885634
+          "trades": 47,
+          "win_rate": 0.6595744680851063,
+          "total_pnl": 172.04781676345476,
+          "avg_pnl_per_trade": 3.6605918460309486,
+          "avg_win": 222.05538767277136,
+          "avg_loss": -419.4793250682786,
+          "stdev_pnl": 366.60577379176556,
+          "sharpe_per_trade": 0.00998509054609213,
+          "max_drawdown": -3020.4335039062844,
+          "final_equity": 172.04781676345476
         },
         "equity_curve": [
-          150.59,
-          276.48,
-          447.91,
-          -319.22,
-          -202.2,
-          -497.01,
-          -868.89,
-          -1546.16,
-          -1543.19,
-          -1351.34,
-          -2087.44,
-          -1950.98,
-          -2197.9,
-          -2078.35,
-          -1859.16,
-          -1558.09,
-          -1399.15,
-          -1137.82,
-          -936.75,
-          -733.46,
-          -593.93,
-          -364.99,
-          -179.54,
-          103.45,
-          419.15,
-          -445.48,
-          -318.15,
-          7.67,
-          255.21,
-          -7.2,
-          -637.06,
-          -1206.31,
-          -1251.52,
-          -1000.79,
-          -777.18,
-          -461.35,
-          -317.47,
-          -124.06,
-          69.57,
-          293.04,
-          510.94,
-          782.0,
-          -237.77,
-          100.28,
-          -622.55,
-          -923.29,
-          -661.72,
-          -488.6,
-          -209.58,
-          143.44
+          368.98,
+          521.73,
+          28.55,
+          -92.01,
+          -172.65,
+          -754.77,
+          -1065.01,
+          -1054.71,
+          -877.36,
+          -1109.31,
+          -1530.18,
+          -2066.07,
+          -1934.94,
+          -2498.71,
+          -2282.77,
+          -2360.68,
+          -2263.69,
+          -2078.03,
+          -1845.07,
+          -1727.88,
+          -1505.81,
+          -1369.25,
+          -1134.75,
+          -832.71,
+          -661.56,
+          -311.9,
+          -27.84,
+          -240.5,
+          -798.51,
+          -1356.61,
+          -1403.55,
+          -1166.55,
+          -955.67,
+          -693.95,
+          -595.15,
+          -359.4,
+          -144.18,
+          58.69,
+          366.03,
+          -1105.81,
+          -1552.79,
+          -1349.43,
+          -1003.86,
+          -665.86,
+          -412.31,
+          -117.24,
+          172.05
         ],
         "trades": [
           {
-            "entry_date": "2023-09-08",
-            "exit_date": "2023-09-12",
+            "entry_date": "2023-09-28",
+            "exit_date": "2023-10-02",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT C445",
-              "LONG C460"
-            ],
-            "entry_credit": 2.6,
-            "pnl": 150.58892004073493
-          },
-          {
-            "entry_date": "2023-09-20",
-            "exit_date": "2023-09-26",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT C435",
+              "SHORT C425",
               "LONG C445"
             ],
-            "entry_credit": 1.89,
-            "pnl": 125.89167854073438
+            "entry_credit": 3.69,
+            "pnl": 368.978720040186
           },
           {
-            "entry_date": "2023-10-04",
-            "exit_date": "2023-10-23",
+            "entry_date": "2023-10-10",
+            "exit_date": "2023-10-19",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT C420",
-              "LONG C435"
+              "SHORT C430",
+              "LONG C445"
             ],
-            "entry_credit": 2.96,
-            "pnl": 171.4257937357704
+            "entry_credit": 2.53,
+            "pnl": 152.7490916227581
           },
           {
-            "entry_date": "2023-10-31",
-            "exit_date": "2023-11-14",
+            "entry_date": "2023-10-27",
+            "exit_date": "2023-11-02",
             "status": "CLOSED_STOP",
             "legs": [
-              "SHORT C415",
-              "LONG C430"
+              "SHORT C410",
+              "LONG C425"
             ],
-            "entry_credit": 2.98,
-            "pnl": -767.1310714802821
+            "entry_credit": 2.21,
+            "pnl": -493.18094739608006
           },
           {
-            "entry_date": "2023-11-22",
+            "entry_date": "2023-11-10",
             "exit_date": "2023-12-04",
-            "status": "CLOSED_PROFIT",
+            "status": "CLOSED_DTE",
             "legs": [
-              "SHORT C455",
-              "LONG C470"
+              "SHORT C440",
+              "LONG C460"
             ],
-            "entry_credit": 2.28,
-            "pnl": 117.02323586214227
+            "entry_credit": 3.34,
+            "pnl": -120.55839839478288
           },
           {
             "entry_date": "2023-12-12",
-            "exit_date": "2023-12-26",
-            "status": "CLOSED_STOP",
+            "exit_date": "2024-01-05",
+            "status": "CLOSED_DTE",
             "legs": [
-              "SHORT C460",
-              "LONG C470"
+              "SHORT C455",
+              "LONG C465"
             ],
-            "entry_credit": 1.35,
-            "pnl": -294.8071892609164
+            "entry_credit": 2.07,
+            "pnl": -80.64222658317775
           },
           {
-            "entry_date": "2024-01-04",
-            "exit_date": "2024-01-23",
+            "entry_date": "2024-01-16",
+            "exit_date": "2024-02-02",
             "status": "CLOSED_STOP",
             "legs": [
-              "SHORT C465",
-              "LONG C475"
+              "SHORT C470",
+              "LONG C485"
             ],
-            "entry_credit": 1.81,
-            "pnl": -371.87883584199284
+            "entry_credit": 2.47,
+            "pnl": -582.1186116774293
           },
           {
-            "entry_date": "2024-01-31",
-            "exit_date": "2024-02-22",
-            "status": "CLOSED_STOP",
+            "entry_date": "2024-02-12",
+            "exit_date": "2024-03-07",
+            "status": "CLOSED_DTE",
             "legs": [
-              "SHORT C480",
-              "LONG C495"
+              "SHORT C495",
+              "LONG C510"
             ],
-            "entry_credit": 2.69,
-            "pnl": -677.2683206505484
+            "entry_credit": 3.08,
+            "pnl": -310.2366405967288
           },
           {
-            "entry_date": "2024-03-01",
-            "exit_date": "2024-03-25",
+            "entry_date": "2024-03-15",
+            "exit_date": "2024-04-08",
             "status": "CLOSED_DTE",
             "legs": [
               "SHORT C510",
               "LONG C525"
             ],
-            "entry_credit": 2.88,
-            "pnl": 2.961140985349431
+            "entry_credit": 2.33,
+            "pnl": 10.29695162526032
           },
           {
-            "entry_date": "2024-04-03",
-            "exit_date": "2024-04-15",
+            "entry_date": "2024-04-16",
+            "exit_date": "2024-04-19",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT C515",
-              "LONG C530"
+              "SHORT C500",
+              "LONG C515"
             ],
-            "entry_credit": 2.63,
-            "pnl": 191.85786620956904
+            "entry_credit": 3.02,
+            "pnl": 177.35589326366858
           },
           {
-            "entry_date": "2024-04-23",
-            "exit_date": "2024-05-15",
-            "status": "CLOSED_STOP",
-            "legs": [
-              "SHORT C505",
-              "LONG C525"
-            ],
-            "entry_credit": 3.45,
-            "pnl": -736.1049709995222
-          },
-          {
-            "entry_date": "2024-05-23",
-            "exit_date": "2024-05-30",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT C525",
-              "LONG C540"
-            ],
-            "entry_credit": 2.62,
-            "pnl": 136.4644765615738
-          },
-          {
-            "entry_date": "2024-06-07",
-            "exit_date": "2024-07-01",
+            "entry_date": "2024-04-29",
+            "exit_date": "2024-05-23",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT C530",
-              "LONG C545"
+              "SHORT C510",
+              "LONG C525"
             ],
-            "entry_credit": 2.54,
-            "pnl": -246.91993826765142
+            "entry_credit": 2.72,
+            "pnl": -231.9524984873425
           },
           {
-            "entry_date": "2024-07-10",
-            "exit_date": "2024-07-19",
-            "status": "CLOSED_PROFIT",
+            "entry_date": "2024-06-03",
+            "exit_date": "2024-06-17",
+            "status": "CLOSED_STOP",
             "legs": [
-              "SHORT C555",
-              "LONG C565"
+              "SHORT C525",
+              "LONG C535"
             ],
-            "entry_credit": 2.08,
-            "pnl": 119.55185165602131
+            "entry_credit": 1.6,
+            "pnl": -420.8705505708437
           },
           {
-            "entry_date": "2024-07-29",
-            "exit_date": "2024-08-05",
+            "entry_date": "2024-06-26",
+            "exit_date": "2024-07-10",
+            "status": "CLOSED_STOP",
+            "legs": [
+              "SHORT C540",
+              "LONG C555"
+            ],
+            "entry_credit": 2.63,
+            "pnl": -535.8860825048531
+          },
+          {
+            "entry_date": "2024-07-18",
+            "exit_date": "2024-07-25",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT C550",
-              "LONG C570"
+              "LONG C565"
             ],
-            "entry_credit": 3.2,
-            "pnl": 219.19021744122313
+            "entry_credit": 2.59,
+            "pnl": 131.1301973044614
           },
           {
-            "entry_date": "2024-08-13",
-            "exit_date": "2024-09-05",
+            "entry_date": "2024-08-02",
+            "exit_date": "2024-08-26",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C540",
+              "LONG C560"
+            ],
+            "entry_credit": 3.42,
+            "pnl": -563.770589888437
+          },
+          {
+            "entry_date": "2024-09-04",
+            "exit_date": "2024-09-06",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT C555",
-              "LONG C585"
+              "LONG C580"
             ],
-            "entry_credit": 5.16,
-            "pnl": 301.06455956198903
+            "entry_credit": 4.21,
+            "pnl": 215.93906764192
           },
           {
-            "entry_date": "2024-09-13",
-            "exit_date": "2024-10-07",
+            "entry_date": "2024-09-16",
+            "exit_date": "2024-10-10",
             "status": "CLOSED_DTE",
             "legs": [
               "SHORT C565",
               "LONG C585"
             ],
-            "entry_credit": 3.73,
-            "pnl": 158.94253129184506
+            "entry_credit": 3.62,
+            "pnl": -77.9144954409599
           },
           {
-            "entry_date": "2024-10-15",
-            "exit_date": "2024-10-31",
+            "entry_date": "2024-10-18",
+            "exit_date": "2024-10-30",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT C580",
-              "LONG C600"
+              "SHORT C585",
+              "LONG C595"
             ],
-            "entry_credit": 3.58,
-            "pnl": 261.3270217393091
+            "entry_credit": 1.77,
+            "pnl": 96.98658809153038
           },
           {
-            "entry_date": "2024-11-08",
+            "entry_date": "2024-11-07",
             "exit_date": "2024-11-15",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT C605",
-              "LONG C625"
+              "SHORT C600",
+              "LONG C620"
             ],
-            "entry_credit": 3.51,
-            "pnl": 201.07076026180516
+            "entry_credit": 3.67,
+            "pnl": 185.6663426274995
           },
           {
             "entry_date": "2024-11-25",
             "exit_date": "2024-12-09",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT C605",
+              "SHORT C600",
               "LONG C625"
             ],
-            "entry_credit": 3.46,
-            "pnl": 203.28916148248214
+            "entry_credit": 4.6,
+            "pnl": 232.9547859994582
           },
           {
             "entry_date": "2024-12-17",
@@ -1526,30 +1478,30 @@
               "SHORT C600",
               "LONG C610"
             ],
-            "entry_credit": 2.12,
-            "pnl": 139.53489453707027
+            "entry_credit": 1.81,
+            "pnl": 117.19467919300008
           },
           {
             "entry_date": "2025-01-21",
-            "exit_date": "2025-02-10",
+            "exit_date": "2025-02-07",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT C610",
               "LONG C635"
             ],
-            "entry_credit": 4.57,
-            "pnl": 228.9319166350376
+            "entry_credit": 4.25,
+            "pnl": 222.06892988100222
           },
           {
-            "entry_date": "2025-02-19",
+            "entry_date": "2025-02-18",
             "exit_date": "2025-02-21",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT C615",
-              "LONG C635"
+              "LONG C630"
             ],
-            "entry_credit": 3.6,
-            "pnl": 185.45021615410135
+            "entry_credit": 2.69,
+            "pnl": 136.5608108293941
           },
           {
             "entry_date": "2025-03-03",
@@ -1557,10 +1509,10 @@
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT C590",
-              "LONG C615"
+              "LONG C610"
             ],
-            "entry_credit": 4.47,
-            "pnl": 282.9922930931733
+            "entry_credit": 3.7,
+            "pnl": 234.4948263465579
           },
           {
             "entry_date": "2025-03-18",
@@ -1570,52 +1522,41 @@
               "SHORT C575",
               "LONG C605"
             ],
-            "entry_credit": 5.2,
-            "pnl": 315.7033743436532
+            "entry_credit": 4.93,
+            "pnl": 302.04907026083134
           },
           {
             "entry_date": "2025-04-11",
-            "exit_date": "2025-04-16",
-            "status": "CLOSED_STOP",
+            "exit_date": "2025-05-05",
+            "status": "CLOSED_DTE",
             "legs": [
-              "SHORT C590",
-              "LONG C605"
+              "SHORT C585",
+              "LONG C670"
             ],
-            "entry_credit": 3.23,
-            "pnl": -864.6315538833534
+            "entry_credit": 12.47,
+            "pnl": 171.14143248112333
           },
           {
-            "entry_date": "2025-04-25",
-            "exit_date": "2025-05-08",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT C610",
-              "LONG C620"
-            ],
-            "entry_credit": 2.26,
-            "pnl": 127.33004315740004
-          },
-          {
-            "entry_date": "2025-05-16",
+            "entry_date": "2025-05-13",
             "exit_date": "2025-05-21",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT C610",
+              "SHORT C605",
               "LONG C640"
             ],
-            "entry_credit": 5.34,
-            "pnl": 325.82234133736705
+            "entry_credit": 5.89,
+            "pnl": 349.6636634196962
           },
           {
             "entry_date": "2025-05-30",
             "exit_date": "2025-06-20",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT C605",
+              "SHORT C600",
               "LONG C630"
             ],
-            "entry_credit": 4.12,
-            "pnl": 247.54071738193755
+            "entry_credit": 5.21,
+            "pnl": 284.0649125654383
           },
           {
             "entry_date": "2025-06-30",
@@ -1625,30 +1566,30 @@
               "SHORT C625",
               "LONG C640"
             ],
-            "entry_credit": 2.76,
-            "pnl": -262.41804259481114
+            "entry_credit": 2.49,
+            "pnl": -212.6635455652135
           },
           {
             "entry_date": "2025-08-01",
-            "exit_date": "2025-08-13",
+            "exit_date": "2025-08-12",
             "status": "CLOSED_STOP",
             "legs": [
               "SHORT C625",
               "LONG C640"
             ],
-            "entry_credit": 3.13,
-            "pnl": -629.857418939413
+            "entry_credit": 2.79,
+            "pnl": -558.0088539709536
           },
           {
-            "entry_date": "2025-08-21",
+            "entry_date": "2025-08-20",
             "exit_date": "2025-09-15",
-            "status": "CLOSED_STOP",
+            "status": "CLOSED_DTE",
             "legs": [
               "SHORT C645",
-              "LONG C660"
+              "LONG C665"
             ],
-            "entry_credit": 2.71,
-            "pnl": -569.2451524471082
+            "entry_credit": 3.31,
+            "pnl": -558.0991018076716
           },
           {
             "entry_date": "2025-09-23",
@@ -1658,8 +1599,8 @@
               "SHORT C670",
               "LONG C680"
             ],
-            "entry_credit": 1.86,
-            "pnl": -45.21399282495935
+            "entry_credit": 1.61,
+            "pnl": -46.947863747084284
           },
           {
             "entry_date": "2025-10-27",
@@ -1669,8 +1610,8 @@
               "SHORT C700",
               "LONG C725"
             ],
-            "entry_credit": 4.58,
-            "pnl": 250.72975295646316
+            "entry_credit": 4.25,
+            "pnl": 237.0023554850224
           },
           {
             "entry_date": "2025-11-14",
@@ -1680,63 +1621,52 @@
               "SHORT C685",
               "LONG C710"
             ],
-            "entry_credit": 4.44,
-            "pnl": 223.61611453919784
+            "entry_credit": 4.1,
+            "pnl": 210.8813161271314
           },
           {
             "entry_date": "2025-11-26",
-            "exit_date": "2025-12-15",
+            "exit_date": "2025-12-12",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT C695",
               "LONG C725"
             ],
-            "entry_credit": 5.4,
-            "pnl": 315.8238172960896
+            "entry_credit": 5.05,
+            "pnl": 261.7236291177496
           },
           {
-            "entry_date": "2025-12-23",
-            "exit_date": "2025-12-31",
-            "status": "CLOSED_PROFIT",
+            "entry_date": "2025-12-22",
+            "exit_date": "2026-01-15",
+            "status": "CLOSED_DTE",
             "legs": [
-              "SHORT C700",
+              "SHORT C695",
               "LONG C715"
             ],
-            "entry_credit": 2.69,
-            "pnl": 143.88576322652042
+            "entry_credit": 3.58,
+            "pnl": 98.79711281354595
           },
           {
-            "entry_date": "2026-01-09",
-            "exit_date": "2026-01-16",
+            "entry_date": "2026-01-26",
+            "exit_date": "2026-02-05",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT C705",
               "LONG C725"
             ],
-            "entry_credit": 3.39,
-            "pnl": 193.40388763203043
+            "entry_credit": 3.31,
+            "pnl": 235.75451918677606
           },
           {
-            "entry_date": "2026-01-27",
-            "exit_date": "2026-02-04",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT C710",
-              "LONG C730"
-            ],
-            "entry_credit": 3.27,
-            "pnl": 193.62957220751156
-          },
-          {
-            "entry_date": "2026-02-12",
+            "entry_date": "2026-02-13",
             "exit_date": "2026-03-03",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT C700",
               "LONG C725"
             ],
-            "entry_credit": 4.28,
-            "pnl": 223.47168042719687
+            "entry_credit": 4.05,
+            "pnl": 215.21715483897844
           },
           {
             "entry_date": "2026-03-11",
@@ -1746,96 +1676,96 @@
               "SHORT C690",
               "LONG C710"
             ],
-            "entry_credit": 3.63,
-            "pnl": 217.90041155520186
+            "entry_credit": 3.31,
+            "pnl": 202.86867326545348
           },
           {
             "entry_date": "2026-03-23",
             "exit_date": "2026-03-27",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT C675",
-              "LONG C700"
+              "SHORT C670",
+              "LONG C695"
             ],
-            "entry_credit": 4.02,
-            "pnl": 271.05954831000696
+            "entry_credit": 4.66,
+            "pnl": 307.3383016583357
           },
           {
             "entry_date": "2026-04-07",
-            "exit_date": "2026-04-16",
+            "exit_date": "2026-04-17",
             "status": "CLOSED_STOP",
             "legs": [
-              "SHORT C685",
+              "SHORT C680",
               "LONG C715"
             ],
-            "entry_credit": 5.01,
-            "pnl": -1019.7732904492483
+            "entry_credit": 6.06,
+            "pnl": -1471.840400832994
           },
           {
-            "entry_date": "2026-04-24",
-            "exit_date": "2026-04-29",
-            "status": "CLOSED_PROFIT",
+            "entry_date": "2026-04-27",
+            "exit_date": "2026-05-21",
+            "status": "CLOSED_DTE",
             "legs": [
               "SHORT C735",
-              "LONG C770"
+              "LONG C760"
             ],
-            "entry_credit": 6.3,
-            "pnl": 338.05277909606775
+            "entry_credit": 4.36,
+            "pnl": -446.97839362790575
           },
           {
-            "entry_date": "2026-05-07",
-            "exit_date": "2026-06-01",
-            "status": "CLOSED_DTE",
+            "entry_date": "2026-06-01",
+            "exit_date": "2026-06-05",
+            "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT C745",
-              "LONG C765"
+              "SHORT C770",
+              "LONG C790"
             ],
-            "entry_credit": 3.97,
-            "pnl": -722.8317367787113
+            "entry_credit": 3.85,
+            "pnl": 203.35934738714272
           },
           {
-            "entry_date": "2026-06-09",
-            "exit_date": "2026-07-06",
-            "status": "CLOSED_DTE",
+            "entry_date": "2026-06-15",
+            "exit_date": "2026-06-23",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C775",
+              "LONG C810"
+            ],
+            "entry_credit": 6.19,
+            "pnl": 345.5685483816108
+          },
+          {
+            "entry_date": "2026-07-01",
+            "exit_date": "2026-07-16",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C775",
+              "LONG C810"
+            ],
+            "entry_credit": 5.89,
+            "pnl": 338.00112525035377
+          },
+          {
+            "entry_date": "2026-07-24",
+            "exit_date": "2026-07-29",
+            "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT C755",
               "LONG C780"
             ],
-            "entry_credit": 4.68,
-            "pnl": -300.7380224718119
-          },
-          {
-            "entry_date": "2026-07-14",
-            "exit_date": "2026-07-17",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT C775",
-              "LONG C805"
-            ],
-            "entry_credit": 5.1,
-            "pnl": 261.5728940685326
-          },
-          {
-            "entry_date": "2026-07-27",
-            "exit_date": "2026-07-29",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT C760",
-              "LONG C780"
-            ],
-            "entry_credit": 3.36,
-            "pnl": 173.11428711802216
+            "entry_credit": 4.52,
+            "pnl": 253.54860785777726
           },
           {
             "entry_date": "2026-08-06",
             "exit_date": "2026-08-20",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT C795",
-              "LONG C825"
+              "SHORT C790",
+              "LONG C820"
             ],
-            "entry_credit": 4.78,
-            "pnl": 279.02795225693035
+            "entry_credit": 5.34,
+            "pnl": 295.07748120992153
           },
           {
             "entry_date": "2026-08-28",
@@ -1843,221 +1773,207 @@
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT C785",
-              "LONG C810"
+              "LONG C805"
             ],
-            "entry_credit": 4.66,
-            "pnl": 353.0208997191251
+            "entry_credit": 3.77,
+            "pnl": 289.2828820823272
           }
         ]
       },
       {
         "name": "iron_condor",
         "stats": {
-          "trades": 36,
-          "win_rate": 0.5555555555555556,
-          "total_pnl": 3196.505390943736,
-          "avg_pnl_per_trade": 88.79181641510378,
-          "avg_win": 419.67013634353276,
-          "avg_loss": -324.80608349543246,
-          "stdev_pnl": 449.3065359096845,
-          "sharpe_per_trade": 0.19761968571263316,
-          "max_drawdown": -1791.9373677781987,
-          "final_equity": 3196.505390943736
+          "trades": 35,
+          "win_rate": 0.5714285714285714,
+          "total_pnl": 3480.290753191158,
+          "avg_pnl_per_trade": 99.43687866260451,
+          "avg_win": 443.31141688531517,
+          "avg_loss": -359.06250563434304,
+          "stdev_pnl": 587.196496312072,
+          "sharpe_per_trade": 0.16934174384064735,
+          "max_drawdown": -2321.399605692542,
+          "final_equity": 3480.290753191158
         },
         "equity_curve": [
-          327.42,
-          418.55,
-          -60.14,
-          -380.76,
-          -857.41,
-          -1184.62,
-          -829.27,
-          -813.98,
-          -519.51,
-          -527.41,
-          -1075.57,
-          -418.0,
-          -20.03,
-          -292.35,
-          112.59,
-          -233.63,
-          224.49,
-          -419.18,
-          -1373.39,
-          -251.59,
-          369.59,
-          367.11,
-          360.3,
-          432.17,
-          724.03,
-          858.57,
-          1126.25,
-          1540.81,
-          1272.65,
-          1834.29,
-          1680.52,
-          2464.38,
-          2134.78,
-          2074.35,
-          2569.16,
-          3196.51
+          697.35,
+          760.81,
+          849.07,
+          792.73,
+          337.58,
+          330.68,
+          -296.08,
+          -256.81,
+          -565.1,
+          -918.61,
+          -315.47,
+          134.13,
+          -5.17,
+          517.03,
+          126.71,
+          585.31,
+          -463.01,
+          -1472.33,
+          890.93,
+          1511.95,
+          1580.2,
+          1462.38,
+          1594.41,
+          1892.88,
+          1508.4,
+          1729.45,
+          2197.36,
+          2384.22,
+          2334.11,
+          2141.14,
+          3035.94,
+          2789.61,
+          2798.58,
+          2948.47,
+          3480.29
         ],
         "trades": [
           {
-            "entry_date": "2023-09-08",
-            "exit_date": "2023-09-12",
+            "entry_date": "2023-09-28",
+            "exit_date": "2023-10-02",
             "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P420",
-              "LONG P405",
-              "SHORT C445",
-              "LONG C460"
-            ],
-            "entry_credit": 5.81,
-            "pnl": 327.42298632896797
-          },
-          {
-            "entry_date": "2023-09-20",
-            "exit_date": "2023-10-16",
-            "status": "CLOSED_DTE",
-            "legs": [
-              "SHORT P420",
-              "LONG P405",
-              "SHORT C435",
-              "LONG C445"
-            ],
-            "entry_credit": 5.1,
-            "pnl": 91.1279932840161
-          },
-          {
-            "entry_date": "2023-10-24",
-            "exit_date": "2023-11-17",
-            "status": "CLOSED_DTE",
             "legs": [
               "SHORT P405",
               "LONG P390",
-              "SHORT C420",
-              "LONG C435"
+              "SHORT C425",
+              "LONG C445"
             ],
-            "entry_credit": 6.01,
-            "pnl": -478.6958556505816
+            "entry_credit": 6.97,
+            "pnl": 697.3549165130113
           },
           {
-            "entry_date": "2023-11-28",
-            "exit_date": "2023-12-22",
+            "entry_date": "2023-10-10",
+            "exit_date": "2023-11-03",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P435",
-              "LONG P420",
-              "SHORT C450",
-              "LONG C465"
+              "SHORT P410",
+              "LONG P400",
+              "SHORT C430",
+              "LONG C445"
             ],
-            "entry_credit": 5.9,
-            "pnl": -320.6197305329237
+            "entry_credit": 4.35,
+            "pnl": 63.459553224981136
           },
           {
-            "entry_date": "2024-01-03",
-            "exit_date": "2024-01-29",
+            "entry_date": "2023-11-13",
+            "exit_date": "2023-12-07",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P415",
+              "LONG P400",
+              "SHORT C440",
+              "LONG C460"
+            ],
+            "entry_credit": 6.37,
+            "pnl": 88.25280309848837
+          },
+          {
+            "entry_date": "2023-12-15",
+            "exit_date": "2024-01-08",
             "status": "CLOSED_DTE",
             "legs": [
               "SHORT P450",
-              "LONG P435",
-              "SHORT C465",
-              "LONG C480"
+              "LONG P440",
+              "SHORT C460",
+              "LONG C470"
             ],
-            "entry_credit": 5.37,
-            "pnl": -476.64824630731283
+            "entry_credit": 3.87,
+            "pnl": -56.33909888176589
           },
           {
-            "entry_date": "2024-02-06",
-            "exit_date": "2024-03-01",
+            "entry_date": "2024-01-17",
+            "exit_date": "2024-02-12",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P470",
-              "LONG P460",
-              "SHORT C490",
-              "LONG C505"
+              "SHORT P450",
+              "LONG P440",
+              "SHORT C470",
+              "LONG C480"
             ],
-            "entry_credit": 4.72,
-            "pnl": -327.20653516516086
+            "entry_credit": 3.54,
+            "pnl": -455.1489110246621
           },
           {
-            "entry_date": "2024-03-11",
-            "exit_date": "2024-04-02",
-            "status": "CLOSED_PROFIT",
+            "entry_date": "2024-02-21",
+            "exit_date": "2024-03-18",
+            "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P490",
+              "SHORT P475",
+              "LONG P460",
+              "SHORT C495",
+              "LONG C510"
+            ],
+            "entry_credit": 5.94,
+            "pnl": -6.897799187159492
+          },
+          {
+            "entry_date": "2024-03-26",
+            "exit_date": "2024-04-19",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P500",
+              "LONG P485",
+              "SHORT C515",
+              "LONG C530"
+            ],
+            "entry_credit": 5.66,
+            "pnl": -626.7622129733966
+          },
+          {
+            "entry_date": "2024-04-29",
+            "exit_date": "2024-05-23",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P485",
               "LONG P470",
               "SHORT C510",
               "LONG C525"
             ],
-            "entry_credit": 6.82,
-            "pnl": 355.3525828798224
+            "entry_credit": 5.51,
+            "pnl": 39.27207324053663
           },
           {
-            "entry_date": "2024-04-10",
-            "exit_date": "2024-05-06",
+            "entry_date": "2024-06-03",
+            "exit_date": "2024-06-27",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P495",
-              "LONG P480",
-              "SHORT C510",
-              "LONG C525"
-            ],
-            "entry_credit": 5.72,
-            "pnl": 15.285045257810737
-          },
-          {
-            "entry_date": "2024-05-14",
-            "exit_date": "2024-05-29",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P500",
-              "LONG P485",
+              "SHORT P505",
+              "LONG P495",
               "SHORT C525",
-              "LONG C540"
+              "LONG C535"
             ],
-            "entry_credit": 5.13,
-            "pnl": 294.47105795964774
+            "entry_credit": 3.3,
+            "pnl": -308.28843306144796
           },
           {
-            "entry_date": "2024-06-06",
-            "exit_date": "2024-07-01",
+            "entry_date": "2024-07-08",
+            "exit_date": "2024-08-01",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P515",
-              "LONG P505",
-              "SHORT C530",
-              "LONG C545"
+              "SHORT P540",
+              "LONG P530",
+              "SHORT C550",
+              "LONG C555"
             ],
-            "entry_credit": 4.87,
-            "pnl": -7.8975581897413605
+            "entry_credit": 3.13,
+            "pnl": -353.5158987351331
           },
           {
-            "entry_date": "2024-07-10",
-            "exit_date": "2024-08-05",
-            "status": "CLOSED_DTE",
-            "legs": [
-              "SHORT P545",
-              "LONG P535",
-              "SHORT C555",
-              "LONG C565"
-            ],
-            "entry_credit": 3.94,
-            "pnl": -548.1604834140326
-          },
-          {
-            "entry_date": "2024-08-13",
+            "entry_date": "2024-08-09",
             "exit_date": "2024-09-03",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P510",
-              "LONG P485",
-              "SHORT C555",
-              "LONG C585"
+              "SHORT P505",
+              "LONG P475",
+              "SHORT C545",
+              "LONG C575"
             ],
-            "entry_credit": 10.23,
-            "pnl": 657.5670522678071
+            "entry_credit": 11.11,
+            "pnl": 603.1456458938541
           },
           {
             "entry_date": "2024-09-11",
@@ -2069,8 +1985,8 @@
               "SHORT C560",
               "LONG C580"
             ],
-            "entry_credit": 7.51,
-            "pnl": 397.97504878096964
+            "entry_credit": 7.55,
+            "pnl": 449.6006895287632
           },
           {
             "entry_date": "2024-10-15",
@@ -2080,10 +1996,10 @@
               "SHORT P560",
               "LONG P545",
               "SHORT C580",
-              "LONG C600"
+              "LONG C595"
             ],
-            "entry_credit": 6.57,
-            "pnl": -272.3235874856256
+            "entry_credit": 6.1,
+            "pnl": -139.29929690887928
           },
           {
             "entry_date": "2024-11-18",
@@ -2091,25 +2007,25 @@
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P565",
-              "LONG P545",
+              "LONG P540",
               "SHORT C595",
               "LONG C615"
             ],
-            "entry_credit": 7.85,
-            "pnl": 404.9356059953302
+            "entry_credit": 8.43,
+            "pnl": 522.1976054790487
           },
           {
             "entry_date": "2024-12-17",
             "exit_date": "2025-01-10",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P590",
-              "LONG P580",
+              "SHORT P585",
+              "LONG P575",
               "SHORT C600",
               "LONG C610"
             ],
-            "entry_credit": 4.5,
-            "pnl": -346.21217066913454
+            "entry_credit": 3.44,
+            "pnl": -390.3207293236168
           },
           {
             "entry_date": "2025-01-21",
@@ -2121,8 +2037,8 @@
               "SHORT C610",
               "LONG C635"
             ],
-            "entry_credit": 8.6,
-            "pnl": 458.12161851811874
+            "entry_credit": 8.56,
+            "pnl": 458.5995051877665
           },
           {
             "entry_date": "2025-02-19",
@@ -2130,12 +2046,12 @@
             "status": "CLOSED_DTE",
             "legs": [
               "SHORT P595",
-              "LONG P580",
+              "LONG P575",
               "SHORT C615",
-              "LONG C635"
+              "LONG C630"
             ],
-            "entry_credit": 6.76,
-            "pnl": -643.6722887681608
+            "entry_credit": 6.82,
+            "pnl": -1048.3209298048332
           },
           {
             "entry_date": "2025-03-25",
@@ -2144,11 +2060,11 @@
             "legs": [
               "SHORT P550",
               "LONG P520",
-              "SHORT C595",
+              "SHORT C590",
               "LONG C625"
             ],
-            "entry_credit": 11.33,
-            "pnl": -954.2089232550311
+            "entry_credit": 12.73,
+            "pnl": -1009.3218151216167
           },
           {
             "entry_date": "2025-04-29",
@@ -2156,12 +2072,12 @@
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P505",
-              "LONG P460",
-              "SHORT C615",
-              "LONG C625"
+              "LONG P440",
+              "SHORT C610",
+              "LONG C705"
             ],
-            "entry_credit": 14.34,
-            "pnl": 1121.7925432085658
+            "entry_credit": 29.14,
+            "pnl": 2363.265905964526
           },
           {
             "entry_date": "2025-05-16",
@@ -2173,8 +2089,8 @@
               "SHORT C610",
               "LONG C640"
             ],
-            "entry_credit": 11.51,
-            "pnl": 621.1826893938417
+            "entry_credit": 11.54,
+            "pnl": 621.0189763477109
           },
           {
             "entry_date": "2025-06-12",
@@ -2186,21 +2102,21 @@
               "SHORT C610",
               "LONG C630"
             ],
-            "entry_credit": 7.45,
-            "pnl": -2.4743317453141955
+            "entry_credit": 7.46,
+            "pnl": 68.25128555544939
           },
           {
             "entry_date": "2025-07-15",
             "exit_date": "2025-08-08",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P610",
-              "LONG P595",
-              "SHORT C630",
-              "LONG C645"
+              "SHORT P605",
+              "LONG P590",
+              "SHORT C625",
+              "LONG C640"
             ],
-            "entry_credit": 5.6,
-            "pnl": -6.818790530085295
+            "entry_credit": 5.51,
+            "pnl": -117.82409440823258
           },
           {
             "entry_date": "2025-08-18",
@@ -2212,12 +2128,12 @@
               "SHORT C650",
               "LONG C670"
             ],
-            "entry_credit": 6.53,
-            "pnl": 71.87925092798002
+            "entry_credit": 6.46,
+            "pnl": 132.03312693091246
           },
           {
             "entry_date": "2025-09-19",
-            "exit_date": "2025-10-03",
+            "exit_date": "2025-10-02",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P650",
@@ -2226,98 +2142,98 @@
               "LONG C685"
             ],
             "entry_credit": 5.58,
-            "pnl": 291.851976743555
+            "pnl": 298.4672703254595
           },
           {
-            "entry_date": "2025-10-13",
-            "exit_date": "2025-11-06",
+            "entry_date": "2025-10-10",
+            "exit_date": "2025-11-03",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P645",
-              "LONG P625",
-              "SHORT C675",
-              "LONG C700"
+              "SHORT P635",
+              "LONG P615",
+              "SHORT C665",
+              "LONG C685"
             ],
-            "entry_credit": 8.45,
-            "pnl": 134.53870675062126
+            "entry_credit": 7.02,
+            "pnl": -384.48363439426424
           },
           {
-            "entry_date": "2025-11-14",
-            "exit_date": "2025-12-08",
+            "entry_date": "2025-11-11",
+            "exit_date": "2025-12-05",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P665",
+              "LONG P645",
+              "SHORT C695",
+              "LONG C715"
+            ],
+            "entry_credit": 7.58,
+            "pnl": 221.05238060471777
+          },
+          {
+            "entry_date": "2025-12-15",
+            "exit_date": "2025-12-31",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P660",
+              "LONG P640",
+              "SHORT C690",
+              "LONG C715"
+            ],
+            "entry_credit": 8.04,
+            "pnl": 467.90672528455497
+          },
+          {
+            "entry_date": "2026-01-09",
+            "exit_date": "2026-02-02",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P680",
+              "LONG P665",
+              "SHORT C705",
+              "LONG C720"
+            ],
+            "entry_credit": 5.63,
+            "pnl": 186.8601935055672
+          },
+          {
+            "entry_date": "2026-02-10",
+            "exit_date": "2026-03-06",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P675",
+              "LONG P650",
+              "SHORT C705",
+              "LONG C730"
+            ],
+            "entry_credit": 9.81,
+            "pnl": -50.10537834099491
+          },
+          {
+            "entry_date": "2026-03-16",
+            "exit_date": "2026-04-09",
             "status": "CLOSED_DTE",
             "legs": [
               "SHORT P655",
               "LONG P630",
-              "SHORT C685",
-              "LONG C710"
+              "SHORT C680",
+              "LONG C705"
             ],
-            "entry_credit": 9.34,
-            "pnl": 267.6872724530393
+            "entry_credit": 9.64,
+            "pnl": -192.97244664911588
           },
           {
-            "entry_date": "2025-12-16",
-            "exit_date": "2026-01-02",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P665",
-              "LONG P645",
-              "SHORT C690",
-              "LONG C710"
-            ],
-            "entry_credit": 8.2,
-            "pnl": 414.5550019863653
-          },
-          {
-            "entry_date": "2026-01-12",
-            "exit_date": "2026-02-05",
-            "status": "CLOSED_DTE",
-            "legs": [
-              "SHORT P685",
-              "LONG P665",
-              "SHORT C705",
-              "LONG C725"
-            ],
-            "entry_credit": 7.66,
-            "pnl": -268.1616409403034
-          },
-          {
-            "entry_date": "2026-02-13",
-            "exit_date": "2026-03-09",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P665",
-              "LONG P640",
-              "SHORT C700",
-              "LONG C725"
-            ],
-            "entry_credit": 9.44,
-            "pnl": 561.6428096059713
-          },
-          {
-            "entry_date": "2026-03-17",
-            "exit_date": "2026-04-10",
-            "status": "CLOSED_DTE",
-            "legs": [
-              "SHORT P655",
-              "LONG P635",
-              "SHORT C685",
-              "LONG C710"
-            ],
-            "entry_credit": 8.12,
-            "pnl": -153.76601443309355
-          },
-          {
-            "entry_date": "2026-04-20",
+            "entry_date": "2026-04-17",
             "exit_date": "2026-04-29",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P690",
+              "SHORT P685",
               "LONG P655",
               "SHORT C735",
-              "LONG C770"
+              "LONG C775"
             ],
-            "entry_credit": 12.96,
-            "pnl": 783.8562147310201
+            "entry_credit": 12.73,
+            "pnl": 894.8051652709797
           },
           {
             "entry_date": "2026-05-07",
@@ -2329,8 +2245,8 @@
               "SHORT C745",
               "LONG C765"
             ],
-            "entry_credit": 7.96,
-            "pnl": -329.604249619007
+            "entry_credit": 7.98,
+            "pnl": -246.3369057000266
           },
           {
             "entry_date": "2026-06-09",
@@ -2338,38 +2254,2566 @@
             "status": "CLOSED_DTE",
             "legs": [
               "SHORT P720",
-              "LONG P700",
+              "LONG P695",
               "SHORT C755",
               "LONG C780"
             ],
-            "entry_credit": 8.66,
-            "pnl": -60.426929221410575
+            "entry_credit": 9.19,
+            "pnl": 8.969802329481169
           },
           {
             "entry_date": "2026-07-14",
-            "exit_date": "2026-07-28",
-            "status": "CLOSED_PROFIT",
+            "exit_date": "2026-08-07",
+            "status": "CLOSED_DTE",
             "legs": [
               "SHORT P735",
               "LONG P710",
               "SHORT C775",
-              "LONG C805"
+              "LONG C800"
             ],
-            "entry_credit": 9.85,
-            "pnl": 494.81397862257825
+            "entry_credit": 9.4,
+            "pnl": 149.8972559984276
           },
           {
-            "entry_date": "2026-08-05",
-            "exit_date": "2026-08-26",
+            "entry_date": "2026-08-17",
+            "exit_date": "2026-08-31",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P755",
-              "LONG P725",
+              "LONG P730",
               "SHORT C795",
-              "LONG C825"
+              "LONG C820"
             ],
-            "entry_credit": 11.17,
-            "pnl": 627.3432911746268
+            "entry_credit": 9.29,
+            "pnl": 531.8174574220664
+          }
+        ]
+      }
+    ]
+  },
+  "yfinance": {
+    "caveat": "Both the underlying price series (real SPX index, ^GSPC) AND the volatility input (real historical VIX, ^VIX) are real market data pulled live via Yahoo Finance (yfinance) -- no proxy scaling, no trailing-realized-vol substitute. This is the most realistic of the backtest tracks on this dashboard for underlying price and volatility level, but the option chain itself is STILL the synthetic Black-Scholes chain in pricing/black_scholes.py -- no real skew, no real bid/ask, no real strikes/OI. VIX is a ~30-day implied-vol figure applied flat regardless of the trade's actual DTE (no term structure). See README.",
+    "price_series_range": [
+      "2021-09-28",
+      "2026-09-25"
+    ],
+    "strategies": [
+      {
+        "name": "bull_put_spread",
+        "stats": {
+          "trades": 78,
+          "win_rate": 0.7564102564102564,
+          "total_pnl": 47738.29199047766,
+          "avg_pnl_per_trade": 612.0293844933035,
+          "avg_win": 2951.7000913620277,
+          "avg_loss": -6653.263863151682,
+          "stdev_pnl": 4563.140539741894,
+          "sharpe_per_trade": 0.13412459668137283,
+          "max_drawdown": -27018.954396827503,
+          "final_equity": 47738.29199047766
+        },
+        "equity_curve": [
+          2674.73,
+          4668.29,
+          6595.23,
+          12003.42,
+          14658.07,
+          4849.18,
+          8281.75,
+          4368.78,
+          7931.09,
+          -1088.03,
+          2935.71,
+          6562.41,
+          -4138.95,
+          -498.28,
+          2375.43,
+          4919.72,
+          -4692.23,
+          -12360.89,
+          -8265.3,
+          -4395.58,
+          -1122.84,
+          -3211.72,
+          -1009.46,
+          -6059.12,
+          -3802.46,
+          -1681.59,
+          724.89,
+          3303.44,
+          5037.07,
+          7198.88,
+          9228.35,
+          3783.2,
+          5561.93,
+          927.19,
+          2960.98,
+          4680.12,
+          6431.37,
+          7846.2,
+          9698.42,
+          11783.16,
+          14160.54,
+          6249.89,
+          8310.74,
+          10142.63,
+          12228.34,
+          3538.91,
+          6531.16,
+          7879.24,
+          10282.58,
+          14668.09,
+          17246.63,
+          12582.12,
+          15858.07,
+          18164.19,
+          15658.57,
+          2785.92,
+          7987.67,
+          13365.87,
+          16280.09,
+          19849.18,
+          22747.84,
+          25572.63,
+          28409.53,
+          31078.52,
+          33709.62,
+          25942.9,
+          29566.62,
+          32381.86,
+          36615.96,
+          35252.08,
+          23388.03,
+          28401.77,
+          32796.4,
+          36645.21,
+          35812.09,
+          40860.47,
+          43305.21,
+          47738.29
+        ],
+        "trades": [
+          {
+            "entry_date": "2021-09-28",
+            "exit_date": "2021-10-08",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4200",
+              "LONG P3950"
+            ],
+            "entry_credit": 52.81,
+            "pnl": 2674.727715191159
+          },
+          {
+            "entry_date": "2021-10-18",
+            "exit_date": "2021-10-25",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4380",
+              "LONG P4195"
+            ],
+            "entry_credit": 38.21,
+            "pnl": 1993.565793282883
+          },
+          {
+            "entry_date": "2021-11-02",
+            "exit_date": "2021-11-24",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4520",
+              "LONG P4330"
+            ],
+            "entry_credit": 38.39,
+            "pnl": 1926.9341254569695
+          },
+          {
+            "entry_date": "2021-12-03",
+            "exit_date": "2021-12-07",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4330",
+              "LONG P3990"
+            ],
+            "entry_credit": 74.08,
+            "pnl": 5408.196433835199
+          },
+          {
+            "entry_date": "2021-12-15",
+            "exit_date": "2021-12-27",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4575",
+              "LONG P4345"
+            ],
+            "entry_credit": 47.72,
+            "pnl": 2654.64419034532
+          },
+          {
+            "entry_date": "2022-01-04",
+            "exit_date": "2022-01-21",
+            "status": "CLOSED_STOP",
+            "legs": [
+              "SHORT P4675",
+              "LONG P4470"
+            ],
+            "entry_credit": 42.37,
+            "pnl": -9808.886871807983
+          },
+          {
+            "entry_date": "2022-01-31",
+            "exit_date": "2022-02-09",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4350",
+              "LONG P4070"
+            ],
+            "entry_credit": 59.94,
+            "pnl": 3432.5675449297078
+          },
+          {
+            "entry_date": "2022-02-17",
+            "exit_date": "2022-03-14",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4195",
+              "LONG P3895"
+            ],
+            "entry_credit": 64.83,
+            "pnl": -3912.970101132362
+          },
+          {
+            "entry_date": "2022-03-22",
+            "exit_date": "2022-03-29",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4355",
+              "LONG P4100"
+            ],
+            "entry_credit": 53.77,
+            "pnl": 3562.312394668197
+          },
+          {
+            "entry_date": "2022-04-06",
+            "exit_date": "2022-05-02",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4335",
+              "LONG P4085"
+            ],
+            "entry_credit": 52.76,
+            "pnl": -9019.123437942471
+          },
+          {
+            "entry_date": "2022-05-10",
+            "exit_date": "2022-05-17",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P3805",
+              "LONG P3485"
+            ],
+            "entry_credit": 70.67,
+            "pnl": 4023.7441302109673
+          },
+          {
+            "entry_date": "2022-05-25",
+            "exit_date": "2022-05-27",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P3810",
+              "LONG P3535"
+            ],
+            "entry_credit": 59.71,
+            "pnl": 3626.6995343221524
+          },
+          {
+            "entry_date": "2022-06-07",
+            "exit_date": "2022-06-14",
+            "status": "CLOSED_STOP",
+            "legs": [
+              "SHORT P4010",
+              "LONG P3765"
+            ],
+            "entry_credit": 52.09,
+            "pnl": -10701.365270522183
+          },
+          {
+            "entry_date": "2022-06-23",
+            "exit_date": "2022-07-07",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P3630",
+              "LONG P3360"
+            ],
+            "entry_credit": 58.4,
+            "pnl": 3640.6774094648667
+          },
+          {
+            "entry_date": "2022-07-15",
+            "exit_date": "2022-07-21",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P3725",
+              "LONG P3490"
+            ],
+            "entry_credit": 50.1,
+            "pnl": 2873.70497020985
+          },
+          {
+            "entry_date": "2022-07-29",
+            "exit_date": "2022-08-10",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4000",
+              "LONG P3780"
+            ],
+            "entry_credit": 46.46,
+            "pnl": 2544.2940121657684
+          },
+          {
+            "entry_date": "2022-08-18",
+            "exit_date": "2022-09-02",
+            "status": "CLOSED_STOP",
+            "legs": [
+              "SHORT P4160",
+              "LONG P3950"
+            ],
+            "entry_credit": 43.96,
+            "pnl": -9611.950807658399
+          },
+          {
+            "entry_date": "2022-09-13",
+            "exit_date": "2022-10-07",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P3775",
+              "LONG P3510"
+            ],
+            "entry_credit": 57.57,
+            "pnl": -7668.657903735612
+          },
+          {
+            "entry_date": "2022-10-17",
+            "exit_date": "2022-10-25",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P3505",
+              "LONG P3225"
+            ],
+            "entry_credit": 61.25,
+            "pnl": 4095.5880675349463
+          },
+          {
+            "entry_date": "2022-11-02",
+            "exit_date": "2022-11-10",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P3615",
+              "LONG P3375"
+            ],
+            "entry_credit": 51.57,
+            "pnl": 3869.713172001262
+          },
+          {
+            "entry_date": "2022-11-18",
+            "exit_date": "2022-11-30",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P3830",
+              "LONG P3600"
+            ],
+            "entry_credit": 48.85,
+            "pnl": 3272.741817562769
+          },
+          {
+            "entry_date": "2022-12-08",
+            "exit_date": "2023-01-03",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P3830",
+              "LONG P3610"
+            ],
+            "entry_credit": 46.09,
+            "pnl": -2088.880813566897
+          },
+          {
+            "entry_date": "2023-01-11",
+            "exit_date": "2023-01-25",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P3845",
+              "LONG P3635"
+            ],
+            "entry_credit": 44.04,
+            "pnl": 2202.2641967195286
+          },
+          {
+            "entry_date": "2023-02-02",
+            "exit_date": "2023-02-27",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4065",
+              "LONG P3865"
+            ],
+            "entry_credit": 41.51,
+            "pnl": -5049.655468067118
+          },
+          {
+            "entry_date": "2023-03-07",
+            "exit_date": "2023-03-29",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P3870",
+              "LONG P3675"
+            ],
+            "entry_credit": 40.68,
+            "pnl": 2256.6534570737986
+          },
+          {
+            "entry_date": "2023-04-06",
+            "exit_date": "2023-04-19",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P3995",
+              "LONG P3800"
+            ],
+            "entry_credit": 40.36,
+            "pnl": 2120.872799651397
+          },
+          {
+            "entry_date": "2023-04-27",
+            "exit_date": "2023-05-18",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4030",
+              "LONG P3855"
+            ],
+            "entry_credit": 36.0,
+            "pnl": 2406.4802240461704
+          },
+          {
+            "entry_date": "2023-05-26",
+            "exit_date": "2023-06-02",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4095",
+              "LONG P3900"
+            ],
+            "entry_credit": 40.14,
+            "pnl": 2578.547552842538
+          },
+          {
+            "entry_date": "2023-06-12",
+            "exit_date": "2023-06-15",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4245",
+              "LONG P4075"
+            ],
+            "entry_credit": 34.45,
+            "pnl": 1733.626943776872
+          },
+          {
+            "entry_date": "2023-06-26",
+            "exit_date": "2023-06-30",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4240",
+              "LONG P4080"
+            ],
+            "entry_credit": 32.36,
+            "pnl": 2161.8130117107526
+          },
+          {
+            "entry_date": "2023-07-11",
+            "exit_date": "2023-07-17",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4345",
+              "LONG P4175"
+            ],
+            "entry_credit": 34.75,
+            "pnl": 2029.4761227828587
+          },
+          {
+            "entry_date": "2023-07-25",
+            "exit_date": "2023-08-18",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4475",
+              "LONG P4315"
+            ],
+            "entry_credit": 32.37,
+            "pnl": -5445.158696590152
+          },
+          {
+            "entry_date": "2023-08-28",
+            "exit_date": "2023-08-30",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4335",
+              "LONG P4165"
+            ],
+            "entry_credit": 34.5,
+            "pnl": 1778.728770597033
+          },
+          {
+            "entry_date": "2023-09-08",
+            "exit_date": "2023-10-02",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4370",
+              "LONG P4210"
+            ],
+            "entry_credit": 32.53,
+            "pnl": -4634.734152026954
+          },
+          {
+            "entry_date": "2023-10-10",
+            "exit_date": "2023-11-03",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4250",
+              "LONG P4060"
+            ],
+            "entry_credit": 39.14,
+            "pnl": 2033.7930714965623
+          },
+          {
+            "entry_date": "2023-11-13",
+            "exit_date": "2023-11-15",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4315",
+              "LONG P4150"
+            ],
+            "entry_credit": 33.29,
+            "pnl": 1719.1353218672361
+          },
+          {
+            "entry_date": "2023-11-24",
+            "exit_date": "2023-12-11",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4480",
+              "LONG P4330"
+            ],
+            "entry_credit": 30.09,
+            "pnl": 1751.247179822522
+          },
+          {
+            "entry_date": "2023-12-19",
+            "exit_date": "2024-01-12",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4685",
+              "LONG P4530"
+            ],
+            "entry_credit": 31.39,
+            "pnl": 1414.8311776425744
+          },
+          {
+            "entry_date": "2024-01-23",
+            "exit_date": "2024-02-06",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4775",
+              "LONG P4620"
+            ],
+            "entry_credit": 30.81,
+            "pnl": 1852.2259503377597
+          },
+          {
+            "entry_date": "2024-02-14",
+            "exit_date": "2024-02-23",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4895",
+              "LONG P4710"
+            ],
+            "entry_credit": 37.16,
+            "pnl": 2084.7374210896587
+          },
+          {
+            "entry_date": "2024-03-04",
+            "exit_date": "2024-03-20",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P5030",
+              "LONG P4855"
+            ],
+            "entry_credit": 35.31,
+            "pnl": 2377.3770106021557
+          },
+          {
+            "entry_date": "2024-03-28",
+            "exit_date": "2024-04-19",
+            "status": "CLOSED_STOP",
+            "legs": [
+              "SHORT P5155",
+              "LONG P4980"
+            ],
+            "entry_credit": 35.02,
+            "pnl": -7910.652927872059
+          },
+          {
+            "entry_date": "2024-04-29",
+            "exit_date": "2024-05-07",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P5005",
+              "LONG P4815"
+            ],
+            "entry_credit": 38.35,
+            "pnl": 2060.851348092811
+          },
+          {
+            "entry_date": "2024-05-15",
+            "exit_date": "2024-06-05",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P5215",
+              "LONG P5045"
+            ],
+            "entry_credit": 34.34,
+            "pnl": 1831.896681692075
+          },
+          {
+            "entry_date": "2024-06-13",
+            "exit_date": "2024-07-02",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P5340",
+              "LONG P5175"
+            ],
+            "entry_credit": 32.85,
+            "pnl": 2085.709858539778
+          },
+          {
+            "entry_date": "2024-07-11",
+            "exit_date": "2024-08-05",
+            "status": "CLOSED_STOP",
+            "legs": [
+              "SHORT P5480",
+              "LONG P5295"
+            ],
+            "entry_credit": 37.02,
+            "pnl": -8689.435728774106
+          },
+          {
+            "entry_date": "2024-08-13",
+            "exit_date": "2024-08-15",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P5290",
+              "LONG P5040"
+            ],
+            "entry_credit": 51.85,
+            "pnl": 2992.255772925762
+          },
+          {
+            "entry_date": "2024-08-23",
+            "exit_date": "2024-09-16",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5505",
+              "LONG P5275"
+            ],
+            "entry_credit": 47.06,
+            "pnl": 1348.08049529218
+          },
+          {
+            "entry_date": "2024-09-24",
+            "exit_date": "2024-10-17",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P5605",
+              "LONG P5380"
+            ],
+            "entry_credit": 46.09,
+            "pnl": 2403.3413597662843
+          },
+          {
+            "entry_date": "2024-10-25",
+            "exit_date": "2024-11-06",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P5630",
+              "LONG P5335"
+            ],
+            "entry_credit": 61.28,
+            "pnl": 4385.509400160241
+          },
+          {
+            "entry_date": "2024-11-14",
+            "exit_date": "2024-11-29",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P5825",
+              "LONG P5610"
+            ],
+            "entry_credit": 43.71,
+            "pnl": 2578.539574032541
+          },
+          {
+            "entry_date": "2024-12-09",
+            "exit_date": "2025-01-02",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5930",
+              "LONG P5710"
+            ],
+            "entry_credit": 44.9,
+            "pnl": -4664.518556993118
+          },
+          {
+            "entry_date": "2025-01-13",
+            "exit_date": "2025-01-15",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P5670",
+              "LONG P5385"
+            ],
+            "entry_credit": 58.96,
+            "pnl": 3275.951267624518
+          },
+          {
+            "entry_date": "2025-01-24",
+            "exit_date": "2025-02-18",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5970",
+              "LONG P5735"
+            ],
+            "entry_credit": 47.59,
+            "pnl": 2306.1202558769364
+          },
+          {
+            "entry_date": "2025-02-26",
+            "exit_date": "2025-03-24",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5785",
+              "LONG P5500"
+            ],
+            "entry_credit": 58.9,
+            "pnl": -2505.6130723337787
+          },
+          {
+            "entry_date": "2025-04-01",
+            "exit_date": "2025-04-07",
+            "status": "CLOSED_STOP",
+            "legs": [
+              "SHORT P5450",
+              "LONG P5145"
+            ],
+            "entry_credit": 64.28,
+            "pnl": -12872.64979160749
+          },
+          {
+            "entry_date": "2025-04-15",
+            "exit_date": "2025-04-25",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P5155",
+              "LONG P4760"
+            ],
+            "entry_credit": 86.54,
+            "pnl": 5201.743000860872
+          },
+          {
+            "entry_date": "2025-05-05",
+            "exit_date": "2025-05-12",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P5450",
+              "LONG P5120"
+            ],
+            "entry_credit": 70.04,
+            "pnl": 5378.20790727787
+          },
+          {
+            "entry_date": "2025-05-20",
+            "exit_date": "2025-06-06",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P5780",
+              "LONG P5510"
+            ],
+            "entry_credit": 55.67,
+            "pnl": 2914.218013903016
+          },
+          {
+            "entry_date": "2025-06-16",
+            "exit_date": "2025-06-26",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P5860",
+              "LONG P5570"
+            ],
+            "entry_credit": 59.88,
+            "pnl": 3569.083348488499
+          },
+          {
+            "entry_date": "2025-07-07",
+            "exit_date": "2025-07-21",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P6065",
+              "LONG P5785"
+            ],
+            "entry_credit": 57.59,
+            "pnl": 2898.6677195087536
+          },
+          {
+            "entry_date": "2025-07-29",
+            "exit_date": "2025-08-12",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P6220",
+              "LONG P5960"
+            ],
+            "entry_credit": 52.76,
+            "pnl": 2824.7843311009347
+          },
+          {
+            "entry_date": "2025-08-20",
+            "exit_date": "2025-08-28",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P6250",
+              "LONG P5995"
+            ],
+            "entry_credit": 52.37,
+            "pnl": 2836.9015577691043
+          },
+          {
+            "entry_date": "2025-09-08",
+            "exit_date": "2025-09-18",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P6350",
+              "LONG P6100"
+            ],
+            "entry_credit": 50.53,
+            "pnl": 2668.9934481529635
+          },
+          {
+            "entry_date": "2025-09-26",
+            "exit_date": "2025-10-20",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P6495",
+              "LONG P6235"
+            ],
+            "entry_credit": 52.83,
+            "pnl": 2631.094890584811
+          },
+          {
+            "entry_date": "2025-10-28",
+            "exit_date": "2025-11-21",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P6725",
+              "LONG P6435"
+            ],
+            "entry_credit": 59.3,
+            "pnl": -7766.716932334884
+          },
+          {
+            "entry_date": "2025-12-02",
+            "exit_date": "2025-12-22",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P6660",
+              "LONG P6375"
+            ],
+            "entry_credit": 58.17,
+            "pnl": 3623.721359023962
+          },
+          {
+            "entry_date": "2025-12-31",
+            "exit_date": "2026-01-09",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P6695",
+              "LONG P6435"
+            ],
+            "entry_credit": 52.73,
+            "pnl": 2815.2382972273645
+          },
+          {
+            "entry_date": "2026-01-20",
+            "exit_date": "2026-01-22",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P6595",
+              "LONG P6250"
+            ],
+            "entry_credit": 72.09,
+            "pnl": 4234.096260473623
+          },
+          {
+            "entry_date": "2026-01-30",
+            "exit_date": "2026-02-23",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P6760",
+              "LONG P6455"
+            ],
+            "entry_credit": 62.91,
+            "pnl": -1363.8807871540848
+          },
+          {
+            "entry_date": "2026-03-03",
+            "exit_date": "2026-03-27",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P6575",
+              "LONG P6175"
+            ],
+            "entry_credit": 84.45,
+            "pnl": -11864.042066858383
+          },
+          {
+            "entry_date": "2026-04-07",
+            "exit_date": "2026-04-08",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P6360",
+              "LONG P5940"
+            ],
+            "entry_credit": 89.7,
+            "pnl": 5013.732614714616
+          },
+          {
+            "entry_date": "2026-04-16",
+            "exit_date": "2026-04-30",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P6855",
+              "LONG P6535"
+            ],
+            "entry_credit": 66.16,
+            "pnl": 4394.632454449183
+          },
+          {
+            "entry_date": "2026-05-08",
+            "exit_date": "2026-05-26",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P7210",
+              "LONG P6890"
+            ],
+            "entry_credit": 65.8,
+            "pnl": 3848.805781353471
+          },
+          {
+            "entry_date": "2026-06-03",
+            "exit_date": "2026-06-29",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P7375",
+              "LONG P7065"
+            ],
+            "entry_credit": 63.15,
+            "pnl": -833.1200129039303
+          },
+          {
+            "entry_date": "2026-07-08",
+            "exit_date": "2026-08-03",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P7295",
+              "LONG P6975"
+            ],
+            "entry_credit": 65.54,
+            "pnl": 5048.385762688884
+          },
+          {
+            "entry_date": "2026-08-11",
+            "exit_date": "2026-09-04",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P7555",
+              "LONG P7255"
+            ],
+            "entry_credit": 61.1,
+            "pnl": 2444.7377726677614
+          },
+          {
+            "entry_date": "2026-09-15",
+            "exit_date": "2026-09-21",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P7390",
+              "LONG P7060"
+            ],
+            "entry_credit": 67.3,
+            "pnl": 4433.083332869387
+          }
+        ]
+      },
+      {
+        "name": "bear_call_spread",
+        "stats": {
+          "trades": 63,
+          "win_rate": 0.6190476190476191,
+          "total_pnl": 8715.83572858302,
+          "avg_pnl_per_trade": 138.3465988663972,
+          "avg_win": 2356.369186362096,
+          "avg_loss": -3465.940105814114,
+          "stdev_pnl": 3408.0674771872264,
+          "sharpe_per_trade": 0.04059385554788913,
+          "max_drawdown": -31817.44874900559,
+          "final_equity": 8715.83572858302
+        },
+        "equity_curve": [
+          -555.82,
+          -705.42,
+          2442.25,
+          4403.86,
+          7068.37,
+          9661.56,
+          13210.91,
+          15908.99,
+          18245.48,
+          22188.63,
+          25448.17,
+          24758.92,
+          15716.94,
+          18213.18,
+          20752.17,
+          23401.68,
+          20254.4,
+          22407.45,
+          20741.1,
+          21042.16,
+          23422.56,
+          23973.53,
+          23732.19,
+          20303.65,
+          20608.47,
+          22335.01,
+          23970.33,
+          25767.64,
+          13974.63,
+          9832.24,
+          11404.91,
+          4223.19,
+          2645.79,
+          4750.35,
+          -87.63,
+          -2896.44,
+          -1533.56,
+          -3951.59,
+          -6049.81,
+          -3017.66,
+          -781.64,
+          1542.17,
+          -1397.0,
+          1466.67,
+          4630.54,
+          7410.03,
+          12520.38,
+          8266.41,
+          6003.41,
+          6695.56,
+          8062.01,
+          4832.94,
+          7138.69,
+          8409.72,
+          7402.04,
+          10154.64,
+          13417.82,
+          5785.89,
+          3169.42,
+          6266.47,
+          8897.61,
+          5434.07,
+          8715.84
+        ],
+        "trades": [
+          {
+            "entry_date": "2021-09-28",
+            "exit_date": "2021-10-22",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C4575",
+              "LONG C4870"
+            ],
+            "entry_credit": 49.0,
+            "pnl": -555.8210459224938
+          },
+          {
+            "entry_date": "2021-11-01",
+            "exit_date": "2021-11-26",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C4780",
+              "LONG C4995"
+            ],
+            "entry_credit": 37.29,
+            "pnl": -149.5997224250459
+          },
+          {
+            "entry_date": "2021-12-06",
+            "exit_date": "2021-12-20",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4870",
+              "LONG C5235"
+            ],
+            "entry_credit": 59.11,
+            "pnl": 3147.6717842580283
+          },
+          {
+            "entry_date": "2021-12-29",
+            "exit_date": "2022-01-07",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4975",
+              "LONG C5200"
+            ],
+            "entry_credit": 38.72,
+            "pnl": 1961.6118258382983
+          },
+          {
+            "entry_date": "2022-01-18",
+            "exit_date": "2022-01-27",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4805",
+              "LONG C5105"
+            ],
+            "entry_credit": 50.48,
+            "pnl": 2664.5032687696357
+          },
+          {
+            "entry_date": "2022-02-04",
+            "exit_date": "2022-02-18",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4730",
+              "LONG C5030"
+            ],
+            "entry_credit": 50.23,
+            "pnl": 2593.1937429221734
+          },
+          {
+            "entry_date": "2022-03-01",
+            "exit_date": "2022-03-11",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4630",
+              "LONG C5055"
+            ],
+            "entry_credit": 66.88,
+            "pnl": 3549.3475621147554
+          },
+          {
+            "entry_date": "2022-03-21",
+            "exit_date": "2022-04-11",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4695",
+              "LONG C4995"
+            ],
+            "entry_credit": 49.68,
+            "pnl": 2698.087445401821
+          },
+          {
+            "entry_date": "2022-04-20",
+            "exit_date": "2022-04-29",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4660",
+              "LONG C4920"
+            ],
+            "entry_credit": 43.72,
+            "pnl": 2336.4849100720903
+          },
+          {
+            "entry_date": "2022-05-09",
+            "exit_date": "2022-05-19",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4305",
+              "LONG C4720"
+            ],
+            "entry_credit": 64.68,
+            "pnl": 3943.154296392129
+          },
+          {
+            "entry_date": "2022-05-27",
+            "exit_date": "2022-06-09",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4395",
+              "LONG C4705"
+            ],
+            "entry_credit": 50.93,
+            "pnl": 3259.5406491941617
+          },
+          {
+            "entry_date": "2022-06-17",
+            "exit_date": "2022-07-11",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C3930",
+              "LONG C4270"
+            ],
+            "entry_credit": 54.16,
+            "pnl": -689.2536214175578
+          },
+          {
+            "entry_date": "2022-07-19",
+            "exit_date": "2022-08-12",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C4150",
+              "LONG C4430"
+            ],
+            "entry_credit": 46.17,
+            "pnl": -9041.983630236893
+          },
+          {
+            "entry_date": "2022-08-22",
+            "exit_date": "2022-08-30",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4355",
+              "LONG C4640"
+            ],
+            "entry_credit": 47.31,
+            "pnl": 2496.2434265909083
+          },
+          {
+            "entry_date": "2022-09-08",
+            "exit_date": "2022-09-20",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4215",
+              "LONG C4490"
+            ],
+            "entry_credit": 45.5,
+            "pnl": 2538.9843127663767
+          },
+          {
+            "entry_date": "2022-09-28",
+            "exit_date": "2022-10-11",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C3970",
+              "LONG C4300"
+            ],
+            "entry_credit": 52.83,
+            "pnl": 2649.5165687475605
+          },
+          {
+            "entry_date": "2022-10-19",
+            "exit_date": "2022-11-14",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C3950",
+              "LONG C4285"
+            ],
+            "entry_credit": 53.38,
+            "pnl": -3147.2799748184343
+          },
+          {
+            "entry_date": "2022-11-22",
+            "exit_date": "2022-12-09",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4190",
+              "LONG C4435"
+            ],
+            "entry_credit": 41.42,
+            "pnl": 2153.051255473244
+          },
+          {
+            "entry_date": "2022-12-19",
+            "exit_date": "2023-01-12",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C4005",
+              "LONG C4250"
+            ],
+            "entry_credit": 41.3,
+            "pnl": -1666.3566192211192
+          },
+          {
+            "entry_date": "2023-01-23",
+            "exit_date": "2023-02-16",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C4195",
+              "LONG C4420"
+            ],
+            "entry_credit": 38.39,
+            "pnl": 301.0603539687594
+          },
+          {
+            "entry_date": "2023-02-27",
+            "exit_date": "2023-03-22",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4165",
+              "LONG C4405"
+            ],
+            "entry_credit": 40.55,
+            "pnl": 2380.406626591946
+          },
+          {
+            "entry_date": "2023-03-30",
+            "exit_date": "2023-04-24",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C4220",
+              "LONG C4440"
+            ],
+            "entry_credit": 37.55,
+            "pnl": 550.9694992456218
+          },
+          {
+            "entry_date": "2023-05-02",
+            "exit_date": "2023-05-26",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C4280",
+              "LONG C4490"
+            ],
+            "entry_credit": 36.07,
+            "pnl": -241.34590575532116
+          },
+          {
+            "entry_date": "2023-06-06",
+            "exit_date": "2023-06-30",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C4420",
+              "LONG C4585"
+            ],
+            "entry_credit": 28.63,
+            "pnl": -3428.5340470696556
+          },
+          {
+            "entry_date": "2023-07-11",
+            "exit_date": "2023-08-04",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C4585",
+              "LONG C4770"
+            ],
+            "entry_credit": 32.41,
+            "pnl": 304.81447748069286
+          },
+          {
+            "entry_date": "2023-08-14",
+            "exit_date": "2023-08-24",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4640",
+              "LONG C4825"
+            ],
+            "entry_credit": 31.99,
+            "pnl": 1726.5412118837219
+          },
+          {
+            "entry_date": "2023-09-01",
+            "exit_date": "2023-09-15",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4650",
+              "LONG C4815"
+            ],
+            "entry_credit": 28.76,
+            "pnl": 1635.3192337812316
+          },
+          {
+            "entry_date": "2023-09-25",
+            "exit_date": "2023-10-19",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4500",
+              "LONG C4705"
+            ],
+            "entry_credit": 35.43,
+            "pnl": 1797.3144779272388
+          },
+          {
+            "entry_date": "2023-10-27",
+            "exit_date": "2023-11-14",
+            "status": "CLOSED_STOP",
+            "legs": [
+              "SHORT C4310",
+              "LONG C4560"
+            ],
+            "entry_credit": 42.2,
+            "pnl": -11793.008743769002
+          },
+          {
+            "entry_date": "2023-11-22",
+            "exit_date": "2023-12-18",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C4690",
+              "LONG C4850"
+            ],
+            "entry_credit": 28.15,
+            "pnl": -4142.393325821212
+          },
+          {
+            "entry_date": "2023-12-27",
+            "exit_date": "2024-01-05",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C4915",
+              "LONG C5080"
+            ],
+            "entry_credit": 29.32,
+            "pnl": 1572.6661849291133
+          },
+          {
+            "entry_date": "2024-01-16",
+            "exit_date": "2024-02-09",
+            "status": "CLOSED_STOP",
+            "legs": [
+              "SHORT C4915",
+              "LONG C5100"
+            ],
+            "entry_credit": 32.1,
+            "pnl": -7181.717565532591
+          },
+          {
+            "entry_date": "2024-02-20",
+            "exit_date": "2024-03-15",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C5145",
+              "LONG C5360"
+            ],
+            "entry_credit": 37.59,
+            "pnl": -1577.402676479852
+          },
+          {
+            "entry_date": "2024-03-25",
+            "exit_date": "2024-04-15",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C5375",
+              "LONG C5565"
+            ],
+            "entry_credit": 33.16,
+            "pnl": 2104.5629560785555
+          },
+          {
+            "entry_date": "2024-04-23",
+            "exit_date": "2024-05-17",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C5245",
+              "LONG C5470"
+            ],
+            "entry_credit": 39.35,
+            "pnl": -4837.981694295268
+          },
+          {
+            "entry_date": "2024-05-28",
+            "exit_date": "2024-06-21",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C5460",
+              "LONG C5650"
+            ],
+            "entry_credit": 33.61,
+            "pnl": -2808.810274134146
+          },
+          {
+            "entry_date": "2024-07-01",
+            "exit_date": "2024-07-25",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C5625",
+              "LONG C5815"
+            ],
+            "entry_credit": 33.52,
+            "pnl": 1362.8824932127884
+          },
+          {
+            "entry_date": "2024-08-02",
+            "exit_date": "2024-08-26",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C5620",
+              "LONG C5985"
+            ],
+            "entry_credit": 60.81,
+            "pnl": -2418.0295357906234
+          },
+          {
+            "entry_date": "2024-09-04",
+            "exit_date": "2024-09-30",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C5780",
+              "LONG C6115"
+            ],
+            "entry_credit": 56.42,
+            "pnl": -2098.216567403352
+          },
+          {
+            "entry_date": "2024-10-08",
+            "exit_date": "2024-10-31",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C6025",
+              "LONG C6375"
+            ],
+            "entry_credit": 58.65,
+            "pnl": 3032.1429084174897
+          },
+          {
+            "entry_date": "2024-11-08",
+            "exit_date": "2024-11-18",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C6195",
+              "LONG C6445"
+            ],
+            "entry_credit": 43.65,
+            "pnl": 2236.02253468172
+          },
+          {
+            "entry_date": "2024-11-26",
+            "exit_date": "2024-12-20",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C6210",
+              "LONG C6450"
+            ],
+            "entry_credit": 42.05,
+            "pnl": 2323.8080900636846
+          },
+          {
+            "entry_date": "2024-12-31",
+            "exit_date": "2025-01-24",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C6105",
+              "LONG C6395"
+            ],
+            "entry_credit": 50.16,
+            "pnl": -2939.1702960414023
+          },
+          {
+            "entry_date": "2025-02-03",
+            "exit_date": "2025-02-25",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C6240",
+              "LONG C6560"
+            ],
+            "entry_credit": 54.54,
+            "pnl": 2863.6751422153393
+          },
+          {
+            "entry_date": "2025-03-05",
+            "exit_date": "2025-03-11",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C6125",
+              "LONG C6495"
+            ],
+            "entry_credit": 61.86,
+            "pnl": 3163.868169926872
+          },
+          {
+            "entry_date": "2025-03-19",
+            "exit_date": "2025-04-03",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C5925",
+              "LONG C6245"
+            ],
+            "entry_credit": 54.27,
+            "pnl": 2779.4896334728264
+          },
+          {
+            "entry_date": "2025-04-11",
+            "exit_date": "2025-04-17",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C5820",
+              "LONG C6430"
+            ],
+            "entry_credit": 93.96,
+            "pnl": 5110.348772284442
+          },
+          {
+            "entry_date": "2025-04-28",
+            "exit_date": "2025-05-22",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C5835",
+              "LONG C6240"
+            ],
+            "entry_credit": 66.78,
+            "pnl": -4253.963917668216
+          },
+          {
+            "entry_date": "2025-06-02",
+            "exit_date": "2025-06-26",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C6175",
+              "LONG C6485"
+            ],
+            "entry_credit": 53.22,
+            "pnl": -2263.001951663716
+          },
+          {
+            "entry_date": "2025-07-07",
+            "exit_date": "2025-07-31",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C6475",
+              "LONG C6790"
+            ],
+            "entry_credit": 53.89,
+            "pnl": 692.1480218803993
+          },
+          {
+            "entry_date": "2025-08-08",
+            "exit_date": "2025-09-02",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C6605",
+              "LONG C6875"
+            ],
+            "entry_credit": 47.08,
+            "pnl": 1366.4513169352972
+          },
+          {
+            "entry_date": "2025-09-10",
+            "exit_date": "2025-10-06",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C6755",
+              "LONG C7035"
+            ],
+            "entry_credit": 48.79,
+            "pnl": -3229.074683052147
+          },
+          {
+            "entry_date": "2025-10-14",
+            "exit_date": "2025-11-07",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C6950",
+              "LONG C7345"
+            ],
+            "entry_credit": 66.49,
+            "pnl": 2305.7483759086467
+          },
+          {
+            "entry_date": "2025-11-17",
+            "exit_date": "2025-12-11",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C7000",
+              "LONG C7430"
+            ],
+            "entry_credit": 72.16,
+            "pnl": 1271.0384731588902
+          },
+          {
+            "entry_date": "2025-12-19",
+            "exit_date": "2026-01-12",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C7060",
+              "LONG C7345"
+            ],
+            "entry_credit": 49.99,
+            "pnl": -1007.6841018420055
+          },
+          {
+            "entry_date": "2026-01-21",
+            "exit_date": "2026-02-17",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C7135",
+              "LONG C7460"
+            ],
+            "entry_credit": 55.84,
+            "pnl": 2752.6008643135583
+          },
+          {
+            "entry_date": "2026-02-25",
+            "exit_date": "2026-03-13",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C7220",
+              "LONG C7575"
+            ],
+            "entry_credit": 60.89,
+            "pnl": 3263.1783691266546
+          },
+          {
+            "entry_date": "2026-03-23",
+            "exit_date": "2026-04-16",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C6960",
+              "LONG C7465"
+            ],
+            "entry_credit": 82.75,
+            "pnl": -7631.9244336688025
+          },
+          {
+            "entry_date": "2026-04-24",
+            "exit_date": "2026-05-18",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C7460",
+              "LONG C7840"
+            ],
+            "entry_credit": 65.07,
+            "pnl": -2616.472150299114
+          },
+          {
+            "entry_date": "2026-05-27",
+            "exit_date": "2026-06-10",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C7790",
+              "LONG C8135"
+            ],
+            "entry_credit": 60.03,
+            "pnl": 3097.0502957403596
+          },
+          {
+            "entry_date": "2026-06-18",
+            "exit_date": "2026-07-13",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C7775",
+              "LONG C8120"
+            ],
+            "entry_credit": 59.41,
+            "pnl": 2631.1338065779864
+          },
+          {
+            "entry_date": "2026-07-21",
+            "exit_date": "2026-08-14",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C7795",
+              "LONG C8155"
+            ],
+            "entry_credit": 61.65,
+            "pnl": -3463.5360552107613
+          },
+          {
+            "entry_date": "2026-08-24",
+            "exit_date": "2026-09-15",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT C7920",
+              "LONG C8265"
+            ],
+            "entry_credit": 59.88,
+            "pnl": 3281.764929776736
+          }
+        ]
+      },
+      {
+        "name": "iron_condor",
+        "stats": {
+          "trades": 55,
+          "win_rate": 0.7090909090909091,
+          "total_pnl": 94306.39563021138,
+          "avg_pnl_per_trade": 1714.6617387311162,
+          "avg_win": 3630.548447233053,
+          "avg_loss": -2955.312113242355,
+          "stdev_pnl": 3623.29665532125,
+          "sharpe_per_trade": 0.47323250118450216,
+          "max_drawdown": -16993.129675729928,
+          "final_equity": 94306.39563021138
+        },
+        "equity_curve": [
+          5657.77,
+          6380.83,
+          8739.39,
+          2214.53,
+          1169.09,
+          8790.03,
+          2725.97,
+          9704.44,
+          5115.89,
+          3943.39,
+          -2691.53,
+          -7288.69,
+          -1417.09,
+          3357.2,
+          5845.98,
+          7962.44,
+          10116.4,
+          12857.77,
+          15168.66,
+          17849.02,
+          18766.48,
+          22729.65,
+          20747.55,
+          25046.97,
+          24856.05,
+          26884.26,
+          22487.97,
+          23813.96,
+          20172.53,
+          22033.44,
+          21322.89,
+          19804.56,
+          22444.24,
+          23527.42,
+          30440.06,
+          33698.52,
+          31930.49,
+          35953.63,
+          34204.32,
+          36145.19,
+          40849.98,
+          42477.96,
+          46259.35,
+          50146.12,
+          53436.72,
+          60344.57,
+          68653.37,
+          74719.81,
+          76430.41,
+          75729.88,
+          77187.86,
+          80653.3,
+          85642.69,
+          88695.25,
+          94306.4
+        ],
+        "trades": [
+          {
+            "entry_date": "2021-09-28",
+            "exit_date": "2021-10-14",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4200",
+              "LONG P3950",
+              "SHORT C4575",
+              "LONG C4870"
+            ],
+            "entry_credit": 101.81,
+            "pnl": 5657.765788401462
+          },
+          {
+            "entry_date": "2021-10-22",
+            "exit_date": "2021-11-15",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4440",
+              "LONG P4265",
+              "SHORT C4700",
+              "LONG C4900"
+            ],
+            "entry_credit": 70.19,
+            "pnl": 723.0671237182747
+          },
+          {
+            "entry_date": "2021-11-23",
+            "exit_date": "2021-12-17",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4555",
+              "LONG P4325",
+              "SHORT C4890",
+              "LONG C5150"
+            ],
+            "entry_credit": 91.91,
+            "pnl": 2358.557082125613
+          },
+          {
+            "entry_date": "2021-12-28",
+            "exit_date": "2022-01-21",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4660",
+              "LONG P4450",
+              "SHORT C4970",
+              "LONG C5210"
+            ],
+            "entry_credit": 84.42,
+            "pnl": -6524.859022637937
+          },
+          {
+            "entry_date": "2022-01-31",
+            "exit_date": "2022-02-24",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4350",
+              "LONG P4070",
+              "SHORT C4765",
+              "LONG C5090"
+            ],
+            "entry_credit": 113.24,
+            "pnl": -1045.442093963021
+          },
+          {
+            "entry_date": "2022-03-04",
+            "exit_date": "2022-03-21",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4125",
+              "LONG P3790",
+              "SHORT C4640",
+              "LONG C5050"
+            ],
+            "entry_credit": 139.16,
+            "pnl": 7620.944892601403
+          },
+          {
+            "entry_date": "2022-03-29",
+            "exit_date": "2022-04-22",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4500",
+              "LONG P4280",
+              "SHORT C4825",
+              "LONG C5075"
+            ],
+            "entry_credit": 87.82,
+            "pnl": -6064.066865895441
+          },
+          {
+            "entry_date": "2022-05-02",
+            "exit_date": "2022-05-26",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P3955",
+              "LONG P3630",
+              "SHORT C4455",
+              "LONG C4855"
+            ],
+            "entry_credit": 135.14,
+            "pnl": 6978.473328986891
+          },
+          {
+            "entry_date": "2022-06-06",
+            "exit_date": "2022-06-30",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P3965",
+              "LONG P3710",
+              "SHORT C4350",
+              "LONG C4650"
+            ],
+            "entry_credit": 103.47,
+            "pnl": -4588.5521337896935
+          },
+          {
+            "entry_date": "2022-07-11",
+            "exit_date": "2022-08-04",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P3705",
+              "LONG P3455",
+              "SHORT C4075",
+              "LONG C4370"
+            ],
+            "entry_credit": 102.53,
+            "pnl": -1172.5000819457307
+          },
+          {
+            "entry_date": "2022-08-12",
+            "exit_date": "2022-09-06",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4155",
+              "LONG P3945",
+              "SHORT C4465",
+              "LONG C4705"
+            ],
+            "entry_credit": 84.06,
+            "pnl": -6634.91870297872
+          },
+          {
+            "entry_date": "2022-09-14",
+            "exit_date": "2022-10-10",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P3790",
+              "LONG P3535",
+              "SHORT C4175",
+              "LONG C4475"
+            ],
+            "entry_credit": 103.4,
+            "pnl": -4597.158757015785
+          },
+          {
+            "entry_date": "2022-10-18",
+            "exit_date": "2022-11-04",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P3550",
+              "LONG P3275",
+              "SHORT C3975",
+              "LONG C4310"
+            ],
+            "entry_credit": 113.34,
+            "pnl": 5871.60371909455
+          },
+          {
+            "entry_date": "2022-11-14",
+            "exit_date": "2022-12-05",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P3815",
+              "LONG P3585",
+              "SHORT C4165",
+              "LONG C4435"
+            ],
+            "entry_credit": 93.55,
+            "pnl": 4774.282413652456
+          },
+          {
+            "entry_date": "2022-12-13",
+            "exit_date": "2023-01-06",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P3885",
+              "LONG P3660",
+              "SHORT C4220",
+              "LONG C4480"
+            ],
+            "entry_credit": 91.15,
+            "pnl": 2488.7858204682343
+          },
+          {
+            "entry_date": "2023-01-17",
+            "exit_date": "2023-02-10",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P3875",
+              "LONG P3680",
+              "SHORT C4160",
+              "LONG C4380"
+            ],
+            "entry_credit": 77.91,
+            "pnl": 2116.453825504911
+          },
+          {
+            "entry_date": "2023-02-21",
+            "exit_date": "2023-03-17",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P3860",
+              "LONG P3635",
+              "SHORT C4200",
+              "LONG C4460"
+            ],
+            "entry_credit": 91.09,
+            "pnl": 2153.9681887721217
+          },
+          {
+            "entry_date": "2023-03-27",
+            "exit_date": "2023-04-20",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P3855",
+              "LONG P3650",
+              "SHORT C4160",
+              "LONG C4390"
+            ],
+            "entry_credit": 81.66,
+            "pnl": 2741.363275683212
+          },
+          {
+            "entry_date": "2023-04-28",
+            "exit_date": "2023-05-22",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4075",
+              "LONG P3905",
+              "SHORT C4315",
+              "LONG C4500"
+            ],
+            "entry_credit": 67.09,
+            "pnl": 2310.8903682609593
+          },
+          {
+            "entry_date": "2023-05-31",
+            "exit_date": "2023-06-26",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4070",
+              "LONG P3880",
+              "SHORT C4345",
+              "LONG C4560"
+            ],
+            "entry_credit": 76.15,
+            "pnl": 2680.3590895360126
+          },
+          {
+            "entry_date": "2023-07-05",
+            "exit_date": "2023-07-31",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4355",
+              "LONG P4195",
+              "SHORT C4590",
+              "LONG C4765"
+            ],
+            "entry_credit": 62.75,
+            "pnl": 917.462270190827
+          },
+          {
+            "entry_date": "2023-08-08",
+            "exit_date": "2023-08-30",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4395",
+              "LONG P4210",
+              "SHORT C4660",
+              "LONG C4860"
+            ],
+            "entry_credit": 72.55,
+            "pnl": 3963.1669110740004
+          },
+          {
+            "entry_date": "2023-09-08",
+            "exit_date": "2023-10-02",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4370",
+              "LONG P4210",
+              "SHORT C4595",
+              "LONG C4770"
+            ],
+            "entry_credit": 63.08,
+            "pnl": -1982.0976557958843
+          },
+          {
+            "entry_date": "2023-10-10",
+            "exit_date": "2023-11-03",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P4250",
+              "LONG P4060",
+              "SHORT C4525",
+              "LONG C4730"
+            ],
+            "entry_credit": 74.35,
+            "pnl": 4299.426014439616
+          },
+          {
+            "entry_date": "2023-11-13",
+            "exit_date": "2023-12-07",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4315",
+              "LONG P4150",
+              "SHORT C4555",
+              "LONG C4740"
+            ],
+            "entry_credit": 65.66,
+            "pnl": -190.92434673576122
+          },
+          {
+            "entry_date": "2023-12-15",
+            "exit_date": "2024-01-08",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4635",
+              "LONG P4485",
+              "SHORT C4850",
+              "LONG C5010"
+            ],
+            "entry_credit": 58.05,
+            "pnl": 2028.2081390869791
+          },
+          {
+            "entry_date": "2024-01-17",
+            "exit_date": "2024-02-12",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4635",
+              "LONG P4460",
+              "SHORT C4895",
+              "LONG C5090"
+            ],
+            "entry_credit": 69.69,
+            "pnl": -4396.2927283007075
+          },
+          {
+            "entry_date": "2024-02-21",
+            "exit_date": "2024-03-18",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4870",
+              "LONG P4675",
+              "SHORT C5150",
+              "LONG C5365"
+            ],
+            "entry_credit": 77.37,
+            "pnl": 1325.9955999149995
+          },
+          {
+            "entry_date": "2024-03-26",
+            "exit_date": "2024-04-19",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5105",
+              "LONG P4930",
+              "SHORT C5360",
+              "LONG C5550"
+            ],
+            "entry_credit": 68.8,
+            "pnl": -3641.4317294322072
+          },
+          {
+            "entry_date": "2024-04-29",
+            "exit_date": "2024-05-23",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5005",
+              "LONG P4815",
+              "SHORT C5285",
+              "LONG C5495"
+            ],
+            "entry_credit": 74.72,
+            "pnl": 1860.9065647720122
+          },
+          {
+            "entry_date": "2024-06-03",
+            "exit_date": "2024-06-27",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5185",
+              "LONG P5005",
+              "SHORT C5440",
+              "LONG C5630"
+            ],
+            "entry_credit": 69.79,
+            "pnl": -710.5478596668377
+          },
+          {
+            "entry_date": "2024-07-08",
+            "exit_date": "2024-08-01",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5475",
+              "LONG P5295",
+              "SHORT C5730",
+              "LONG C5920"
+            ],
+            "entry_credit": 69.37,
+            "pnl": -1518.3267539457859
+          },
+          {
+            "entry_date": "2024-08-09",
+            "exit_date": "2024-09-03",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5180",
+              "LONG P4910",
+              "SHORT C5585",
+              "LONG C5895"
+            ],
+            "entry_credit": 108.61,
+            "pnl": 2639.6806519612796
+          },
+          {
+            "entry_date": "2024-09-11",
+            "exit_date": "2024-10-07",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5410",
+              "LONG P5160",
+              "SHORT C5770",
+              "LONG C6050"
+            ],
+            "entry_credit": 99.8,
+            "pnl": 1083.177928456496
+          },
+          {
+            "entry_date": "2024-10-15",
+            "exit_date": "2024-11-06",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P5635",
+              "LONG P5335",
+              "SHORT C6080",
+              "LONG C6425"
+            ],
+            "entry_credit": 120.61,
+            "pnl": 6912.642531175996
+          },
+          {
+            "entry_date": "2024-11-14",
+            "exit_date": "2024-12-09",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5825",
+              "LONG P5610",
+              "SHORT C6140",
+              "LONG C6380"
+            ],
+            "entry_credit": 85.38,
+            "pnl": 3258.4536563538263
+          },
+          {
+            "entry_date": "2024-12-17",
+            "exit_date": "2025-01-10",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5910",
+              "LONG P5665",
+              "SHORT C6265",
+              "LONG C6535"
+            ],
+            "entry_credit": 96.62,
+            "pnl": -1768.0276686459379
+          },
+          {
+            "entry_date": "2025-01-21",
+            "exit_date": "2025-02-14",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5915",
+              "LONG P5685",
+              "SHORT C6250",
+              "LONG C6510"
+            ],
+            "entry_credit": 92.04,
+            "pnl": 4023.145810817795
+          },
+          {
+            "entry_date": "2025-02-25",
+            "exit_date": "2025-03-21",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5785",
+              "LONG P5490",
+              "SHORT C6210",
+              "LONG C6540"
+            ],
+            "entry_credit": 117.48,
+            "pnl": -1749.3187142722463
+          },
+          {
+            "entry_date": "2025-03-31",
+            "exit_date": "2025-04-24",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5425",
+              "LONG P5115",
+              "SHORT C5885",
+              "LONG C6245"
+            ],
+            "entry_credit": 126.16,
+            "pnl": 1940.877044477928
+          },
+          {
+            "entry_date": "2025-05-02",
+            "exit_date": "2025-05-27",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5495",
+              "LONG P5170",
+              "SHORT C5970",
+              "LONG C6340"
+            ],
+            "entry_credit": 130.57,
+            "pnl": 4704.789676212398
+          },
+          {
+            "entry_date": "2025-06-04",
+            "exit_date": "2025-06-30",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5815",
+              "LONG P5550",
+              "SHORT C6205",
+              "LONG C6500"
+            ],
+            "entry_credit": 105.17,
+            "pnl": 1627.97243821133
+          },
+          {
+            "entry_date": "2025-07-09",
+            "exit_date": "2025-08-04",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P6115",
+              "LONG P5860",
+              "SHORT C6485",
+              "LONG C6765"
+            ],
+            "entry_credit": 100.21,
+            "pnl": 3781.3978714386535
+          },
+          {
+            "entry_date": "2025-08-12",
+            "exit_date": "2025-09-05",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P6305",
+              "LONG P6065",
+              "SHORT C6660",
+              "LONG C6925"
+            ],
+            "entry_credit": 94.28,
+            "pnl": 3886.764434358355
+          },
+          {
+            "entry_date": "2025-09-15",
+            "exit_date": "2025-10-09",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P6465",
+              "LONG P6200",
+              "SHORT C6845",
+              "LONG C7140"
+            ],
+            "entry_credit": 105.47,
+            "pnl": 3290.6036837825254
+          },
+          {
+            "entry_date": "2025-10-17",
+            "exit_date": "2025-11-10",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P6455",
+              "LONG P6110",
+              "SHORT C6970",
+              "LONG C7365"
+            ],
+            "entry_credit": 138.44,
+            "pnl": 6907.8508381787115
+          },
+          {
+            "entry_date": "2025-11-18",
+            "exit_date": "2025-12-02",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P6375",
+              "LONG P5970",
+              "SHORT C6980",
+              "LONG C7450"
+            ],
+            "entry_credit": 164.27,
+            "pnl": 8308.799217043415
+          },
+          {
+            "entry_date": "2025-12-10",
+            "exit_date": "2026-01-05",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P6725",
+              "LONG P6450",
+              "SHORT C7130",
+              "LONG C7435"
+            ],
+            "entry_credit": 108.3,
+            "pnl": 6066.440465166993
+          },
+          {
+            "entry_date": "2026-01-13",
+            "exit_date": "2026-02-06",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P6800",
+              "LONG P6515",
+              "SHORT C7210",
+              "LONG C7525"
+            ],
+            "entry_credit": 112.53,
+            "pnl": 1710.600476950583
+          },
+          {
+            "entry_date": "2026-02-17",
+            "exit_date": "2026-03-13",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P6635",
+              "LONG P6285",
+              "SHORT C7150",
+              "LONG C7545"
+            ],
+            "entry_credit": 139.45,
+            "pnl": -700.5286968559773
+          },
+          {
+            "entry_date": "2026-03-23",
+            "exit_date": "2026-04-16",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P6325",
+              "LONG P5900",
+              "SHORT C6960",
+              "LONG C7465"
+            ],
+            "entry_credit": 174.16,
+            "pnl": 1457.9743095371982
+          },
+          {
+            "entry_date": "2026-04-24",
+            "exit_date": "2026-05-18",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P6965",
+              "LONG P6625",
+              "SHORT C7460",
+              "LONG C7840"
+            ],
+            "entry_credit": 135.11,
+            "pnl": 3465.4455828113187
+          },
+          {
+            "entry_date": "2026-05-27",
+            "exit_date": "2026-06-22",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P7340",
+              "LONG P7030",
+              "SHORT C7790",
+              "LONG C8135"
+            ],
+            "entry_credit": 123.58,
+            "pnl": 4989.387729302567
+          },
+          {
+            "entry_date": "2026-06-30",
+            "exit_date": "2026-07-24",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P7315",
+              "LONG P7005",
+              "SHORT C7775",
+              "LONG C8120"
+            ],
+            "entry_credit": 122.65,
+            "pnl": 3052.5616954105913
+          },
+          {
+            "entry_date": "2026-08-03",
+            "exit_date": "2026-08-27",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P7425",
+              "LONG P7115",
+              "SHORT C7870",
+              "LONG C8205"
+            ],
+            "entry_credit": 121.34,
+            "pnl": 5611.142984156574
           }
         ]
       }
@@ -2377,574 +4821,634 @@
   },
   "gex": {
     "caveat": "REAL chain -- open interest and gamma are pulled live from moomoo/OpenD (get_option_chain + get_market_snapshot) for the nearest-to-0DTE SPX expiration, matching the strike-selection rules in strategy_logic/ (not the 45-DTE backtest track above). Spot is derived from this same chain via put-call parity (get_market_snapshot rejects SPX/VIX index codes directly). Still restricted to strikes within the dashboard's +/- window around spot, same as the fallback path, for a consistent chart scale -- not the full chain. No proxy, no BSM re-derivation.",
-    "spot": 7709.93,
-    "spot_source": "moomoo:SPX real chain (2026-09-08)",
+    "spot": 7745.47,
+    "spot_source": "moomoo:SPX real chain (2026-09-28)",
     "sigma": null,
-    "put_wall": 7675.0,
-    "call_wall": 7725.0,
-    "gamma_flip": 7692.24,
-    "positive_gex": 11037179028.83,
-    "negative_gex": -7926511250.95,
-    "net_gex": 3110667777.88,
-    "gross_gex": 18963690279.78,
+    "put_wall": 7700.0,
+    "call_wall": 7760.0,
+    "gamma_flip": 7714.1,
+    "positive_gex": 10481020650.87,
+    "negative_gex": -6477873350.37,
+    "net_gex": 4003147300.5,
+    "gross_gex": 16958894001.25,
     "by_strike": [
       {
-        "strike": 7480.0,
-        "positive_gex": 0.0,
-        "negative_gex": -4959952.71,
-        "net_gex": -4959952.71
-      },
-      {
-        "strike": 7485.0,
-        "positive_gex": 0.0,
-        "negative_gex": -2803118.64,
-        "net_gex": -2803118.64
-      },
-      {
-        "strike": 7490.0,
-        "positive_gex": 0.0,
-        "negative_gex": -5319381.03,
-        "net_gex": -5319381.03
-      },
-      {
-        "strike": 7495.0,
-        "positive_gex": 0.0,
-        "negative_gex": -30910613.95,
-        "net_gex": -30910613.95
-      },
-      {
-        "strike": 7500.0,
-        "positive_gex": 0.0,
-        "negative_gex": -64950759.37,
-        "net_gex": -64950759.37
-      },
-      {
-        "strike": 7505.0,
-        "positive_gex": 0.0,
-        "negative_gex": -6602467.11,
-        "net_gex": -6602467.11
-      },
-      {
-        "strike": 7510.0,
-        "positive_gex": 0.0,
-        "negative_gex": -8858782.86,
-        "net_gex": -8858782.86
-      },
-      {
         "strike": 7515.0,
-        "positive_gex": 0.0,
-        "negative_gex": -10358358.94,
-        "net_gex": -10358358.94
+        "positive_gex": 214234.24,
+        "negative_gex": -11956752.61,
+        "net_gex": -11742518.37
       },
       {
         "strike": 7520.0,
-        "positive_gex": 0.0,
-        "negative_gex": -10559267.26,
-        "net_gex": -10559267.26
+        "positive_gex": 387414.25,
+        "negative_gex": -9150883.96,
+        "net_gex": -8763469.71
       },
       {
         "strike": 7525.0,
-        "positive_gex": 0.0,
-        "negative_gex": -10746111.13,
-        "net_gex": -10746111.13
+        "positive_gex": 515063.28,
+        "negative_gex": -15141739.83,
+        "net_gex": -14626676.54
       },
       {
         "strike": 7530.0,
-        "positive_gex": 0.0,
-        "negative_gex": -24336969.14,
-        "net_gex": -24336969.14
+        "positive_gex": 621814.21,
+        "negative_gex": -3103255.99,
+        "net_gex": -2481441.78
       },
       {
         "strike": 7535.0,
-        "positive_gex": 0.0,
-        "negative_gex": -7566275.36,
-        "net_gex": -7566275.36
+        "positive_gex": 157116.15,
+        "negative_gex": -9286062.82,
+        "net_gex": -9128946.67
       },
       {
         "strike": 7540.0,
-        "positive_gex": 0.0,
-        "negative_gex": -8845564.63,
-        "net_gex": -8845564.63
+        "positive_gex": 1616457.92,
+        "negative_gex": -12881715.35,
+        "net_gex": -11265257.43
       },
       {
         "strike": 7545.0,
-        "positive_gex": 0.0,
-        "negative_gex": -47562832.3,
-        "net_gex": -47562832.3
+        "positive_gex": 768665.97,
+        "negative_gex": -11961849.81,
+        "net_gex": -11193183.84
       },
       {
         "strike": 7550.0,
-        "positive_gex": 0.0,
-        "negative_gex": -119355798.9,
-        "net_gex": -119355798.9
+        "positive_gex": 2852687.96,
+        "negative_gex": -35970597.62,
+        "net_gex": -33117909.65
       },
       {
         "strike": 7555.0,
-        "positive_gex": 0.0,
-        "negative_gex": -9406052.26,
-        "net_gex": -9406052.26
+        "positive_gex": 435395.92,
+        "negative_gex": -5560764.41,
+        "net_gex": -5125368.49
       },
       {
         "strike": 7560.0,
-        "positive_gex": 0.0,
-        "negative_gex": -62929977.03,
-        "net_gex": -62929977.03
+        "positive_gex": 1008480.0,
+        "negative_gex": -7387057.21,
+        "net_gex": -6378577.21
       },
       {
         "strike": 7565.0,
-        "positive_gex": 0.0,
-        "negative_gex": -10405586.29,
-        "net_gex": -10405586.29
+        "positive_gex": 1303335.12,
+        "negative_gex": -9014547.85,
+        "net_gex": -7711212.73
       },
       {
         "strike": 7570.0,
-        "positive_gex": 0.0,
-        "negative_gex": -18838704.08,
-        "net_gex": -18838704.08
+        "positive_gex": 904161.64,
+        "negative_gex": -17496298.56,
+        "net_gex": -16592136.91
       },
       {
         "strike": 7575.0,
-        "positive_gex": 0.0,
-        "negative_gex": -149773453.49,
-        "net_gex": -149773453.49
+        "positive_gex": 23703169.05,
+        "negative_gex": -23783399.5,
+        "net_gex": -80230.45
       },
       {
         "strike": 7580.0,
-        "positive_gex": 0.0,
-        "negative_gex": -26284969.65,
-        "net_gex": -26284969.65
+        "positive_gex": 2098423.41,
+        "negative_gex": -268499538.65,
+        "net_gex": -266401115.24
       },
       {
         "strike": 7585.0,
-        "positive_gex": 0.0,
-        "negative_gex": -27403271.28,
-        "net_gex": -27403271.28
+        "positive_gex": 2421188.31,
+        "negative_gex": -16590111.45,
+        "net_gex": -14168923.14
       },
       {
         "strike": 7590.0,
-        "positive_gex": 0.0,
-        "negative_gex": -17963010.99,
-        "net_gex": -17963010.99
+        "positive_gex": 4509148.81,
+        "negative_gex": -245264045.2,
+        "net_gex": -240754896.39
       },
       {
         "strike": 7595.0,
-        "positive_gex": 0.0,
-        "negative_gex": -16224091.69,
-        "net_gex": -16224091.69
+        "positive_gex": 1497583.2,
+        "negative_gex": -82441130.5,
+        "net_gex": -80943547.3
       },
       {
         "strike": 7600.0,
-        "positive_gex": 0.0,
-        "negative_gex": -142162860.04,
-        "net_gex": -142162860.04
+        "positive_gex": 31651369.82,
+        "negative_gex": -108358820.46,
+        "net_gex": -76707450.64
       },
       {
         "strike": 7605.0,
-        "positive_gex": 0.0,
-        "negative_gex": -30737635.63,
-        "net_gex": -30737635.63
+        "positive_gex": 2818083.28,
+        "negative_gex": -38385526.32,
+        "net_gex": -35567443.05
       },
       {
         "strike": 7610.0,
-        "positive_gex": 0.0,
-        "negative_gex": -43958275.65,
-        "net_gex": -43958275.65
+        "positive_gex": 3941755.67,
+        "negative_gex": -79472777.28,
+        "net_gex": -75531021.61
       },
       {
         "strike": 7615.0,
-        "positive_gex": 0.0,
-        "negative_gex": -34023343.39,
-        "net_gex": -34023343.39
+        "positive_gex": 7356395.16,
+        "negative_gex": -23752697.08,
+        "net_gex": -16396301.92
       },
       {
         "strike": 7620.0,
-        "positive_gex": 0.0,
-        "negative_gex": -51438415.47,
-        "net_gex": -51438415.47
+        "positive_gex": 7459373.71,
+        "negative_gex": -29211238.31,
+        "net_gex": -21751864.6
       },
       {
         "strike": 7625.0,
-        "positive_gex": 0.0,
-        "negative_gex": -96787013.27,
-        "net_gex": -96787013.27
+        "positive_gex": 11822068.99,
+        "negative_gex": -53823893.45,
+        "net_gex": -42001824.45
       },
       {
         "strike": 7630.0,
-        "positive_gex": 0.0,
-        "negative_gex": -101690962.94,
-        "net_gex": -101690962.94
+        "positive_gex": 50212345.03,
+        "negative_gex": -58735514.54,
+        "net_gex": -8523169.5
       },
       {
         "strike": 7635.0,
-        "positive_gex": 0.0,
-        "negative_gex": -32583876.9,
-        "net_gex": -32583876.9
+        "positive_gex": 7958978.1,
+        "negative_gex": -77678386.99,
+        "net_gex": -69719408.89
       },
       {
         "strike": 7640.0,
-        "positive_gex": 0.0,
-        "negative_gex": -74220968.5,
-        "net_gex": -74220968.5
+        "positive_gex": 20167573.39,
+        "negative_gex": -165723909.37,
+        "net_gex": -145556335.98
       },
       {
         "strike": 7645.0,
-        "positive_gex": 0.0,
-        "negative_gex": -44266807.67,
-        "net_gex": -44266807.67
+        "positive_gex": 6627077.54,
+        "negative_gex": -41163761.94,
+        "net_gex": -34536684.4
       },
       {
         "strike": 7650.0,
-        "positive_gex": 0.0,
-        "negative_gex": -731242228.93,
-        "net_gex": -731242228.93
+        "positive_gex": 59462080.07,
+        "negative_gex": -123218797.9,
+        "net_gex": -63756717.83
       },
       {
         "strike": 7655.0,
-        "positive_gex": 0.0,
-        "negative_gex": -74079804.61,
-        "net_gex": -74079804.61
+        "positive_gex": 12189858.06,
+        "negative_gex": -57865321.9,
+        "net_gex": -45675463.85
       },
       {
         "strike": 7660.0,
-        "positive_gex": 0.0,
-        "negative_gex": -155857520.05,
-        "net_gex": -155857520.05
+        "positive_gex": 34106558.39,
+        "negative_gex": -88510576.02,
+        "net_gex": -54404017.63
       },
       {
         "strike": 7665.0,
-        "positive_gex": 0.0,
-        "negative_gex": -64565566.44,
-        "net_gex": -64565566.44
+        "positive_gex": 53587266.33,
+        "negative_gex": -71690697.28,
+        "net_gex": -18103430.95
       },
       {
         "strike": 7670.0,
-        "positive_gex": 0.0,
-        "negative_gex": -232170210.05,
-        "net_gex": -232170210.05
+        "positive_gex": 75521844.75,
+        "negative_gex": -97042359.83,
+        "net_gex": -21520515.07
       },
       {
         "strike": 7675.0,
-        "positive_gex": 0.0,
-        "negative_gex": -852490477.01,
-        "net_gex": -852490477.01
+        "positive_gex": 75047540.83,
+        "negative_gex": -230247865.71,
+        "net_gex": -155200324.87
       },
       {
         "strike": 7680.0,
-        "positive_gex": 0.0,
-        "negative_gex": -246302417.12,
-        "net_gex": -246302417.12
+        "positive_gex": 56690250.44,
+        "negative_gex": -95809046.98,
+        "net_gex": -39118796.54
       },
       {
         "strike": 7685.0,
-        "positive_gex": 0.0,
-        "negative_gex": -201405460.44,
-        "net_gex": -201405460.44
+        "positive_gex": 19056888.15,
+        "negative_gex": -100465865.6,
+        "net_gex": -81408977.45
       },
       {
         "strike": 7690.0,
-        "positive_gex": 0.0,
-        "negative_gex": -277249241.96,
-        "net_gex": -277249241.96
+        "positive_gex": 74881079.49,
+        "negative_gex": -179402675.37,
+        "net_gex": -104521595.88
       },
       {
         "strike": 7695.0,
-        "positive_gex": 493067002.07,
-        "negative_gex": -151347967.17,
-        "net_gex": 341719034.9
+        "positive_gex": 51947858.08,
+        "negative_gex": -114118878.72,
+        "net_gex": -62171020.64
       },
       {
         "strike": 7700.0,
-        "positive_gex": 953775090.36,
-        "negative_gex": -471599119.93,
-        "net_gex": 482175970.43
+        "positive_gex": 331440768.44,
+        "negative_gex": -537596555.53,
+        "net_gex": -206155787.1
       },
       {
         "strike": 7705.0,
-        "positive_gex": 243749859.79,
-        "negative_gex": -139865008.56,
-        "net_gex": 103884851.23
+        "positive_gex": 121221762.09,
+        "negative_gex": -206238235.53,
+        "net_gex": -85016473.43
       },
       {
         "strike": 7710.0,
-        "positive_gex": 303540667.01,
-        "negative_gex": -162578190.59,
-        "net_gex": 140962476.42
+        "positive_gex": 139542874.33,
+        "negative_gex": -408286488.32,
+        "net_gex": -268743614.0
       },
       {
         "strike": 7715.0,
-        "positive_gex": 406773514.36,
-        "negative_gex": -253678266.33,
-        "net_gex": 153095248.02
+        "positive_gex": 234177045.35,
+        "negative_gex": -174919105.93,
+        "net_gex": 59257939.43
       },
       {
         "strike": 7720.0,
-        "positive_gex": 518014406.24,
-        "negative_gex": -259186768.55,
-        "net_gex": 258827637.69
+        "positive_gex": 176232920.16,
+        "negative_gex": -166044090.34,
+        "net_gex": 10188829.82
       },
       {
         "strike": 7725.0,
-        "positive_gex": 1265098087.42,
-        "negative_gex": -549283785.12,
-        "net_gex": 715814302.3
+        "positive_gex": 184988184.05,
+        "negative_gex": -491758304.52,
+        "net_gex": -306770120.46
       },
       {
         "strike": 7730.0,
-        "positive_gex": 394715259.2,
-        "negative_gex": -211124826.8,
-        "net_gex": 183590432.4
+        "positive_gex": 213271219.37,
+        "negative_gex": -270354116.24,
+        "net_gex": -57082896.86
       },
       {
         "strike": 7735.0,
-        "positive_gex": 291805341.87,
-        "negative_gex": -55656242.34,
-        "net_gex": 236149099.52
+        "positive_gex": 267496181.46,
+        "negative_gex": -85720645.31,
+        "net_gex": 181775536.15
       },
       {
         "strike": 7740.0,
-        "positive_gex": 320569721.74,
-        "negative_gex": -114098953.7,
-        "net_gex": 206470768.04
+        "positive_gex": 158980342.22,
+        "negative_gex": -129891399.82,
+        "net_gex": 29088942.4
       },
       {
         "strike": 7745.0,
-        "positive_gex": 494888137.0,
-        "negative_gex": -87594354.57,
-        "net_gex": 407293782.43
+        "positive_gex": 171675474.96,
+        "negative_gex": -53467513.14,
+        "net_gex": 118207961.83
       },
       {
         "strike": 7750.0,
-        "positive_gex": 1249516757.41,
-        "negative_gex": -662734031.59,
-        "net_gex": 586782725.82
+        "positive_gex": 614137455.5,
+        "negative_gex": -280749083.66,
+        "net_gex": 333388371.84
       },
       {
         "strike": 7755.0,
-        "positive_gex": 322629792.94,
-        "negative_gex": -173170127.96,
-        "net_gex": 149459664.98
+        "positive_gex": 240172864.81,
+        "negative_gex": -34834966.65,
+        "net_gex": 205337898.16
       },
       {
         "strike": 7760.0,
-        "positive_gex": 418157448.71,
-        "negative_gex": -45365063.22,
-        "net_gex": 372792385.49
+        "positive_gex": 983062825.93,
+        "negative_gex": -488220454.47,
+        "net_gex": 494842371.46
       },
       {
         "strike": 7765.0,
-        "positive_gex": 308052828.24,
-        "negative_gex": -23616272.81,
-        "net_gex": 284436555.44
+        "positive_gex": 104207425.79,
+        "negative_gex": -59732292.0,
+        "net_gex": 44475133.79
       },
       {
         "strike": 7770.0,
-        "positive_gex": 290287136.05,
-        "negative_gex": -41971465.57,
-        "net_gex": 248315670.48
+        "positive_gex": 549128642.16,
+        "negative_gex": -45109602.19,
+        "net_gex": 504019039.97
       },
       {
         "strike": 7775.0,
-        "positive_gex": 347790883.6,
-        "negative_gex": -50231581.03,
-        "net_gex": 297559302.57
+        "positive_gex": 977897833.67,
+        "negative_gex": -100794696.21,
+        "net_gex": 877103137.46
       },
       {
         "strike": 7780.0,
-        "positive_gex": 153658529.17,
-        "negative_gex": -26596374.44,
-        "net_gex": 127062154.73
+        "positive_gex": 311245424.75,
+        "negative_gex": -76544760.42,
+        "net_gex": 234700664.33
       },
       {
         "strike": 7785.0,
-        "positive_gex": 96356643.59,
-        "negative_gex": -6683213.06,
-        "net_gex": 89673430.53
+        "positive_gex": 145263917.75,
+        "negative_gex": -11670076.37,
+        "net_gex": 133593841.37
       },
       {
         "strike": 7790.0,
-        "positive_gex": 288718812.7,
-        "negative_gex": -8824617.99,
-        "net_gex": 279894194.72
+        "positive_gex": 158420214.88,
+        "negative_gex": -24730524.33,
+        "net_gex": 133689690.54
       },
       {
         "strike": 7795.0,
-        "positive_gex": 170174796.91,
-        "negative_gex": -2543804.59,
-        "net_gex": 167630992.32
+        "positive_gex": 187942565.35,
+        "negative_gex": -29226244.75,
+        "net_gex": 158716320.6
       },
       {
         "strike": 7800.0,
-        "positive_gex": 646380930.15,
-        "negative_gex": -171737906.93,
-        "net_gex": 474643023.23
+        "positive_gex": 699493067.8,
+        "negative_gex": -155667581.91,
+        "net_gex": 543825485.89
       },
       {
         "strike": 7805.0,
-        "positive_gex": 265425237.13,
-        "negative_gex": -3285519.56,
-        "net_gex": 262139717.57
+        "positive_gex": 447779727.5,
+        "negative_gex": -933098.97,
+        "net_gex": 446846628.54
       },
       {
         "strike": 7810.0,
-        "positive_gex": 100733167.6,
-        "negative_gex": -10964166.75,
-        "net_gex": 89769000.85
+        "positive_gex": 129885655.85,
+        "negative_gex": -7185734.95,
+        "net_gex": 122699920.9
       },
       {
         "strike": 7815.0,
-        "positive_gex": 62462922.69,
-        "negative_gex": -2842134.12,
-        "net_gex": 59620788.57
+        "positive_gex": 135489032.43,
+        "negative_gex": -1060975.73,
+        "net_gex": 134428056.7
       },
       {
         "strike": 7820.0,
-        "positive_gex": 57404509.0,
-        "negative_gex": -12008735.98,
-        "net_gex": 45395773.02
+        "positive_gex": 376084948.7,
+        "negative_gex": -2412143.02,
+        "net_gex": 373672805.68
       },
       {
         "strike": 7825.0,
-        "positive_gex": 63321643.31,
-        "negative_gex": -4245251.86,
-        "net_gex": 59076391.45
+        "positive_gex": 336419093.8,
+        "negative_gex": -12041081.63,
+        "net_gex": 324378012.17
       },
       {
         "strike": 7830.0,
-        "positive_gex": 73535219.42,
-        "negative_gex": -6826207.49,
-        "net_gex": 66709011.92
+        "positive_gex": 125929088.18,
+        "negative_gex": -872408.81,
+        "net_gex": 125056679.37
       },
       {
         "strike": 7835.0,
-        "positive_gex": 37490016.7,
-        "negative_gex": -0.0,
-        "net_gex": 37490016.7
+        "positive_gex": 36606672.62,
+        "negative_gex": -1275172.3,
+        "net_gex": 35331500.32
       },
       {
         "strike": 7840.0,
-        "positive_gex": 37096146.39,
-        "negative_gex": -1938727.46,
-        "net_gex": 35157418.93
+        "positive_gex": 107624130.22,
+        "negative_gex": -174748.69,
+        "net_gex": 107449381.53
       },
       {
         "strike": 7845.0,
-        "positive_gex": 38627288.43,
-        "negative_gex": -116599.77,
-        "net_gex": 38510688.65
+        "positive_gex": 22195213.35,
+        "negative_gex": -192886.31,
+        "net_gex": 22002327.04
       },
       {
         "strike": 7850.0,
-        "positive_gex": 70928681.05,
-        "negative_gex": -3824336.76,
-        "net_gex": 67104344.29
+        "positive_gex": 110215265.61,
+        "negative_gex": -0.0,
+        "net_gex": 110215265.61
       },
       {
         "strike": 7855.0,
-        "positive_gex": 12536952.95,
-        "negative_gex": -1083963.42,
-        "net_gex": 11452989.53
+        "positive_gex": 81635557.64,
+        "negative_gex": -0.0,
+        "net_gex": 81635557.64
       },
       {
         "strike": 7860.0,
-        "positive_gex": 36379760.68,
-        "negative_gex": -313753.32,
-        "net_gex": 36066007.36
+        "positive_gex": 44262604.17,
+        "negative_gex": -0.0,
+        "net_gex": 44262604.17
       },
       {
         "strike": 7865.0,
-        "positive_gex": 13563045.28,
+        "positive_gex": 23685133.66,
         "negative_gex": -0.0,
-        "net_gex": 13563045.28
+        "net_gex": 23685133.66
       },
       {
         "strike": 7870.0,
-        "positive_gex": 10024934.2,
-        "negative_gex": -194599.76,
-        "net_gex": 9830334.44
+        "positive_gex": 53054219.55,
+        "negative_gex": -0.0,
+        "net_gex": 53054219.55
       },
       {
         "strike": 7875.0,
-        "positive_gex": 50990608.48,
-        "negative_gex": -15050636.23,
-        "net_gex": 35939972.25
+        "positive_gex": 149462315.49,
+        "negative_gex": -0.0,
+        "net_gex": 149462315.49
       },
       {
         "strike": 7880.0,
-        "positive_gex": 21323771.01,
+        "positive_gex": 71741154.47,
         "negative_gex": -0.0,
-        "net_gex": 21323771.01
+        "net_gex": 71741154.47
       },
       {
         "strike": 7885.0,
-        "positive_gex": 1683443.76,
+        "positive_gex": 13244453.54,
         "negative_gex": -0.0,
-        "net_gex": 1683443.76
+        "net_gex": 13244453.54
       },
       {
         "strike": 7890.0,
-        "positive_gex": 12459237.52,
-        "negative_gex": -256273.42,
-        "net_gex": 12202964.1
+        "positive_gex": 33280155.45,
+        "negative_gex": -0.0,
+        "net_gex": 33280155.45
       },
       {
         "strike": 7895.0,
-        "positive_gex": 1306464.06,
-        "negative_gex": -82851.07,
-        "net_gex": 1223613.0
+        "positive_gex": 23966735.93,
+        "negative_gex": -0.0,
+        "net_gex": 23966735.93
       },
       {
         "strike": 7900.0,
-        "positive_gex": 48229769.09,
-        "negative_gex": -3216480.07,
-        "net_gex": 45013289.02
+        "positive_gex": 186719132.28,
+        "negative_gex": -0.0,
+        "net_gex": 186719132.28
       },
       {
         "strike": 7905.0,
-        "positive_gex": 736505.09,
+        "positive_gex": 6577134.18,
         "negative_gex": -0.0,
-        "net_gex": 736505.09
+        "net_gex": 6577134.18
       },
       {
         "strike": 7910.0,
-        "positive_gex": 21205167.36,
-        "negative_gex": -151796.16,
-        "net_gex": 21053371.2
+        "positive_gex": 15800820.22,
+        "negative_gex": -0.0,
+        "net_gex": 15800820.22
       },
       {
         "strike": 7915.0,
-        "positive_gex": 1635240.42,
+        "positive_gex": 6271931.81,
         "negative_gex": -0.0,
-        "net_gex": 1635240.42
+        "net_gex": 6271931.81
       },
       {
         "strike": 7920.0,
-        "positive_gex": 5060740.83,
-        "negative_gex": -143473.42,
-        "net_gex": 4917267.4
+        "positive_gex": 4307111.98,
+        "negative_gex": -0.0,
+        "net_gex": 4307111.98
       },
       {
         "strike": 7925.0,
-        "positive_gex": 4374160.26,
-        "negative_gex": -279345.27,
-        "net_gex": 4094814.98
+        "positive_gex": 188130133.93,
+        "negative_gex": -0.0,
+        "net_gex": 188130133.93
       },
       {
         "strike": 7930.0,
-        "positive_gex": 1720397.81,
+        "positive_gex": 7917275.41,
         "negative_gex": -0.0,
-        "net_gex": 1720397.81
+        "net_gex": 7917275.41
       },
       {
         "strike": 7935.0,
-        "positive_gex": 0.0,
+        "positive_gex": 5706231.3,
         "negative_gex": -0.0,
-        "net_gex": 0.0
+        "net_gex": 5706231.3
       },
       {
         "strike": 7940.0,
-        "positive_gex": 9202351.78,
+        "positive_gex": 3093648.93,
         "negative_gex": -0.0,
-        "net_gex": 9202351.78
+        "net_gex": 3093648.93
+      },
+      {
+        "strike": 7945.0,
+        "positive_gex": 3643810.52,
+        "negative_gex": -0.0,
+        "net_gex": 3643810.52
+      },
+      {
+        "strike": 7950.0,
+        "positive_gex": 26311186.06,
+        "negative_gex": -0.0,
+        "net_gex": 26311186.06
+      },
+      {
+        "strike": 7955.0,
+        "positive_gex": 2100037.09,
+        "negative_gex": -0.0,
+        "net_gex": 2100037.09
+      },
+      {
+        "strike": 7960.0,
+        "positive_gex": 2766316.45,
+        "negative_gex": -0.0,
+        "net_gex": 2766316.45
+      },
+      {
+        "strike": 7965.0,
+        "positive_gex": 1278887.02,
+        "negative_gex": -0.0,
+        "net_gex": 1278887.02
+      },
+      {
+        "strike": 7970.0,
+        "positive_gex": 1976288.76,
+        "negative_gex": -0.0,
+        "net_gex": 1976288.76
+      },
+      {
+        "strike": 7975.0,
+        "positive_gex": 16995026.8,
+        "negative_gex": -0.0,
+        "net_gex": 16995026.8
+      },
+      {
+        "strike": 7980.0,
+        "positive_gex": 1344924.42,
+        "negative_gex": -0.0,
+        "net_gex": 1344924.42
+      }
+    ]
+  },
+  "inventory": {
+    "caveat": "Live snapshot of open option positions in your real Tiger account (TradeClient.get_positions(sec_type=OPT)), read-only -- this platform never places, modifies, or cancels orders. Requires TIGER_PROPS_PATH (or the explicit TIGER_ID/TIGER_ACCOUNT/TIGER_PRIVATE_KEY_PATH trio) in .env; see collectors/tiger_trade_history_collector.py's docstring. A point-in-time snapshot, not historical -- see the trade journal (sourced via tiger_trade_history_collector.py) for closed trades.",
+    "positions": []
+  },
+  "signal_accuracy": {
+    "caveat": "Every day's signal is logged by daily_signal_feeder.py regardless of whether a trade was actually taken (a WATCH day has no short_strike, so nothing to grade). WIN here means the underlying closed on the safe side of the short strike THAT SIGNAL selected (max profit at expiry) -- not a generic +/-1sigma-of-entry band, even though expected_move_1sigma is also recorded as a diagnostic. Est. P&L is a simplification (full credit if win, full max_loss if loss) -- not exact settlement math for a partial-loss outcome. PRIME/VALID/WATCH thresholds and the price-action/market-structure heuristics behind them are this platform's own default (see strategy_logic/signal_scorer.py's docstring) -- the course never quantifies these, and they haven't been validated against enough real outcomes yet to trust blindly. Small samples here are not statistically meaningful -- treat any tier's win rate as noise until N is large.",
+    "total_captured": 1,
+    "open": 1,
+    "closed": 0,
+    "win_rate": null,
+    "profit_factor": null,
+    "net_pnl_est": null,
+    "by_tier": [
+      {
+        "tier": "PRIME",
+        "cells": 1,
+        "graded": 0,
+        "wins": 0,
+        "win_rate": null,
+        "est_pnl": null
+      },
+      {
+        "tier": "VALID",
+        "cells": 0,
+        "graded": 0,
+        "wins": 0,
+        "win_rate": null,
+        "est_pnl": null
+      },
+      {
+        "tier": "WATCH",
+        "cells": 0,
+        "graded": 0,
+        "wins": 0,
+        "win_rate": null,
+        "est_pnl": null
+      }
+    ],
+    "recent": [
+      {
+        "trade_date": "2026-09-27",
+        "direction": "BULLISH_CONFIRMED",
+        "tier": "PRIME",
+        "strategy": "bull_put_spread",
+        "short_strike": 7700.0,
+        "confirmed_count": 4,
+        "assessed_count": 5,
+        "credit": 90.00000000000003,
+        "max_loss": 410.0,
+        "hold_win": null,
+        "settle_price": null
       }
     ]
   }
