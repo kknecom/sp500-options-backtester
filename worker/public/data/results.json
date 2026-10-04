@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-27T20:55:25",
+  "generated_at": "2026-10-04T17:23:43",
   "synthetic": {
     "caveat": "Demo run over ~50 trading days of SPY-derived SPX-proxy closes with a synthetic Black-Scholes options chain (no real quotes, no skew). Too short and too calm a window to validate a strategy -- shown only to prove the engine runs end-to-end. See README for details.",
     "price_series_range": [
@@ -571,14 +571,14 @@
   },
   "gate": {
     "caveat": "Go/No-Go gate is event-only here (no VIX passed in) -- blocks same-day/next-day high-impact scheduled macro events (FOMC, CPI, NFP) from a maintained calendar (data/calendar/, see strategy_logic/event_calendar.py). This is NOT live news -- unscheduled events (Fed speakers, geopolitical shocks) are not covered. See README.",
-    "as_of": "2026-09-27",
+    "as_of": "2026-10-04",
     "decision": "GO",
     "event_risk_clear": true,
     "reasons": [],
     "upcoming_events": [
       {
-        "date": "2026-10-02",
-        "event": "NFP (Employment Situation, Sep 2026)",
+        "date": "2026-10-14",
+        "event": "CPI (Sep 2026)",
         "impact": "high"
       }
     ]
@@ -586,163 +586,188 @@
   "moomoo": {
     "caveat": "Underlying prices are REAL SPY daily closes pulled live via the moomoo OpenAPI (OpenD) -- SPX/VIX themselves aren't usable here (moomoo's historical-kline endpoint rejects US indices outright), so SPY is the same proxy the synthetic demo below also uses, just over a much longer real window instead of ~50 cherry-picked calm days. Option prices/greeks are still the SYNTHETIC Black-Scholes chain in pricing/black_scholes.py -- real historical SPX option chains (strikes/greeks on the actual days these trades opened) aren't available from any live quote API. This validates strategy rules and P&L accounting against real market moves across a longer window, not real tradable option pricing. See README for details.",
     "price_series_range": [
-      "2023-09-28",
-      "2026-09-25"
+      "2023-10-05",
+      "2026-10-02"
     ],
     "strategies": [
       {
         "name": "bull_put_spread",
         "stats": {
-          "trades": 49,
-          "win_rate": 0.8571428571428571,
-          "total_pnl": 5094.656520686689,
-          "avg_pnl_per_trade": 103.97258205483037,
-          "avg_win": 215.91301885710504,
-          "avg_loss": -567.6700387588177,
-          "stdev_pnl": 344.4164852245018,
-          "sharpe_per_trade": 0.3018803875983395,
-          "max_drawdown": -2253.5993739816595,
-          "final_equity": 5094.656520686689
+          "trades": 52,
+          "win_rate": 0.8461538461538461,
+          "total_pnl": 5364.963268774101,
+          "avg_pnl_per_trade": 103.1723705533481,
+          "avg_win": 212.62375221332158,
+          "avg_loss": -498.8102285765061,
+          "stdev_pnl": 333.32524070226276,
+          "sharpe_per_trade": 0.3095246262658672,
+          "max_drawdown": -2253.59937398166,
+          "final_equity": 5364.963268774101
         },
         "equity_curve": [
-          328.38,
-          -150.23,
-          51.78,
-          247.22,
-          391.94,
-          498.05,
-          628.17,
-          840.0,
-          998.37,
-          583.95,
-          730.04,
-          886.92,
-          1023.45,
-          1118.52,
-          1239.98,
-          848.93,
-          1059.58,
-          1404.78,
-          1681.83,
-          1867.7,
-          2065.56,
-          2252.67,
-          2361.31,
-          2304.18,
-          2600.34,
-          1821.69,
-          346.74,
-          1293.0,
-          1754.1,
-          2043.05,
-          2243.97,
-          2430.08,
-          2489.16,
-          2705.26,
-          2871.04,
-          2972.77,
-          3009.64,
-          3147.4,
-          3342.89,
-          3509.57,
-          3541.98,
-          3163.09,
-          3454.56,
-          3814.21,
-          4116.53,
-          4345.46,
-          4454.17,
-          4766.66,
-          5094.66
+          302.47,
+          -126.08,
+          34.88,
+          205.82,
+          353.39,
+          519.59,
+          632.09,
+          807.76,
+          954.92,
+          1177.16,
+          1335.52,
+          921.1,
+          1067.2,
+          1224.08,
+          1360.6,
+          1455.67,
+          1577.14,
+          1186.08,
+          1396.73,
+          1741.93,
+          2018.99,
+          2204.85,
+          2402.72,
+          2589.82,
+          2698.46,
+          2641.34,
+          2937.5,
+          2158.84,
+          683.9,
+          1630.15,
+          2091.25,
+          2380.2,
+          2581.13,
+          2767.23,
+          2826.31,
+          3042.42,
+          3208.2,
+          3309.92,
+          3346.79,
+          3484.55,
+          3680.05,
+          3846.73,
+          3879.13,
+          3500.25,
+          3791.71,
+          4151.36,
+          4453.69,
+          4682.61,
+          4791.32,
+          5103.82,
+          5431.81,
+          5364.96
         ],
         "trades": [
           {
-            "entry_date": "2023-09-28",
-            "exit_date": "2023-10-02",
+            "entry_date": "2023-10-05",
+            "exit_date": "2023-10-09",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P400",
+              "LONG P385"
+            ],
+            "entry_credit": 3.03,
+            "pnl": 302.4723478614006
+          },
+          {
+            "entry_date": "2023-10-17",
+            "exit_date": "2023-10-25",
+            "status": "CLOSED_STOP",
+            "legs": [
+              "SHORT P415",
+              "LONG P405"
+            ],
+            "entry_credit": 2.07,
+            "pnl": -428.5521869933163
+          },
+          {
+            "entry_date": "2023-11-02",
+            "exit_date": "2023-11-10",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P405",
               "LONG P390"
             ],
-            "entry_credit": 3.28,
-            "pnl": 328.37619647282537
+            "entry_credit": 2.97,
+            "pnl": 160.95977988287837
           },
           {
-            "entry_date": "2023-10-10",
-            "exit_date": "2023-10-26",
-            "status": "CLOSED_STOP",
-            "legs": [
-              "SHORT P410",
-              "LONG P400"
-            ],
-            "entry_credit": 1.81,
-            "pnl": -478.60799717198074
-          },
-          {
-            "entry_date": "2023-11-03",
-            "exit_date": "2023-11-14",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P410",
-              "LONG P395"
-            ],
-            "entry_credit": 3.18,
-            "pnl": 202.0147964774697
-          },
-          {
-            "entry_date": "2023-11-22",
-            "exit_date": "2023-12-01",
+            "entry_date": "2023-11-20",
+            "exit_date": "2023-11-30",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P430",
               "LONG P415"
             ],
-            "entry_credit": 2.8,
-            "pnl": 195.43711127618116
+            "entry_credit": 3.33,
+            "pnl": 170.94313219823007
           },
           {
-            "entry_date": "2023-12-11",
-            "exit_date": "2023-12-13",
+            "entry_date": "2023-12-08",
+            "exit_date": "2023-12-12",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P440",
-              "LONG P430"
+              "LONG P425"
             ],
-            "entry_credit": 1.75,
-            "pnl": 144.7211834324397
+            "entry_credit": 2.95,
+            "pnl": 147.56875228781735
           },
           {
-            "entry_date": "2023-12-21",
-            "exit_date": "2024-01-12",
+            "entry_date": "2023-12-20",
+            "exit_date": "2023-12-26",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P450",
-              "LONG P440"
+              "LONG P435"
             ],
-            "entry_credit": 1.68,
-            "pnl": 106.11367615472975
+            "entry_credit": 2.93,
+            "pnl": 166.1945997468928
           },
           {
-            "entry_date": "2024-01-23",
-            "exit_date": "2024-02-06",
+            "entry_date": "2024-01-04",
+            "exit_date": "2024-01-10",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P465",
-              "LONG P455"
+              "SHORT P445",
+              "LONG P435"
             ],
-            "entry_credit": 2.27,
-            "pnl": 130.11812308703588
+            "entry_credit": 1.88,
+            "pnl": 112.5031027606413
           },
           {
-            "entry_date": "2024-02-14",
+            "entry_date": "2024-01-19",
+            "exit_date": "2024-01-25",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P460",
+              "LONG P445"
+            ],
+            "entry_credit": 2.76,
+            "pnl": 175.6746505793945
+          },
+          {
+            "entry_date": "2024-02-02",
+            "exit_date": "2024-02-09",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P470",
+              "LONG P455"
+            ],
+            "entry_credit": 2.66,
+            "pnl": 147.15464252089026
+          },
+          {
+            "entry_date": "2024-02-20",
             "exit_date": "2024-02-29",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT P475",
               "LONG P460"
             ],
-            "entry_credit": 3.09,
-            "pnl": 211.8294930014926
+            "entry_credit": 3.42,
+            "pnl": 222.23787745176685
           },
           {
             "entry_date": "2024-03-08",
@@ -1194,6 +1219,17 @@
             ],
             "entry_credit": 6.11,
             "pnl": 327.99192251365594
+          },
+          {
+            "entry_date": "2026-09-04",
+            "exit_date": "2026-09-28",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P760",
+              "LONG P745"
+            ],
+            "entry_credit": 2.91,
+            "pnl": -66.84736747898938
           }
         ]
       },
@@ -1201,109 +1237,109 @@
         "name": "bear_call_spread",
         "stats": {
           "trades": 47,
-          "win_rate": 0.6595744680851063,
-          "total_pnl": 172.04781676345476,
-          "avg_pnl_per_trade": 3.6605918460309486,
-          "avg_win": 222.05538767277136,
-          "avg_loss": -419.4793250682786,
-          "stdev_pnl": 366.60577379176556,
-          "sharpe_per_trade": 0.00998509054609213,
-          "max_drawdown": -3020.4335039062844,
-          "final_equity": 172.04781676345476
+          "win_rate": 0.6808510638297872,
+          "total_pnl": 256.5226989168078,
+          "avg_pnl_per_trade": 5.457929764187395,
+          "avg_win": 214.1306232101306,
+          "avg_loss": -439.7104829204915,
+          "stdev_pnl": 364.10049540337883,
+          "sharpe_per_trade": 0.014990173957716471,
+          "max_drawdown": -2730.695619677474,
+          "final_equity": 256.5226989168078
         },
         "equity_curve": [
-          368.98,
-          521.73,
-          28.55,
-          -92.01,
-          -172.65,
-          -754.77,
-          -1065.01,
-          -1054.71,
-          -877.36,
-          -1109.31,
-          -1530.18,
-          -2066.07,
-          -1934.94,
-          -2498.71,
-          -2282.77,
-          -2360.68,
-          -2263.69,
-          -2078.03,
-          -1845.07,
-          -1727.88,
-          -1505.81,
-          -1369.25,
-          -1134.75,
-          -832.71,
-          -661.56,
-          -311.9,
-          -27.84,
-          -240.5,
-          -798.51,
-          -1356.61,
-          -1403.55,
-          -1166.55,
-          -955.67,
-          -693.95,
-          -595.15,
-          -359.4,
-          -144.18,
-          58.69,
-          366.03,
-          -1105.81,
-          -1552.79,
-          -1349.43,
-          -1003.86,
-          -665.86,
-          -412.31,
-          -117.24,
-          172.05
+          202.85,
+          316.46,
+          -181.26,
+          -7.54,
+          -88.18,
+          -670.3,
+          -980.53,
+          -970.24,
+          -792.88,
+          -1024.83,
+          -1445.7,
+          -1981.59,
+          -1850.46,
+          -2414.23,
+          -2198.29,
+          -2276.21,
+          -2179.22,
+          -1993.55,
+          -1760.6,
+          -1643.4,
+          -1421.33,
+          -1284.77,
+          -1050.28,
+          -748.23,
+          -577.09,
+          -227.43,
+          56.64,
+          -156.02,
+          -714.03,
+          -1272.13,
+          -1319.08,
+          -1082.08,
+          -871.2,
+          -609.47,
+          -510.68,
+          -274.92,
+          -59.7,
+          143.17,
+          450.5,
+          -1021.34,
+          -1468.32,
+          -1264.96,
+          -919.39,
+          -581.39,
+          -327.84,
+          -32.76,
+          256.52
         ],
         "trades": [
           {
-            "entry_date": "2023-09-28",
-            "exit_date": "2023-10-02",
+            "entry_date": "2023-10-05",
+            "exit_date": "2023-10-09",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT C425",
-              "LONG C445"
+              "LONG C440"
             ],
-            "entry_credit": 3.69,
-            "pnl": 368.978720040186
+            "entry_credit": 2.46,
+            "pnl": 202.8538066398001
           },
           {
-            "entry_date": "2023-10-10",
-            "exit_date": "2023-10-19",
+            "entry_date": "2023-10-17",
+            "exit_date": "2023-10-20",
             "status": "CLOSED_PROFIT",
             "legs": [
               "SHORT C430",
-              "LONG C445"
+              "LONG C440"
             ],
-            "entry_credit": 2.53,
-            "pnl": 152.7490916227581
+            "entry_credit": 1.91,
+            "pnl": 113.61100294768676
           },
           {
-            "entry_date": "2023-10-27",
-            "exit_date": "2023-11-02",
+            "entry_date": "2023-10-30",
+            "exit_date": "2023-11-07",
             "status": "CLOSED_STOP",
             "legs": [
-              "SHORT C410",
-              "LONG C425"
+              "SHORT C415",
+              "LONG C430"
             ],
-            "entry_credit": 2.21,
-            "pnl": -493.18094739608006
+            "entry_credit": 2.43,
+            "pnl": -497.72738850577696
           },
           {
-            "entry_date": "2023-11-10",
+            "entry_date": "2023-11-15",
             "exit_date": "2023-12-04",
-            "status": "CLOSED_DTE",
+            "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT C440",
-              "LONG C460"
+              "SHORT C450",
+              "LONG C470"
             ],
-            "entry_credit": 3.34,
-            "pnl": -120.55839839478288
+            "entry_credit": 3.21,
+            "pnl": 173.72592694372423
           },
           {
             "entry_date": "2023-12-12",
@@ -1783,197 +1819,211 @@
       {
         "name": "iron_condor",
         "stats": {
-          "trades": 35,
-          "win_rate": 0.5714285714285714,
-          "total_pnl": 3480.290753191158,
-          "avg_pnl_per_trade": 99.43687866260451,
-          "avg_win": 443.31141688531517,
-          "avg_loss": -359.06250563434304,
-          "stdev_pnl": 587.196496312072,
-          "sharpe_per_trade": 0.16934174384064735,
-          "max_drawdown": -2321.399605692542,
-          "final_equity": 3480.290753191158
+          "trades": 36,
+          "win_rate": 0.6111111111111112,
+          "total_pnl": 4853.077690414623,
+          "avg_pnl_per_trade": 134.8077136226284,
+          "avg_win": 446.1662998867493,
+          "avg_loss": -354.4700647924187,
+          "stdev_pnl": 570.0554879011804,
+          "sharpe_per_trade": 0.23648173990739202,
+          "max_drawdown": -2057.64274492645,
+          "final_equity": 4853.077690414623
         },
         "equity_curve": [
-          697.35,
-          760.81,
-          849.07,
-          792.73,
-          337.58,
-          330.68,
-          -296.08,
-          -256.81,
-          -565.1,
-          -918.61,
-          -315.47,
-          134.13,
-          -5.17,
-          517.03,
-          126.71,
-          585.31,
-          -463.01,
-          -1472.33,
-          890.93,
-          1511.95,
-          1580.2,
-          1462.38,
-          1594.41,
-          1892.88,
-          1508.4,
-          1729.45,
-          2197.36,
-          2384.22,
-          2334.11,
-          2141.14,
-          3035.94,
-          2789.61,
-          2798.58,
-          2948.47,
-          3480.29
+          505.33,
+          453.55,
+          821.62,
+          842.58,
+          554.67,
+          374.44,
+          711.58,
+          400.8,
+          672.36,
+          933.07,
+          380.16,
+          1057.32,
+          1506.92,
+          1367.62,
+          1889.82,
+          1499.5,
+          1958.1,
+          909.78,
+          -99.55,
+          2263.72,
+          2884.74,
+          2952.99,
+          2835.17,
+          2967.2,
+          3265.67,
+          2881.18,
+          3102.24,
+          3570.14,
+          3757.0,
+          3706.9,
+          3513.92,
+          4408.73,
+          4162.39,
+          4171.36,
+          4321.26,
+          4853.08
         ],
         "trades": [
           {
-            "entry_date": "2023-09-28",
-            "exit_date": "2023-10-02",
+            "entry_date": "2023-10-05",
+            "exit_date": "2023-10-09",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P405",
-              "LONG P390",
+              "SHORT P400",
+              "LONG P385",
               "SHORT C425",
-              "LONG C445"
+              "LONG C440"
             ],
-            "entry_credit": 6.97,
-            "pnl": 697.3549165130113
+            "entry_credit": 5.48,
+            "pnl": 505.32615450120073
           },
           {
-            "entry_date": "2023-10-10",
-            "exit_date": "2023-11-03",
-            "status": "CLOSED_DTE",
-            "legs": [
-              "SHORT P410",
-              "LONG P400",
-              "SHORT C430",
-              "LONG C445"
-            ],
-            "entry_credit": 4.35,
-            "pnl": 63.459553224981136
-          },
-          {
-            "entry_date": "2023-11-13",
-            "exit_date": "2023-12-07",
+            "entry_date": "2023-10-17",
+            "exit_date": "2023-11-10",
             "status": "CLOSED_DTE",
             "legs": [
               "SHORT P415",
-              "LONG P400",
-              "SHORT C440",
-              "LONG C460"
+              "LONG P405",
+              "SHORT C430",
+              "LONG C440"
             ],
-            "entry_credit": 6.37,
-            "pnl": 88.25280309848837
+            "entry_credit": 3.98,
+            "pnl": -51.77950101614712
           },
           {
-            "entry_date": "2023-12-15",
-            "exit_date": "2024-01-08",
-            "status": "CLOSED_DTE",
+            "entry_date": "2023-11-20",
+            "exit_date": "2023-12-01",
+            "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P450",
-              "LONG P440",
-              "SHORT C460",
+              "SHORT P430",
+              "LONG P415",
+              "SHORT C450",
               "LONG C470"
             ],
-            "entry_credit": 3.87,
-            "pnl": -56.33909888176589
+            "entry_credit": 7.04,
+            "pnl": 368.0738920281699
           },
           {
-            "entry_date": "2024-01-17",
-            "exit_date": "2024-02-12",
+            "entry_date": "2023-12-11",
+            "exit_date": "2024-01-04",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P450",
-              "LONG P440",
-              "SHORT C470",
-              "LONG C480"
+              "SHORT P440",
+              "LONG P430",
+              "SHORT C455",
+              "LONG C465"
             ],
-            "entry_credit": 3.54,
-            "pnl": -455.1489110246621
+            "entry_credit": 3.42,
+            "pnl": 20.95483165604719
           },
           {
-            "entry_date": "2024-02-21",
-            "exit_date": "2024-03-18",
+            "entry_date": "2024-01-12",
+            "exit_date": "2024-02-05",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P475",
-              "LONG P460",
-              "SHORT C495",
+              "SHORT P455",
+              "LONG P445",
+              "SHORT C470",
+              "LONG C485"
+            ],
+            "entry_credit": 4.85,
+            "pnl": -287.90209074033794
+          },
+          {
+            "entry_date": "2024-02-13",
+            "exit_date": "2024-03-08",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P470",
+              "LONG P455",
+              "SHORT C490",
               "LONG C510"
             ],
-            "entry_credit": 5.94,
-            "pnl": -6.897799187159492
+            "entry_credit": 6.44,
+            "pnl": -180.2322045420002
           },
           {
-            "entry_date": "2024-03-26",
-            "exit_date": "2024-04-19",
-            "status": "CLOSED_DTE",
+            "entry_date": "2024-03-18",
+            "exit_date": "2024-04-10",
+            "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P500",
-              "LONG P485",
-              "SHORT C515",
-              "LONG C530"
-            ],
-            "entry_credit": 5.66,
-            "pnl": -626.7622129733966
-          },
-          {
-            "entry_date": "2024-04-29",
-            "exit_date": "2024-05-23",
-            "status": "CLOSED_DTE",
-            "legs": [
-              "SHORT P485",
-              "LONG P470",
+              "SHORT P490",
+              "LONG P475",
               "SHORT C510",
               "LONG C525"
             ],
-            "entry_credit": 5.51,
-            "pnl": 39.27207324053663
+            "entry_credit": 5.73,
+            "pnl": 337.1376028434349
           },
           {
-            "entry_date": "2024-06-03",
-            "exit_date": "2024-06-27",
+            "entry_date": "2024-04-18",
+            "exit_date": "2024-05-13",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P505",
-              "LONG P495",
-              "SHORT C525",
-              "LONG C535"
+              "SHORT P480",
+              "LONG P465",
+              "SHORT C495",
+              "LONG C510"
             ],
-            "entry_credit": 3.3,
-            "pnl": -308.28843306144796
+            "entry_credit": 6.2,
+            "pnl": -310.7767651306231
           },
           {
-            "entry_date": "2024-07-08",
-            "exit_date": "2024-08-01",
-            "status": "CLOSED_DTE",
+            "entry_date": "2024-05-21",
+            "exit_date": "2024-06-07",
+            "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P540",
-              "LONG P530",
-              "SHORT C550",
+              "SHORT P510",
+              "LONG P495",
+              "SHORT C530",
+              "LONG C545"
+            ],
+            "entry_credit": 5.4,
+            "pnl": 271.5569866990178
+          },
+          {
+            "entry_date": "2024-06-17",
+            "exit_date": "2024-07-01",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P525",
+              "LONG P515",
+              "SHORT C540",
               "LONG C555"
             ],
-            "entry_credit": 3.13,
-            "pnl": -353.5158987351331
+            "entry_credit": 4.73,
+            "pnl": 260.71051548321105
           },
           {
-            "entry_date": "2024-08-09",
+            "entry_date": "2024-07-10",
+            "exit_date": "2024-08-05",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P545",
+              "LONG P535",
+              "SHORT C555",
+              "LONG C565"
+            ],
+            "entry_credit": 3.95,
+            "pnl": -552.9051150131736
+          },
+          {
+            "entry_date": "2024-08-13",
             "exit_date": "2024-09-03",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P505",
-              "LONG P475",
-              "SHORT C545",
-              "LONG C575"
+              "SHORT P510",
+              "LONG P485",
+              "SHORT C555",
+              "LONG C585"
             ],
-            "entry_credit": 11.11,
-            "pnl": 603.1456458938541
+            "entry_credit": 10.22,
+            "pnl": 677.1552685619711
           },
           {
             "entry_date": "2024-09-11",
@@ -2294,170 +2344,158 @@
   "yfinance": {
     "caveat": "Both the underlying price series (real SPX index, ^GSPC) AND the volatility input (real historical VIX, ^VIX) are real market data pulled live via Yahoo Finance (yfinance) -- no proxy scaling, no trailing-realized-vol substitute. This is the most realistic of the backtest tracks on this dashboard for underlying price and volatility level, but the option chain itself is STILL the synthetic Black-Scholes chain in pricing/black_scholes.py -- no real skew, no real bid/ask, no real strikes/OI. VIX is a ~30-day implied-vol figure applied flat regardless of the trade's actual DTE (no term structure). See README.",
     "price_series_range": [
-      "2021-09-28",
-      "2026-09-25"
+      "2021-10-05",
+      "2026-10-02"
     ],
     "strategies": [
       {
         "name": "bull_put_spread",
         "stats": {
-          "trades": 78,
-          "win_rate": 0.7564102564102564,
-          "total_pnl": 47738.29199047766,
-          "avg_pnl_per_trade": 612.0293844933035,
-          "avg_win": 2951.7000913620277,
-          "avg_loss": -6653.263863151682,
-          "stdev_pnl": 4563.140539741894,
-          "sharpe_per_trade": 0.13412459668137283,
-          "max_drawdown": -27018.954396827503,
-          "final_equity": 47738.29199047766
+          "trades": 77,
+          "win_rate": 0.7402597402597403,
+          "total_pnl": 40254.596547986825,
+          "avg_pnl_per_trade": 522.7869681556731,
+          "avg_win": 2955.4973795594874,
+          "avg_loss": -6410.437704345197,
+          "stdev_pnl": 4579.971536416496,
+          "sharpe_per_trade": 0.11414633562651286,
+          "max_drawdown": -27225.707016586082,
+          "final_equity": 40254.596547986825
         },
         "equity_curve": [
-          2674.73,
-          4668.29,
-          6595.23,
-          12003.42,
-          14658.07,
-          4849.18,
-          8281.75,
-          4368.78,
-          7931.09,
-          -1088.03,
-          2935.71,
-          6562.41,
-          -4138.95,
-          -498.28,
-          2375.43,
-          4919.72,
-          -4692.23,
-          -12360.89,
-          -8265.3,
-          -4395.58,
-          -1122.84,
-          -3211.72,
-          -1009.46,
-          -6059.12,
-          -3802.46,
-          -1681.59,
-          724.89,
-          3303.44,
-          5037.07,
-          7198.88,
-          9228.35,
-          3783.2,
-          5561.93,
-          927.19,
-          2960.98,
-          4680.12,
-          6431.37,
-          7846.2,
-          9698.42,
-          11783.16,
-          14160.54,
-          6249.89,
-          8310.74,
-          10142.63,
-          12228.34,
-          3538.91,
-          6531.16,
-          7879.24,
-          10282.58,
-          14668.09,
-          17246.63,
-          12582.12,
-          15858.07,
-          18164.19,
-          15658.57,
-          2785.92,
-          7987.67,
-          13365.87,
-          16280.09,
-          19849.18,
-          22747.84,
-          25572.63,
-          28409.53,
-          31078.52,
-          33709.62,
-          25942.9,
-          29566.62,
-          32381.86,
-          36615.96,
-          35252.08,
-          23388.03,
-          28401.77,
-          32796.4,
-          36645.21,
-          35812.09,
-          40860.47,
-          43305.21,
-          47738.29
+          3284.17,
+          5675.73,
+          4085.74,
+          7381.13,
+          -2634.51,
+          798.05,
+          -3114.92,
+          447.4,
+          -8571.73,
+          -4547.98,
+          -921.28,
+          -11622.65,
+          -7981.97,
+          -5108.27,
+          -2563.97,
+          -12175.92,
+          -19844.58,
+          -15748.99,
+          -11879.28,
+          -8606.54,
+          -10695.42,
+          -8493.16,
+          -13542.81,
+          -11286.16,
+          -9165.28,
+          -6758.8,
+          -4180.26,
+          -2446.63,
+          -284.82,
+          1744.66,
+          -3700.5,
+          -1921.77,
+          -6556.5,
+          -4522.71,
+          -2803.58,
+          -1052.33,
+          362.5,
+          2214.73,
+          4299.47,
+          6676.84,
+          -1233.81,
+          827.04,
+          2658.94,
+          4744.65,
+          -3944.79,
+          -952.53,
+          395.55,
+          2798.89,
+          7184.4,
+          9762.94,
+          5098.42,
+          8374.37,
+          10680.49,
+          8174.88,
+          -4697.77,
+          503.97,
+          5882.18,
+          8796.4,
+          12365.48,
+          15264.15,
+          18088.93,
+          20925.83,
+          23594.83,
+          26225.92,
+          18459.21,
+          22082.93,
+          24898.17,
+          29132.26,
+          27768.38,
+          15904.34,
+          20918.07,
+          25312.7,
+          29161.51,
+          28328.39,
+          33376.78,
+          35821.51,
+          40254.6
         ],
         "trades": [
           {
-            "entry_date": "2021-09-28",
-            "exit_date": "2021-10-08",
+            "entry_date": "2021-10-05",
+            "exit_date": "2021-10-14",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P4200",
-              "LONG P3950"
+              "SHORT P4205",
+              "LONG P3975"
             ],
-            "entry_credit": 52.81,
-            "pnl": 2674.727715191159
+            "entry_credit": 47.87,
+            "pnl": 3284.1679355666784
           },
           {
-            "entry_date": "2021-10-18",
-            "exit_date": "2021-10-25",
+            "entry_date": "2021-10-22",
+            "exit_date": "2021-11-03",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P4380",
-              "LONG P4195"
+              "SHORT P4440",
+              "LONG P4265"
             ],
-            "entry_credit": 38.21,
-            "pnl": 1993.565793282883
+            "entry_credit": 35.55,
+            "pnl": 2391.562842993919
           },
           {
-            "entry_date": "2021-11-02",
-            "exit_date": "2021-11-24",
+            "entry_date": "2021-11-11",
+            "exit_date": "2021-12-06",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4525",
+              "LONG P4320"
+            ],
+            "entry_credit": 41.94,
+            "pnl": -1589.988067263397
+          },
+          {
+            "entry_date": "2021-12-14",
+            "exit_date": "2021-12-23",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P4520",
-              "LONG P4330"
+              "SHORT P4480",
+              "LONG P4230"
             ],
-            "entry_credit": 38.39,
-            "pnl": 1926.9341254569695
+            "entry_credit": 52.37,
+            "pnl": 3295.3827240820674
           },
           {
-            "entry_date": "2021-12-03",
-            "exit_date": "2021-12-07",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P4330",
-              "LONG P3990"
-            ],
-            "entry_credit": 74.08,
-            "pnl": 5408.196433835199
-          },
-          {
-            "entry_date": "2021-12-15",
-            "exit_date": "2021-12-27",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P4575",
-              "LONG P4345"
-            ],
-            "entry_credit": 47.72,
-            "pnl": 2654.64419034532
-          },
-          {
-            "entry_date": "2022-01-04",
+            "entry_date": "2022-01-03",
             "exit_date": "2022-01-21",
             "status": "CLOSED_STOP",
             "legs": [
-              "SHORT P4675",
-              "LONG P4470"
+              "SHORT P4680",
+              "LONG P4475"
             ],
-            "entry_credit": 42.37,
-            "pnl": -9808.886871807983
+            "entry_credit": 41.92,
+            "pnl": -10015.639491566566
           },
           {
             "entry_date": "2022-01-31",
@@ -3256,159 +3294,147 @@
       {
         "name": "bear_call_spread",
         "stats": {
-          "trades": 63,
-          "win_rate": 0.6190476190476191,
-          "total_pnl": 8715.83572858302,
-          "avg_pnl_per_trade": 138.3465988663972,
-          "avg_win": 2356.369186362096,
-          "avg_loss": -3465.940105814114,
-          "stdev_pnl": 3408.0674771872264,
-          "sharpe_per_trade": 0.04059385554788913,
+          "trades": 62,
+          "win_rate": 0.6290322580645161,
+          "total_pnl": 2064.3195993854674,
+          "avg_pnl_per_trade": 33.295477409443,
+          "avg_win": 2296.386895814549,
+          "avg_loss": -3804.120405973128,
+          "stdev_pnl": 3476.7019458031136,
+          "sharpe_per_trade": 0.009576741960764138,
           "max_drawdown": -31817.44874900559,
-          "final_equity": 8715.83572858302
+          "final_equity": 2064.3195993854674
         },
         "equity_curve": [
-          -555.82,
-          -705.42,
-          2442.25,
-          4403.86,
-          7068.37,
-          9661.56,
-          13210.91,
-          15908.99,
-          18245.48,
-          22188.63,
-          25448.17,
-          24758.92,
-          15716.94,
-          18213.18,
-          20752.17,
-          23401.68,
-          20254.4,
-          22407.45,
-          20741.1,
-          21042.16,
-          23422.56,
-          23973.53,
-          23732.19,
-          20303.65,
-          20608.47,
-          22335.01,
-          23970.33,
-          25767.64,
-          13974.63,
-          9832.24,
-          11404.91,
-          4223.19,
-          2645.79,
-          4750.35,
-          -87.63,
-          -2896.44,
-          -1533.56,
-          -3951.59,
-          -6049.81,
-          -3017.66,
-          -781.64,
-          1542.17,
-          -1397.0,
-          1466.67,
-          4630.54,
-          7410.03,
-          12520.38,
-          8266.41,
-          6003.41,
-          6695.56,
-          8062.01,
-          4832.94,
-          7138.69,
-          8409.72,
-          7402.04,
-          10154.64,
-          13417.82,
-          5785.89,
-          3169.42,
-          6266.47,
-          8897.61,
-          5434.07,
-          8715.84
+          -5017.63,
+          -3345.05,
+          -2467.07,
+          -227.98,
+          2804.1,
+          6559.39,
+          9257.48,
+          11593.96,
+          15537.12,
+          18796.66,
+          18107.4,
+          9065.42,
+          11561.66,
+          14100.65,
+          16750.17,
+          13602.89,
+          15755.94,
+          14089.58,
+          14390.64,
+          16771.05,
+          17322.02,
+          17080.67,
+          13652.14,
+          13956.95,
+          15683.49,
+          17318.81,
+          19116.13,
+          7323.12,
+          3180.72,
+          4753.39,
+          -2428.33,
+          -4005.73,
+          -1901.17,
+          -6739.15,
+          -9547.96,
+          -8185.08,
+          -10603.11,
+          -12701.32,
+          -9669.18,
+          -7433.16,
+          -5109.35,
+          -8048.52,
+          -5184.84,
+          -2020.98,
+          758.51,
+          5868.86,
+          1614.9,
+          -648.1,
+          44.04,
+          1410.5,
+          -1818.58,
+          487.17,
+          1758.21,
+          750.52,
+          3503.12,
+          6766.3,
+          -865.62,
+          -3482.09,
+          -385.04,
+          2246.09,
+          -1217.45,
+          2064.32
         ],
         "trades": [
           {
-            "entry_date": "2021-09-28",
-            "exit_date": "2021-10-22",
+            "entry_date": "2021-10-05",
+            "exit_date": "2021-10-29",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT C4575",
-              "LONG C4870"
+              "SHORT C4550",
+              "LONG C4815"
             ],
-            "entry_credit": 49.0,
-            "pnl": -555.8210459224938
+            "entry_credit": 44.54,
+            "pnl": -5017.627566190748
           },
           {
-            "entry_date": "2021-11-01",
-            "exit_date": "2021-11-26",
+            "entry_date": "2021-11-08",
+            "exit_date": "2021-12-02",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT C4780",
-              "LONG C4995"
+              "SHORT C4880",
+              "LONG C5110"
             ],
-            "entry_credit": 37.29,
-            "pnl": -149.5997224250459
+            "entry_credit": 39.61,
+            "pnl": 1672.579913091954
           },
           {
-            "entry_date": "2021-12-06",
-            "exit_date": "2021-12-20",
+            "entry_date": "2021-12-10",
+            "exit_date": "2022-01-03",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT C4905",
+              "LONG C5155"
+            ],
+            "entry_credit": 42.93,
+            "pnl": 877.9790941357106
+          },
+          {
+            "entry_date": "2022-01-11",
+            "exit_date": "2022-01-20",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT C4870",
-              "LONG C5235"
+              "SHORT C4905",
+              "LONG C5150"
             ],
-            "entry_credit": 59.11,
-            "pnl": 3147.6717842580283
+            "entry_credit": 41.9,
+            "pnl": 2239.0882819212547
           },
           {
-            "entry_date": "2021-12-29",
-            "exit_date": "2022-01-07",
+            "entry_date": "2022-01-28",
+            "exit_date": "2022-02-17",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT C4975",
-              "LONG C5200"
+              "SHORT C4705",
+              "LONG C5060"
             ],
-            "entry_credit": 38.72,
-            "pnl": 1961.6118258382983
+            "entry_credit": 57.74,
+            "pnl": 3032.083697966081
           },
           {
-            "entry_date": "2022-01-18",
-            "exit_date": "2022-01-27",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT C4805",
-              "LONG C5105"
-            ],
-            "entry_credit": 50.48,
-            "pnl": 2664.5032687696357
-          },
-          {
-            "entry_date": "2022-02-04",
-            "exit_date": "2022-02-18",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT C4730",
-              "LONG C5030"
-            ],
-            "entry_credit": 50.23,
-            "pnl": 2593.1937429221734
-          },
-          {
-            "entry_date": "2022-03-01",
+            "entry_date": "2022-02-28",
             "exit_date": "2022-03-11",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT C4630",
+              "SHORT C4665",
               "LONG C5055"
             ],
-            "entry_credit": 66.88,
-            "pnl": 3549.3475621147554
+            "entry_credit": 62.95,
+            "pnl": 3755.287865433543
           },
           {
             "entry_date": "2022-03-21",
@@ -4031,620 +4057,621 @@
       {
         "name": "iron_condor",
         "stats": {
-          "trades": 55,
-          "win_rate": 0.7090909090909091,
-          "total_pnl": 94306.39563021138,
-          "avg_pnl_per_trade": 1714.6617387311162,
-          "avg_win": 3630.548447233053,
-          "avg_loss": -2955.312113242355,
-          "stdev_pnl": 3623.29665532125,
-          "sharpe_per_trade": 0.47323250118450216,
-          "max_drawdown": -16993.129675729928,
-          "final_equity": 94306.39563021138
+          "trades": 56,
+          "win_rate": 0.6607142857142857,
+          "total_pnl": 95908.30003690509,
+          "avg_pnl_per_trade": 1712.6482149447338,
+          "avg_win": 3694.369123592367,
+          "avg_loss": -2146.4925018953936,
+          "stdev_pnl": 3323.108363376378,
+          "sharpe_per_trade": 0.5153753737975104,
+          "max_drawdown": -13586.489635714026,
+          "final_equity": 95908.30003690509
         },
         "equity_curve": [
-          5657.77,
-          6380.83,
-          8739.39,
-          2214.53,
-          1169.09,
-          8790.03,
-          2725.97,
-          9704.44,
-          5115.89,
-          3943.39,
-          -2691.53,
-          -7288.69,
-          -1417.09,
-          3357.2,
-          5845.98,
-          7962.44,
-          10116.4,
-          12857.77,
-          15168.66,
-          17849.02,
-          18766.48,
-          22729.65,
-          20747.55,
-          25046.97,
-          24856.05,
-          26884.26,
-          22487.97,
-          23813.96,
-          20172.53,
-          22033.44,
-          21322.89,
-          19804.56,
-          22444.24,
-          23527.42,
-          30440.06,
-          33698.52,
-          31930.49,
-          35953.63,
-          34204.32,
-          36145.19,
-          40849.98,
-          42477.96,
-          46259.35,
-          50146.12,
-          53436.72,
-          60344.57,
-          68653.37,
-          74719.81,
-          76430.41,
-          75729.88,
-          77187.86,
-          80653.3,
-          85642.69,
-          88695.25,
-          94306.4
+          -280.42,
+          -2112.74,
+          2328.88,
+          357.2,
+          3248.55,
+          8630.83,
+          697.21,
+          -2416.66,
+          3238.1,
+          6651.06,
+          3559.07,
+          8550.54,
+          10338.07,
+          12977.8,
+          12707.04,
+          10858.04,
+          14608.98,
+          17381.81,
+          15400.97,
+          13375.69,
+          10886.3,
+          8840.86,
+          8432.01,
+          7762.02,
+          5701.53,
+          3795.32,
+          4878.9,
+          7163.33,
+          11999.25,
+          14344.43,
+          13630.61,
+          8191.75,
+          8542.69,
+          9307.46,
+          14841.79,
+          19378.03,
+          21791.06,
+          24646.9,
+          32260.33,
+          34880.65,
+          39058.14,
+          40558.59,
+          44339.99,
+          48226.75,
+          51517.35,
+          58425.2,
+          66734.0,
+          72800.44,
+          74511.04,
+          73810.52,
+          75268.49,
+          78733.94,
+          83723.32,
+          86775.89,
+          92387.03,
+          95908.3
         ],
         "trades": [
           {
-            "entry_date": "2021-09-28",
-            "exit_date": "2021-10-14",
+            "entry_date": "2021-10-05",
+            "exit_date": "2021-10-29",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4205",
+              "LONG P3975",
+              "SHORT C4550",
+              "LONG C4815"
+            ],
+            "entry_credit": 92.41,
+            "pnl": -280.41916308597905
+          },
+          {
+            "entry_date": "2021-11-08",
+            "exit_date": "2021-12-02",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4580",
+              "LONG P4375",
+              "SHORT C4880",
+              "LONG C5110"
+            ],
+            "entry_credit": 81.35,
+            "pnl": -1832.3241271687891
+          },
+          {
+            "entry_date": "2021-12-10",
+            "exit_date": "2022-01-03",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P4200",
-              "LONG P3950",
-              "SHORT C4575",
-              "LONG C4870"
+              "SHORT P4580",
+              "LONG P4360",
+              "SHORT C4905",
+              "LONG C5155"
             ],
-            "entry_credit": 101.81,
-            "pnl": 5657.765788401462
+            "entry_credit": 88.44,
+            "pnl": 4441.622925404291
           },
           {
-            "entry_date": "2021-10-22",
-            "exit_date": "2021-11-15",
+            "entry_date": "2022-01-11",
+            "exit_date": "2022-02-04",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P4440",
-              "LONG P4265",
-              "SHORT C4700",
-              "LONG C4900"
-            ],
-            "entry_credit": 70.19,
-            "pnl": 723.0671237182747
-          },
-          {
-            "entry_date": "2021-11-23",
-            "exit_date": "2021-12-17",
-            "status": "CLOSED_DTE",
-            "legs": [
-              "SHORT P4555",
-              "LONG P4325",
-              "SHORT C4890",
+              "SHORT P4585",
+              "LONG P4365",
+              "SHORT C4905",
               "LONG C5150"
             ],
-            "entry_credit": 91.91,
-            "pnl": 2358.557082125613
+            "entry_credit": 87.45,
+            "pnl": -1971.6831887602525
           },
           {
-            "entry_date": "2021-12-28",
-            "exit_date": "2022-01-21",
+            "entry_date": "2022-02-14",
+            "exit_date": "2022-03-10",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P4660",
-              "LONG P4450",
-              "SHORT C4970",
-              "LONG C5210"
+              "SHORT P4215",
+              "LONG P3910",
+              "SHORT C4680",
+              "LONG C5045"
             ],
-            "entry_credit": 84.42,
-            "pnl": -6524.859022637937
+            "entry_credit": 124.93,
+            "pnl": 2891.354914830248
           },
           {
-            "entry_date": "2022-01-31",
-            "exit_date": "2022-02-24",
-            "status": "CLOSED_DTE",
-            "legs": [
-              "SHORT P4350",
-              "LONG P4070",
-              "SHORT C4765",
-              "LONG C5090"
-            ],
-            "entry_credit": 113.24,
-            "pnl": -1045.442093963021
-          },
-          {
-            "entry_date": "2022-03-04",
-            "exit_date": "2022-03-21",
+            "entry_date": "2022-03-18",
+            "exit_date": "2022-04-08",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P4125",
-              "LONG P3790",
-              "SHORT C4640",
-              "LONG C5050"
+              "SHORT P4305",
+              "LONG P4040",
+              "SHORT C4700",
+              "LONG C5005"
             ],
-            "entry_credit": 139.16,
-            "pnl": 7620.944892601403
+            "entry_credit": 106.97,
+            "pnl": 5382.276805623592
           },
           {
-            "entry_date": "2022-03-29",
-            "exit_date": "2022-04-22",
+            "entry_date": "2022-04-19",
+            "exit_date": "2022-05-13",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P4500",
-              "LONG P4280",
-              "SHORT C4825",
-              "LONG C5075"
+              "SHORT P4320",
+              "LONG P4080",
+              "SHORT C4670",
+              "LONG C4945"
             ],
-            "entry_credit": 87.82,
-            "pnl": -6064.066865895441
+            "entry_credit": 96.8,
+            "pnl": -7933.619309027591
           },
           {
-            "entry_date": "2022-05-02",
-            "exit_date": "2022-05-26",
+            "entry_date": "2022-05-23",
+            "exit_date": "2022-06-16",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P3805",
+              "LONG P3525",
+              "SHORT C4225",
+              "LONG C4555"
+            ],
+            "entry_credit": 114.04,
+            "pnl": -3113.8691756645358
+          },
+          {
+            "entry_date": "2022-06-27",
+            "exit_date": "2022-07-20",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P3955",
-              "LONG P3630",
-              "SHORT C4455",
-              "LONG C4855"
+              "SHORT P3745",
+              "LONG P3485",
+              "SHORT C4135",
+              "LONG C4440"
             ],
-            "entry_credit": 135.14,
-            "pnl": 6978.473328986891
+            "entry_credit": 105.8,
+            "pnl": 5654.764301448165
           },
           {
-            "entry_date": "2022-06-06",
-            "exit_date": "2022-06-30",
+            "entry_date": "2022-07-28",
+            "exit_date": "2022-08-22",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P3965",
+              "SHORT P3935",
               "LONG P3710",
-              "SHORT C4350",
-              "LONG C4650"
+              "SHORT C4275",
+              "LONG C4535"
             ],
-            "entry_credit": 103.47,
-            "pnl": -4588.5521337896935
+            "entry_credit": 90.5,
+            "pnl": 3412.9513427793113
           },
           {
-            "entry_date": "2022-07-11",
-            "exit_date": "2022-08-04",
+            "entry_date": "2022-08-30",
+            "exit_date": "2022-09-23",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P3705",
-              "LONG P3455",
-              "SHORT C4075",
-              "LONG C4370"
+              "SHORT P3830",
+              "LONG P3570",
+              "SHORT C4215",
+              "LONG C4520"
             ],
-            "entry_credit": 102.53,
-            "pnl": -1172.5000819457307
+            "entry_credit": 105.9,
+            "pnl": -3091.9808648716526
           },
           {
-            "entry_date": "2022-08-12",
-            "exit_date": "2022-09-06",
+            "entry_date": "2022-10-03",
+            "exit_date": "2022-10-27",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P4155",
-              "LONG P3945",
-              "SHORT C4465",
-              "LONG C4705"
+              "SHORT P3515",
+              "LONG P3245",
+              "SHORT C3925",
+              "LONG C4250"
             ],
-            "entry_credit": 84.06,
-            "pnl": -6634.91870297872
+            "entry_credit": 111.57,
+            "pnl": 4991.460578824465
           },
           {
-            "entry_date": "2022-09-14",
-            "exit_date": "2022-10-10",
+            "entry_date": "2022-11-04",
+            "exit_date": "2022-11-28",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P3790",
-              "LONG P3535",
-              "SHORT C4175",
-              "LONG C4475"
-            ],
-            "entry_credit": 103.4,
-            "pnl": -4597.158757015785
-          },
-          {
-            "entry_date": "2022-10-18",
-            "exit_date": "2022-11-04",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P3550",
-              "LONG P3275",
+              "SHORT P3630",
+              "LONG P3400",
               "SHORT C3975",
-              "LONG C4310"
+              "LONG C4245"
             ],
-            "entry_credit": 113.34,
-            "pnl": 5871.60371909455
+            "entry_credit": 92.94,
+            "pnl": 1787.536764358191
           },
           {
-            "entry_date": "2022-11-14",
-            "exit_date": "2022-12-05",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P3815",
-              "LONG P3585",
-              "SHORT C4165",
-              "LONG C4435"
-            ],
-            "entry_credit": 93.55,
-            "pnl": 4774.282413652456
-          },
-          {
-            "entry_date": "2022-12-13",
-            "exit_date": "2023-01-06",
+            "entry_date": "2022-12-06",
+            "exit_date": "2022-12-30",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P3885",
-              "LONG P3660",
-              "SHORT C4220",
-              "LONG C4480"
+              "SHORT P3810",
+              "LONG P3590",
+              "SHORT C4135",
+              "LONG C4385"
             ],
-            "entry_credit": 91.15,
-            "pnl": 2488.7858204682343
+            "entry_credit": 87.73,
+            "pnl": 2639.7307174912953
           },
           {
-            "entry_date": "2023-01-17",
-            "exit_date": "2023-02-10",
+            "entry_date": "2023-01-10",
+            "exit_date": "2023-02-03",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P3875",
-              "LONG P3680",
-              "SHORT C4160",
-              "LONG C4380"
+              "SHORT P3800",
+              "LONG P3595",
+              "SHORT C4095",
+              "LONG C4330"
             ],
-            "entry_credit": 77.91,
-            "pnl": 2116.453825504911
+            "entry_credit": 82.51,
+            "pnl": -270.7638292830737
           },
           {
-            "entry_date": "2023-02-21",
-            "exit_date": "2023-03-17",
+            "entry_date": "2023-02-13",
+            "exit_date": "2023-03-09",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P3860",
-              "LONG P3635",
-              "SHORT C4200",
-              "LONG C4460"
+              "SHORT P4010",
+              "LONG P3800",
+              "SHORT C4325",
+              "LONG C4565"
             ],
-            "entry_credit": 91.09,
-            "pnl": 2153.9681887721217
+            "entry_credit": 83.77,
+            "pnl": -1849.0030938878335
           },
           {
-            "entry_date": "2023-03-27",
-            "exit_date": "2023-04-20",
+            "entry_date": "2023-03-17",
+            "exit_date": "2023-04-10",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P3855",
-              "LONG P3650",
-              "SHORT C4160",
-              "LONG C4390"
+              "SHORT P3765",
+              "LONG P3520",
+              "SHORT C4135",
+              "LONG C4430"
             ],
-            "entry_credit": 81.66,
-            "pnl": 2741.363275683212
+            "entry_credit": 100.71,
+            "pnl": 3750.942308663784
           },
           {
-            "entry_date": "2023-04-28",
-            "exit_date": "2023-05-22",
+            "entry_date": "2023-04-18",
+            "exit_date": "2023-05-12",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P4075",
+              "SHORT P4050",
+              "LONG P3875",
+              "SHORT C4310",
+              "LONG C4505"
+            ],
+            "entry_credit": 69.53,
+            "pnl": 2772.828517905208
+          },
+          {
+            "entry_date": "2023-05-22",
+            "exit_date": "2023-06-15",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4085",
               "LONG P3905",
-              "SHORT C4315",
-              "LONG C4500"
+              "SHORT C4350",
+              "LONG C4555"
             ],
-            "entry_credit": 67.09,
-            "pnl": 2310.8903682609593
+            "entry_credit": 72.67,
+            "pnl": -1980.8359729253325
           },
           {
-            "entry_date": "2023-05-31",
-            "exit_date": "2023-06-26",
+            "entry_date": "2023-06-26",
+            "exit_date": "2023-07-20",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P4070",
-              "LONG P3880",
-              "SHORT C4345",
-              "LONG C4560"
+              "SHORT P4240",
+              "LONG P4080",
+              "SHORT C4465",
+              "LONG C4640"
             ],
-            "entry_credit": 76.15,
-            "pnl": 2680.3590895360126
+            "entry_credit": 63.06,
+            "pnl": -2025.28388431693
           },
           {
-            "entry_date": "2023-07-05",
-            "exit_date": "2023-07-31",
+            "entry_date": "2023-07-28",
+            "exit_date": "2023-08-21",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P4355",
-              "LONG P4195",
-              "SHORT C4590",
-              "LONG C4765"
+              "SHORT P4495",
+              "LONG P4335",
+              "SHORT C4720",
+              "LONG C4890"
             ],
-            "entry_credit": 62.75,
-            "pnl": 917.462270190827
+            "entry_credit": 61.88,
+            "pnl": -2489.3816189280556
           },
           {
-            "entry_date": "2023-08-08",
-            "exit_date": "2023-08-30",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P4395",
-              "LONG P4210",
-              "SHORT C4660",
-              "LONG C4860"
-            ],
-            "entry_credit": 72.55,
-            "pnl": 3963.1669110740004
-          },
-          {
-            "entry_date": "2023-09-08",
-            "exit_date": "2023-10-02",
+            "entry_date": "2023-08-29",
+            "exit_date": "2023-09-22",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P4370",
-              "LONG P4210",
-              "SHORT C4595",
-              "LONG C4770"
-            ],
-            "entry_credit": 63.08,
-            "pnl": -1982.0976557958843
-          },
-          {
-            "entry_date": "2023-10-10",
-            "exit_date": "2023-11-03",
-            "status": "CLOSED_PROFIT",
-            "legs": [
-              "SHORT P4250",
-              "LONG P4060",
-              "SHORT C4525",
-              "LONG C4730"
-            ],
-            "entry_credit": 74.35,
-            "pnl": 4299.426014439616
-          },
-          {
-            "entry_date": "2023-11-13",
-            "exit_date": "2023-12-07",
-            "status": "CLOSED_DTE",
-            "legs": [
-              "SHORT P4315",
-              "LONG P4150",
-              "SHORT C4555",
-              "LONG C4740"
+              "SHORT P4405",
+              "LONG P4235",
+              "SHORT C4645",
+              "LONG C4825"
             ],
             "entry_credit": 65.66,
-            "pnl": -190.92434673576122
+            "pnl": -2045.4485957758975
           },
           {
-            "entry_date": "2023-12-15",
-            "exit_date": "2024-01-08",
+            "entry_date": "2023-10-02",
+            "exit_date": "2023-10-26",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P4635",
-              "LONG P4485",
-              "SHORT C4850",
-              "LONG C5010"
+              "SHORT P4175",
+              "LONG P3985",
+              "SHORT C4455",
+              "LONG C4670"
             ],
-            "entry_credit": 58.05,
-            "pnl": 2028.2081390869791
+            "entry_credit": 75.77,
+            "pnl": -408.8461160190917
           },
           {
-            "entry_date": "2024-01-17",
-            "exit_date": "2024-02-12",
+            "entry_date": "2023-11-03",
+            "exit_date": "2023-11-27",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P4635",
-              "LONG P4460",
+              "SHORT P4265",
+              "LONG P4095",
+              "SHORT C4505",
+              "LONG C4685"
+            ],
+            "entry_credit": 65.65,
+            "pnl": -669.9920579443301
+          },
+          {
+            "entry_date": "2023-12-05",
+            "exit_date": "2023-12-29",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4485",
+              "LONG P4330",
+              "SHORT C4700",
+              "LONG C4865"
+            ],
+            "entry_credit": 59.98,
+            "pnl": -2060.4860337169725
+          },
+          {
+            "entry_date": "2024-01-09",
+            "exit_date": "2024-02-02",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P4670",
+              "LONG P4515",
               "SHORT C4895",
-              "LONG C5090"
+              "LONG C5060"
             ],
-            "entry_credit": 69.69,
-            "pnl": -4396.2927283007075
+            "entry_credit": 60.41,
+            "pnl": -1906.2153560874194
           },
           {
-            "entry_date": "2024-02-21",
-            "exit_date": "2024-03-18",
+            "entry_date": "2024-02-12",
+            "exit_date": "2024-03-07",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P4870",
-              "LONG P4675",
-              "SHORT C5150",
-              "LONG C5365"
+              "SHORT P4920",
+              "LONG P4740",
+              "SHORT C5180",
+              "LONG C5375"
             ],
-            "entry_credit": 77.37,
-            "pnl": 1325.9955999149995
+            "entry_credit": 70.09,
+            "pnl": 1083.5858124144636
           },
           {
-            "entry_date": "2024-03-26",
-            "exit_date": "2024-04-19",
+            "entry_date": "2024-03-15",
+            "exit_date": "2024-04-08",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P5105",
-              "LONG P4930",
-              "SHORT C5360",
-              "LONG C5550"
+              "SHORT P5010",
+              "LONG P4820",
+              "SHORT C5280",
+              "LONG C5490"
             ],
-            "entry_credit": 68.8,
-            "pnl": -3641.4317294322072
+            "entry_credit": 75.11,
+            "pnl": 2284.4266161580463
           },
           {
-            "entry_date": "2024-04-29",
-            "exit_date": "2024-05-23",
-            "status": "CLOSED_DTE",
-            "legs": [
-              "SHORT P5005",
-              "LONG P4815",
-              "SHORT C5285",
-              "LONG C5495"
-            ],
-            "entry_credit": 74.72,
-            "pnl": 1860.9065647720122
-          },
-          {
-            "entry_date": "2024-06-03",
-            "exit_date": "2024-06-27",
-            "status": "CLOSED_DTE",
-            "legs": [
-              "SHORT P5185",
-              "LONG P5005",
-              "SHORT C5440",
-              "LONG C5630"
-            ],
-            "entry_credit": 69.79,
-            "pnl": -710.5478596668377
-          },
-          {
-            "entry_date": "2024-07-08",
-            "exit_date": "2024-08-01",
-            "status": "CLOSED_DTE",
-            "legs": [
-              "SHORT P5475",
-              "LONG P5295",
-              "SHORT C5730",
-              "LONG C5920"
-            ],
-            "entry_credit": 69.37,
-            "pnl": -1518.3267539457859
-          },
-          {
-            "entry_date": "2024-08-09",
-            "exit_date": "2024-09-03",
-            "status": "CLOSED_DTE",
-            "legs": [
-              "SHORT P5180",
-              "LONG P4910",
-              "SHORT C5585",
-              "LONG C5895"
-            ],
-            "entry_credit": 108.61,
-            "pnl": 2639.6806519612796
-          },
-          {
-            "entry_date": "2024-09-11",
-            "exit_date": "2024-10-07",
-            "status": "CLOSED_DTE",
-            "legs": [
-              "SHORT P5410",
-              "LONG P5160",
-              "SHORT C5770",
-              "LONG C6050"
-            ],
-            "entry_credit": 99.8,
-            "pnl": 1083.177928456496
-          },
-          {
-            "entry_date": "2024-10-15",
-            "exit_date": "2024-11-06",
+            "entry_date": "2024-04-16",
+            "exit_date": "2024-05-02",
             "status": "CLOSED_PROFIT",
             "legs": [
-              "SHORT P5635",
+              "SHORT P4915",
+              "LONG P4680",
+              "SHORT C5255",
+              "LONG C5520"
+            ],
+            "entry_credit": 94.38,
+            "pnl": 4835.919910065124
+          },
+          {
+            "entry_date": "2024-05-10",
+            "exit_date": "2024-06-03",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5130",
+              "LONG P4960",
+              "SHORT C5370",
+              "LONG C5555"
+            ],
+            "entry_credit": 66.72,
+            "pnl": 2345.1809412445273
+          },
+          {
+            "entry_date": "2024-06-11",
+            "exit_date": "2024-07-05",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5275",
+              "LONG P5100",
+              "SHORT C5530",
+              "LONG C5725"
+            ],
+            "entry_credit": 69.44,
+            "pnl": -713.8159374766772
+          },
+          {
+            "entry_date": "2024-07-15",
+            "exit_date": "2024-08-08",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5525",
               "LONG P5335",
-              "SHORT C6080",
-              "LONG C6425"
+              "SHORT C5800",
+              "LONG C6005"
             ],
-            "entry_credit": 120.61,
-            "pnl": 6912.642531175996
+            "entry_credit": 73.85,
+            "pnl": -5438.860514216089
           },
           {
-            "entry_date": "2024-11-14",
-            "exit_date": "2024-12-09",
+            "entry_date": "2024-08-16",
+            "exit_date": "2024-09-09",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P5825",
-              "LONG P5610",
+              "SHORT P5435",
+              "LONG P5225",
+              "SHORT C5740",
+              "LONG C5970"
+            ],
+            "entry_credit": 82.41,
+            "pnl": 350.9330050803982
+          },
+          {
+            "entry_date": "2024-09-17",
+            "exit_date": "2024-10-11",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5485",
+              "LONG P5235",
+              "SHORT C5855",
+              "LONG C6135"
+            ],
+            "entry_credit": 98.96,
+            "pnl": 764.7749931347093
+          },
+          {
+            "entry_date": "2024-10-21",
+            "exit_date": "2024-11-12",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P5695",
+              "LONG P5420",
+              "SHORT C6090",
+              "LONG C6395"
+            ],
+            "entry_credit": 109.06,
+            "pnl": 5534.329076463554
+          },
+          {
+            "entry_date": "2024-11-20",
+            "exit_date": "2024-12-16",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P5765",
+              "LONG P5510",
               "SHORT C6140",
-              "LONG C6380"
+              "LONG C6430"
             ],
-            "entry_credit": 85.38,
-            "pnl": 3258.4536563538263
+            "entry_credit": 102.17,
+            "pnl": 4536.239450847895
           },
           {
-            "entry_date": "2024-12-17",
-            "exit_date": "2025-01-10",
-            "status": "CLOSED_DTE",
-            "legs": [
-              "SHORT P5910",
-              "LONG P5665",
-              "SHORT C6265",
-              "LONG C6535"
-            ],
-            "entry_credit": 96.62,
-            "pnl": -1768.0276686459379
-          },
-          {
-            "entry_date": "2025-01-21",
-            "exit_date": "2025-02-14",
+            "entry_date": "2024-12-24",
+            "exit_date": "2025-01-17",
             "status": "CLOSED_DTE",
             "legs": [
               "SHORT P5915",
-              "LONG P5685",
-              "SHORT C6250",
-              "LONG C6510"
+              "LONG P5695",
+              "SHORT C6235",
+              "LONG C6475"
             ],
-            "entry_credit": 92.04,
-            "pnl": 4023.145810817795
+            "entry_credit": 86.23,
+            "pnl": 2413.0284559225997
           },
           {
-            "entry_date": "2025-02-25",
-            "exit_date": "2025-03-21",
+            "entry_date": "2025-01-28",
+            "exit_date": "2025-02-21",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P5785",
-              "LONG P5490",
-              "SHORT C6210",
-              "LONG C6540"
+              "SHORT P5920",
+              "LONG P5670",
+              "SHORT C6290",
+              "LONG C6570"
             ],
-            "entry_credit": 117.48,
-            "pnl": -1749.3187142722463
+            "entry_credit": 99.37,
+            "pnl": 2855.8409836241653
           },
           {
-            "entry_date": "2025-03-31",
-            "exit_date": "2025-04-24",
+            "entry_date": "2025-03-03",
+            "exit_date": "2025-03-24",
+            "status": "CLOSED_PROFIT",
+            "legs": [
+              "SHORT P5650",
+              "LONG P5320",
+              "SHORT C6145",
+              "LONG C6525"
+            ],
+            "entry_credit": 133.22,
+            "pnl": 7613.428825196383
+          },
+          {
+            "entry_date": "2025-04-01",
+            "exit_date": "2025-04-25",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P5425",
-              "LONG P5115",
-              "SHORT C5885",
-              "LONG C6245"
+              "SHORT P5450",
+              "LONG P5145",
+              "SHORT C5905",
+              "LONG C6255"
             ],
-            "entry_credit": 126.16,
-            "pnl": 1940.877044477928
+            "entry_credit": 122.85,
+            "pnl": 2620.3264390290033
           },
           {
-            "entry_date": "2025-05-02",
-            "exit_date": "2025-05-27",
+            "entry_date": "2025-05-05",
+            "exit_date": "2025-05-29",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P5495",
-              "LONG P5170",
-              "SHORT C5970",
-              "LONG C6340"
+              "SHORT P5450",
+              "LONG P5120",
+              "SHORT C5945",
+              "LONG C6330"
             ],
-            "entry_credit": 130.57,
-            "pnl": 4704.789676212398
+            "entry_credit": 134.05,
+            "pnl": 4177.481803822674
           },
           {
-            "entry_date": "2025-06-04",
+            "entry_date": "2025-06-06",
             "exit_date": "2025-06-30",
             "status": "CLOSED_DTE",
             "legs": [
-              "SHORT P5815",
-              "LONG P5550",
-              "SHORT C6205",
-              "LONG C6500"
+              "SHORT P5850",
+              "LONG P5595",
+              "SHORT C6225",
+              "LONG C6505"
             ],
-            "entry_credit": 105.17,
-            "pnl": 1627.97243821133
+            "entry_credit": 100.2,
+            "pnl": 1500.450808584847
           },
           {
             "entry_date": "2025-07-09",
@@ -4814,6 +4841,19 @@
             ],
             "entry_credit": 121.34,
             "pnl": 5611.142984156574
+          },
+          {
+            "entry_date": "2026-09-04",
+            "exit_date": "2026-09-28",
+            "status": "CLOSED_DTE",
+            "legs": [
+              "SHORT P7555",
+              "LONG P7270",
+              "SHORT C7970",
+              "LONG C8285"
+            ],
+            "entry_credit": 112.57,
+            "pnl": 3521.271985863149
           }
         ]
       }
@@ -4821,580 +4861,562 @@
   },
   "gex": {
     "caveat": "REAL chain -- open interest and gamma are pulled live from moomoo/OpenD (get_option_chain + get_market_snapshot) for the nearest-to-0DTE SPX expiration, matching the strike-selection rules in strategy_logic/ (not the 45-DTE backtest track above). Spot is derived from this same chain via put-call parity (get_market_snapshot rejects SPX/VIX index codes directly). Still restricted to strikes within the dashboard's +/- window around spot, same as the fallback path, for a consistent chart scale -- not the full chain. No proxy, no BSM re-derivation.",
-    "spot": 7745.47,
-    "spot_source": "moomoo:SPX real chain (2026-09-28)",
+    "spot": 7722.75,
+    "spot_source": "moomoo:SPX real chain (2026-10-05)",
     "sigma": null,
     "put_wall": 7700.0,
-    "call_wall": 7760.0,
-    "gamma_flip": 7714.1,
-    "positive_gex": 10481020650.87,
-    "negative_gex": -6477873350.37,
-    "net_gex": 4003147300.5,
-    "gross_gex": 16958894001.25,
+    "call_wall": 7750.0,
+    "gamma_flip": 7688.62,
+    "positive_gex": 10019300809.1,
+    "negative_gex": -7061114951.2,
+    "net_gex": 2958185857.9,
+    "gross_gex": 17080415760.31,
     "by_strike": [
       {
+        "strike": 7490.0,
+        "positive_gex": 0.0,
+        "negative_gex": -72673101.84,
+        "net_gex": -72673101.84
+      },
+      {
+        "strike": 7495.0,
+        "positive_gex": 0.0,
+        "negative_gex": -21058084.89,
+        "net_gex": -21058084.89
+      },
+      {
+        "strike": 7500.0,
+        "positive_gex": 0.0,
+        "negative_gex": -64817313.17,
+        "net_gex": -64817313.17
+      },
+      {
+        "strike": 7505.0,
+        "positive_gex": 0.0,
+        "negative_gex": -6883514.19,
+        "net_gex": -6883514.19
+      },
+      {
+        "strike": 7510.0,
+        "positive_gex": 0.0,
+        "negative_gex": -10546631.82,
+        "net_gex": -10546631.82
+      },
+      {
         "strike": 7515.0,
-        "positive_gex": 214234.24,
-        "negative_gex": -11956752.61,
-        "net_gex": -11742518.37
+        "positive_gex": 0.0,
+        "negative_gex": -6166001.81,
+        "net_gex": -6166001.81
       },
       {
         "strike": 7520.0,
-        "positive_gex": 387414.25,
-        "negative_gex": -9150883.96,
-        "net_gex": -8763469.71
+        "positive_gex": 0.0,
+        "negative_gex": -9225295.2,
+        "net_gex": -9225295.2
       },
       {
         "strike": 7525.0,
-        "positive_gex": 515063.28,
-        "negative_gex": -15141739.83,
-        "net_gex": -14626676.54
+        "positive_gex": 0.0,
+        "negative_gex": -9065549.28,
+        "net_gex": -9065549.28
       },
       {
         "strike": 7530.0,
-        "positive_gex": 621814.21,
-        "negative_gex": -3103255.99,
-        "net_gex": -2481441.78
+        "positive_gex": 0.0,
+        "negative_gex": -6356379.33,
+        "net_gex": -6356379.33
       },
       {
         "strike": 7535.0,
-        "positive_gex": 157116.15,
-        "negative_gex": -9286062.82,
-        "net_gex": -9128946.67
+        "positive_gex": 0.0,
+        "negative_gex": -6453989.84,
+        "net_gex": -6453989.84
       },
       {
         "strike": 7540.0,
-        "positive_gex": 1616457.92,
-        "negative_gex": -12881715.35,
-        "net_gex": -11265257.43
+        "positive_gex": 0.0,
+        "negative_gex": -7036016.36,
+        "net_gex": -7036016.36
       },
       {
         "strike": 7545.0,
-        "positive_gex": 768665.97,
-        "negative_gex": -11961849.81,
-        "net_gex": -11193183.84
+        "positive_gex": 0.0,
+        "negative_gex": -7575199.63,
+        "net_gex": -7575199.63
       },
       {
         "strike": 7550.0,
-        "positive_gex": 2852687.96,
-        "negative_gex": -35970597.62,
-        "net_gex": -33117909.65
+        "positive_gex": 0.0,
+        "negative_gex": -59465992.85,
+        "net_gex": -59465992.85
       },
       {
         "strike": 7555.0,
-        "positive_gex": 435395.92,
-        "negative_gex": -5560764.41,
-        "net_gex": -5125368.49
+        "positive_gex": 0.0,
+        "negative_gex": -6858997.97,
+        "net_gex": -6858997.97
       },
       {
         "strike": 7560.0,
-        "positive_gex": 1008480.0,
-        "negative_gex": -7387057.21,
-        "net_gex": -6378577.21
+        "positive_gex": 0.0,
+        "negative_gex": -12791292.81,
+        "net_gex": -12791292.81
       },
       {
         "strike": 7565.0,
-        "positive_gex": 1303335.12,
-        "negative_gex": -9014547.85,
-        "net_gex": -7711212.73
+        "positive_gex": 0.0,
+        "negative_gex": -8629713.92,
+        "net_gex": -8629713.92
       },
       {
         "strike": 7570.0,
-        "positive_gex": 904161.64,
-        "negative_gex": -17496298.56,
-        "net_gex": -16592136.91
+        "positive_gex": 0.0,
+        "negative_gex": -12474677.69,
+        "net_gex": -12474677.69
       },
       {
         "strike": 7575.0,
-        "positive_gex": 23703169.05,
-        "negative_gex": -23783399.5,
-        "net_gex": -80230.45
+        "positive_gex": 0.0,
+        "negative_gex": -48265383.17,
+        "net_gex": -48265383.17
       },
       {
         "strike": 7580.0,
-        "positive_gex": 2098423.41,
-        "negative_gex": -268499538.65,
-        "net_gex": -266401115.24
+        "positive_gex": 0.0,
+        "negative_gex": -24958802.38,
+        "net_gex": -24958802.38
       },
       {
         "strike": 7585.0,
-        "positive_gex": 2421188.31,
-        "negative_gex": -16590111.45,
-        "net_gex": -14168923.14
+        "positive_gex": 0.0,
+        "negative_gex": -15658501.75,
+        "net_gex": -15658501.75
       },
       {
         "strike": 7590.0,
-        "positive_gex": 4509148.81,
-        "negative_gex": -245264045.2,
-        "net_gex": -240754896.39
+        "positive_gex": 0.0,
+        "negative_gex": -22286561.22,
+        "net_gex": -22286561.22
       },
       {
         "strike": 7595.0,
-        "positive_gex": 1497583.2,
-        "negative_gex": -82441130.5,
-        "net_gex": -80943547.3
+        "positive_gex": 0.0,
+        "negative_gex": -17275740.81,
+        "net_gex": -17275740.81
       },
       {
         "strike": 7600.0,
-        "positive_gex": 31651369.82,
-        "negative_gex": -108358820.46,
-        "net_gex": -76707450.64
+        "positive_gex": 0.0,
+        "negative_gex": -135910219.72,
+        "net_gex": -135910219.72
       },
       {
         "strike": 7605.0,
-        "positive_gex": 2818083.28,
-        "negative_gex": -38385526.32,
-        "net_gex": -35567443.05
+        "positive_gex": 0.0,
+        "negative_gex": -14662183.4,
+        "net_gex": -14662183.4
       },
       {
         "strike": 7610.0,
-        "positive_gex": 3941755.67,
-        "negative_gex": -79472777.28,
-        "net_gex": -75531021.61
+        "positive_gex": 0.0,
+        "negative_gex": -42182297.55,
+        "net_gex": -42182297.55
       },
       {
         "strike": 7615.0,
-        "positive_gex": 7356395.16,
-        "negative_gex": -23752697.08,
-        "net_gex": -16396301.92
+        "positive_gex": 1192315.89,
+        "negative_gex": -15818827.5,
+        "net_gex": -14626511.61
       },
       {
         "strike": 7620.0,
-        "positive_gex": 7459373.71,
-        "negative_gex": -29211238.31,
-        "net_gex": -21751864.6
+        "positive_gex": 9033934.97,
+        "negative_gex": -42527068.52,
+        "net_gex": -33493133.55
       },
       {
         "strike": 7625.0,
-        "positive_gex": 11822068.99,
-        "negative_gex": -53823893.45,
-        "net_gex": -42001824.45
+        "positive_gex": 11336192.57,
+        "negative_gex": -142583717.3,
+        "net_gex": -131247524.73
       },
       {
         "strike": 7630.0,
-        "positive_gex": 50212345.03,
-        "negative_gex": -58735514.54,
-        "net_gex": -8523169.5
+        "positive_gex": 11743217.16,
+        "negative_gex": -72183487.06,
+        "net_gex": -60440269.89
       },
       {
         "strike": 7635.0,
-        "positive_gex": 7958978.1,
-        "negative_gex": -77678386.99,
-        "net_gex": -69719408.89
+        "positive_gex": 33179204.54,
+        "negative_gex": -54278363.51,
+        "net_gex": -21099158.96
       },
       {
         "strike": 7640.0,
-        "positive_gex": 20167573.39,
-        "negative_gex": -165723909.37,
-        "net_gex": -145556335.98
+        "positive_gex": 50762496.67,
+        "negative_gex": -64426500.81,
+        "net_gex": -13664004.14
       },
       {
         "strike": 7645.0,
-        "positive_gex": 6627077.54,
-        "negative_gex": -41163761.94,
-        "net_gex": -34536684.4
+        "positive_gex": 15861572.23,
+        "negative_gex": -61596717.77,
+        "net_gex": -45735145.54
       },
       {
         "strike": 7650.0,
-        "positive_gex": 59462080.07,
-        "negative_gex": -123218797.9,
-        "net_gex": -63756717.83
+        "positive_gex": 56340914.5,
+        "negative_gex": -186831142.4,
+        "net_gex": -130490227.89
       },
       {
         "strike": 7655.0,
-        "positive_gex": 12189858.06,
-        "negative_gex": -57865321.9,
-        "net_gex": -45675463.85
+        "positive_gex": 25941959.54,
+        "negative_gex": -81953558.64,
+        "net_gex": -56011599.1
       },
       {
         "strike": 7660.0,
-        "positive_gex": 34106558.39,
-        "negative_gex": -88510576.02,
-        "net_gex": -54404017.63
+        "positive_gex": 39763502.65,
+        "negative_gex": -128774491.23,
+        "net_gex": -89010988.58
       },
       {
         "strike": 7665.0,
-        "positive_gex": 53587266.33,
-        "negative_gex": -71690697.28,
-        "net_gex": -18103430.95
+        "positive_gex": 44043650.86,
+        "negative_gex": -45886765.15,
+        "net_gex": -1843114.29
       },
       {
         "strike": 7670.0,
-        "positive_gex": 75521844.75,
-        "negative_gex": -97042359.83,
-        "net_gex": -21520515.07
+        "positive_gex": 92897581.5,
+        "negative_gex": -146995294.43,
+        "net_gex": -54097712.93
       },
       {
         "strike": 7675.0,
-        "positive_gex": 75047540.83,
-        "negative_gex": -230247865.71,
-        "net_gex": -155200324.87
+        "positive_gex": 182458548.46,
+        "negative_gex": -255098790.09,
+        "net_gex": -72640241.63
       },
       {
         "strike": 7680.0,
-        "positive_gex": 56690250.44,
-        "negative_gex": -95809046.98,
-        "net_gex": -39118796.54
+        "positive_gex": 108048050.29,
+        "negative_gex": -587976297.29,
+        "net_gex": -479928247.0
       },
       {
         "strike": 7685.0,
-        "positive_gex": 19056888.15,
-        "negative_gex": -100465865.6,
-        "net_gex": -81408977.45
+        "positive_gex": 157309980.77,
+        "negative_gex": -268643038.95,
+        "net_gex": -111333058.18
       },
       {
         "strike": 7690.0,
-        "positive_gex": 74881079.49,
-        "negative_gex": -179402675.37,
-        "net_gex": -104521595.88
+        "positive_gex": 179721122.81,
+        "negative_gex": -137129400.13,
+        "net_gex": 42591722.68
       },
       {
         "strike": 7695.0,
-        "positive_gex": 51947858.08,
-        "negative_gex": -114118878.72,
-        "net_gex": -62171020.64
+        "positive_gex": 216084686.75,
+        "negative_gex": -253184461.5,
+        "net_gex": -37099774.75
       },
       {
         "strike": 7700.0,
-        "positive_gex": 331440768.44,
-        "negative_gex": -537596555.53,
-        "net_gex": -206155787.1
+        "positive_gex": 1251350577.86,
+        "negative_gex": -809378869.39,
+        "net_gex": 441971708.47
       },
       {
         "strike": 7705.0,
-        "positive_gex": 121221762.09,
-        "negative_gex": -206238235.53,
-        "net_gex": -85016473.43
+        "positive_gex": 612152956.33,
+        "negative_gex": -786977955.64,
+        "net_gex": -174824999.31
       },
       {
         "strike": 7710.0,
-        "positive_gex": 139542874.33,
-        "negative_gex": -408286488.32,
-        "net_gex": -268743614.0
+        "positive_gex": 242346173.91,
+        "negative_gex": -480695196.05,
+        "net_gex": -238349022.15
       },
       {
         "strike": 7715.0,
-        "positive_gex": 234177045.35,
-        "negative_gex": -174919105.93,
-        "net_gex": 59257939.43
+        "positive_gex": 115893959.7,
+        "negative_gex": -105854109.33,
+        "net_gex": 10039850.37
       },
       {
         "strike": 7720.0,
-        "positive_gex": 176232920.16,
-        "negative_gex": -166044090.34,
-        "net_gex": 10188829.82
+        "positive_gex": 247382832.77,
+        "negative_gex": -157841553.02,
+        "net_gex": 89541279.75
       },
       {
         "strike": 7725.0,
-        "positive_gex": 184988184.05,
-        "negative_gex": -491758304.52,
-        "net_gex": -306770120.46
+        "positive_gex": 362110649.61,
+        "negative_gex": -130113251.51,
+        "net_gex": 231997398.1
       },
       {
         "strike": 7730.0,
-        "positive_gex": 213271219.37,
-        "negative_gex": -270354116.24,
-        "net_gex": -57082896.86
+        "positive_gex": 1046528570.89,
+        "negative_gex": -208630183.18,
+        "net_gex": 837898387.71
       },
       {
         "strike": 7735.0,
-        "positive_gex": 267496181.46,
-        "negative_gex": -85720645.31,
-        "net_gex": 181775536.15
+        "positive_gex": 139991687.92,
+        "negative_gex": -48769927.73,
+        "net_gex": 91221760.19
       },
       {
         "strike": 7740.0,
-        "positive_gex": 158980342.22,
-        "negative_gex": -129891399.82,
-        "net_gex": 29088942.4
+        "positive_gex": 467754027.53,
+        "negative_gex": -78300335.31,
+        "net_gex": 389453692.23
       },
       {
         "strike": 7745.0,
-        "positive_gex": 171675474.96,
-        "negative_gex": -53467513.14,
-        "net_gex": 118207961.83
+        "positive_gex": 206812430.81,
+        "negative_gex": -20739645.9,
+        "net_gex": 186072784.91
       },
       {
         "strike": 7750.0,
-        "positive_gex": 614137455.5,
-        "negative_gex": -280749083.66,
-        "net_gex": 333388371.84
+        "positive_gex": 1382572122.49,
+        "negative_gex": -661804583.22,
+        "net_gex": 720767539.28
       },
       {
         "strike": 7755.0,
-        "positive_gex": 240172864.81,
-        "negative_gex": -34834966.65,
-        "net_gex": 205337898.16
+        "positive_gex": 176957204.99,
+        "negative_gex": -35476399.41,
+        "net_gex": 141480805.58
       },
       {
         "strike": 7760.0,
-        "positive_gex": 983062825.93,
-        "negative_gex": -488220454.47,
-        "net_gex": 494842371.46
+        "positive_gex": 256120905.61,
+        "negative_gex": -128953503.89,
+        "net_gex": 127167401.73
       },
       {
         "strike": 7765.0,
-        "positive_gex": 104207425.79,
-        "negative_gex": -59732292.0,
-        "net_gex": 44475133.79
+        "positive_gex": 261806581.58,
+        "negative_gex": -15124833.84,
+        "net_gex": 246681747.75
       },
       {
         "strike": 7770.0,
-        "positive_gex": 549128642.16,
-        "negative_gex": -45109602.19,
-        "net_gex": 504019039.97
+        "positive_gex": 263658065.22,
+        "negative_gex": -89816037.59,
+        "net_gex": 173842027.63
       },
       {
         "strike": 7775.0,
-        "positive_gex": 977897833.67,
-        "negative_gex": -100794696.21,
-        "net_gex": 877103137.46
+        "positive_gex": 315812899.71,
+        "negative_gex": -46861766.48,
+        "net_gex": 268951133.23
       },
       {
         "strike": 7780.0,
-        "positive_gex": 311245424.75,
-        "negative_gex": -76544760.42,
-        "net_gex": 234700664.33
+        "positive_gex": 113955773.45,
+        "negative_gex": -19389859.87,
+        "net_gex": 94565913.58
       },
       {
         "strike": 7785.0,
-        "positive_gex": 145263917.75,
-        "negative_gex": -11670076.37,
-        "net_gex": 133593841.37
+        "positive_gex": 75845474.38,
+        "negative_gex": -1595332.43,
+        "net_gex": 74250141.94
       },
       {
         "strike": 7790.0,
-        "positive_gex": 158420214.88,
-        "negative_gex": -24730524.33,
-        "net_gex": 133689690.54
+        "positive_gex": 187591023.65,
+        "negative_gex": -15891106.14,
+        "net_gex": 171699917.51
       },
       {
         "strike": 7795.0,
-        "positive_gex": 187942565.35,
-        "negative_gex": -29226244.75,
-        "net_gex": 158716320.6
+        "positive_gex": 47229466.74,
+        "negative_gex": -1279816.92,
+        "net_gex": 45949649.83
       },
       {
         "strike": 7800.0,
-        "positive_gex": 699493067.8,
-        "negative_gex": -155667581.91,
-        "net_gex": 543825485.89
+        "positive_gex": 295600828.52,
+        "negative_gex": -8995101.85,
+        "net_gex": 286605726.67
       },
       {
         "strike": 7805.0,
-        "positive_gex": 447779727.5,
-        "negative_gex": -933098.97,
-        "net_gex": 446846628.54
+        "positive_gex": 43289785.52,
+        "negative_gex": -295747.01,
+        "net_gex": 42994038.51
       },
       {
         "strike": 7810.0,
-        "positive_gex": 129885655.85,
-        "negative_gex": -7185734.95,
-        "net_gex": 122699920.9
+        "positive_gex": 95322555.14,
+        "negative_gex": -808949.88,
+        "net_gex": 94513605.26
       },
       {
         "strike": 7815.0,
-        "positive_gex": 135489032.43,
-        "negative_gex": -1060975.73,
-        "net_gex": 134428056.7
+        "positive_gex": 87747977.27,
+        "negative_gex": -365417.03,
+        "net_gex": 87382560.24
       },
       {
         "strike": 7820.0,
-        "positive_gex": 376084948.7,
-        "negative_gex": -2412143.02,
-        "net_gex": 373672805.68
+        "positive_gex": 52979433.54,
+        "negative_gex": -1348601.21,
+        "net_gex": 51630832.33
       },
       {
         "strike": 7825.0,
-        "positive_gex": 336419093.8,
-        "negative_gex": -12041081.63,
-        "net_gex": 324378012.17
+        "positive_gex": 75497540.17,
+        "negative_gex": -1992578.48,
+        "net_gex": 73504961.69
       },
       {
         "strike": 7830.0,
-        "positive_gex": 125929088.18,
-        "negative_gex": -872408.81,
-        "net_gex": 125056679.37
+        "positive_gex": 34787656.12,
+        "negative_gex": -385017.58,
+        "net_gex": 34402638.53
       },
       {
         "strike": 7835.0,
-        "positive_gex": 36606672.62,
-        "negative_gex": -1275172.3,
-        "net_gex": 35331500.32
+        "positive_gex": 11278454.07,
+        "negative_gex": -0.0,
+        "net_gex": 11278454.07
       },
       {
         "strike": 7840.0,
-        "positive_gex": 107624130.22,
-        "negative_gex": -174748.69,
-        "net_gex": 107449381.53
+        "positive_gex": 28781307.37,
+        "negative_gex": -415488.1,
+        "net_gex": 28365819.26
       },
       {
         "strike": 7845.0,
-        "positive_gex": 22195213.35,
-        "negative_gex": -192886.31,
-        "net_gex": 22002327.04
+        "positive_gex": 6775239.53,
+        "negative_gex": -288637.76,
+        "net_gex": 6486601.77
       },
       {
         "strike": 7850.0,
-        "positive_gex": 110215265.61,
-        "negative_gex": -0.0,
-        "net_gex": 110215265.61
+        "positive_gex": 60908843.86,
+        "negative_gex": -1866909.33,
+        "net_gex": 59041934.53
       },
       {
         "strike": 7855.0,
-        "positive_gex": 81635557.64,
-        "negative_gex": -0.0,
-        "net_gex": 81635557.64
+        "positive_gex": 40666509.75,
+        "negative_gex": -136160.58,
+        "net_gex": 40530349.18
       },
       {
         "strike": 7860.0,
-        "positive_gex": 44262604.17,
-        "negative_gex": -0.0,
-        "net_gex": 44262604.17
+        "positive_gex": 31604388.45,
+        "negative_gex": -194012.04,
+        "net_gex": 31410376.41
       },
       {
         "strike": 7865.0,
-        "positive_gex": 23685133.66,
-        "negative_gex": -0.0,
-        "net_gex": 23685133.66
+        "positive_gex": 5937555.34,
+        "negative_gex": -184615.03,
+        "net_gex": 5752940.31
       },
       {
         "strike": 7870.0,
-        "positive_gex": 53054219.55,
-        "negative_gex": -0.0,
-        "net_gex": 53054219.55
+        "positive_gex": 8393166.55,
+        "negative_gex": -175956.96,
+        "net_gex": 8217209.59
       },
       {
         "strike": 7875.0,
-        "positive_gex": 149462315.49,
-        "negative_gex": -0.0,
-        "net_gex": 149462315.49
+        "positive_gex": 32214851.08,
+        "negative_gex": -3133945.39,
+        "net_gex": 29080905.69
       },
       {
         "strike": 7880.0,
-        "positive_gex": 71741154.47,
+        "positive_gex": 4190558.62,
         "negative_gex": -0.0,
-        "net_gex": 71741154.47
+        "net_gex": 4190558.62
       },
       {
         "strike": 7885.0,
-        "positive_gex": 13244453.54,
-        "negative_gex": -0.0,
-        "net_gex": 13244453.54
+        "positive_gex": 5318317.81,
+        "negative_gex": -104303.77,
+        "net_gex": 5214014.04
       },
       {
         "strike": 7890.0,
-        "positive_gex": 33280155.45,
-        "negative_gex": -0.0,
-        "net_gex": 33280155.45
+        "positive_gex": 6631930.4,
+        "negative_gex": -65344.03,
+        "net_gex": 6566586.37
       },
       {
         "strike": 7895.0,
-        "positive_gex": 23966735.93,
-        "negative_gex": -0.0,
-        "net_gex": 23966735.93
+        "positive_gex": 3711150.6,
+        "negative_gex": -143920.15,
+        "net_gex": 3567230.45
       },
       {
         "strike": 7900.0,
-        "positive_gex": 186719132.28,
-        "negative_gex": -0.0,
-        "net_gex": 186719132.28
+        "positive_gex": 27116664.37,
+        "negative_gex": -1060066.92,
+        "net_gex": 26056597.45
       },
       {
         "strike": 7905.0,
-        "positive_gex": 6577134.18,
-        "negative_gex": -0.0,
-        "net_gex": 6577134.18
+        "positive_gex": 6433768.73,
+        "negative_gex": -43520.3,
+        "net_gex": 6390248.43
       },
       {
         "strike": 7910.0,
-        "positive_gex": 15800820.22,
-        "negative_gex": -0.0,
-        "net_gex": 15800820.22
+        "positive_gex": 5216601.74,
+        "negative_gex": -82166.51,
+        "net_gex": 5134435.23
       },
       {
         "strike": 7915.0,
-        "positive_gex": 6271931.81,
-        "negative_gex": -0.0,
-        "net_gex": 6271931.81
+        "positive_gex": 6725394.62,
+        "negative_gex": -79162.87,
+        "net_gex": 6646231.74
       },
       {
         "strike": 7920.0,
-        "positive_gex": 4307111.98,
-        "negative_gex": -0.0,
-        "net_gex": 4307111.98
+        "positive_gex": 3129395.39,
+        "negative_gex": -38169.44,
+        "net_gex": 3091225.95
       },
       {
         "strike": 7925.0,
-        "positive_gex": 188130133.93,
-        "negative_gex": -0.0,
-        "net_gex": 188130133.93
+        "positive_gex": 9861789.22,
+        "negative_gex": -110520.31,
+        "net_gex": 9751268.9
       },
       {
         "strike": 7930.0,
-        "positive_gex": 7917275.41,
-        "negative_gex": -0.0,
-        "net_gex": 7917275.41
-      },
-      {
-        "strike": 7935.0,
-        "positive_gex": 5706231.3,
-        "negative_gex": -0.0,
-        "net_gex": 5706231.3
+        "positive_gex": 4936185.47,
+        "negative_gex": -47341.49,
+        "net_gex": 4888843.98
       },
       {
         "strike": 7940.0,
-        "positive_gex": 3093648.93,
+        "positive_gex": 4444523.69,
         "negative_gex": -0.0,
-        "net_gex": 3093648.93
-      },
-      {
-        "strike": 7945.0,
-        "positive_gex": 3643810.52,
-        "negative_gex": -0.0,
-        "net_gex": 3643810.52
+        "net_gex": 4444523.69
       },
       {
         "strike": 7950.0,
-        "positive_gex": 26311186.06,
-        "negative_gex": -0.0,
-        "net_gex": 26311186.06
-      },
-      {
-        "strike": 7955.0,
-        "positive_gex": 2100037.09,
-        "negative_gex": -0.0,
-        "net_gex": 2100037.09
-      },
-      {
-        "strike": 7960.0,
-        "positive_gex": 2766316.45,
-        "negative_gex": -0.0,
-        "net_gex": 2766316.45
-      },
-      {
-        "strike": 7965.0,
-        "positive_gex": 1278887.02,
-        "negative_gex": -0.0,
-        "net_gex": 1278887.02
-      },
-      {
-        "strike": 7970.0,
-        "positive_gex": 1976288.76,
-        "negative_gex": -0.0,
-        "net_gex": 1976288.76
-      },
-      {
-        "strike": 7975.0,
-        "positive_gex": 16995026.8,
-        "negative_gex": -0.0,
-        "net_gex": 16995026.8
-      },
-      {
-        "strike": 7980.0,
-        "positive_gex": 1344924.42,
-        "negative_gex": -0.0,
-        "net_gex": 1344924.42
+        "positive_gex": 10206118.85,
+        "negative_gex": -93665.45,
+        "net_gex": 10112453.4
       }
     ]
   },
