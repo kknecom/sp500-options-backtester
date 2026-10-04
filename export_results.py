@@ -364,10 +364,43 @@ INVENTORY_CAVEAT = (
 )
 
 
+def _tiger_trade_history() -> list[dict]:
+    """Closed/synced Tiger trades from the local DB (source='live:tiger'),
+    newest first, with legs -- populated by run_trade_history_sync.py."""
+    import sqlite3
+    conn = sqlite3.connect(config.DB_PATH)
+    conn.row_factory = sqlite3.Row
+    trades = conn.execute(
+        "SELECT trade_id, strategy, entry_date, expiration_date, entry_credit, max_loss, contracts, "
+        "status, exit_date, realized_pnl, notes FROM trades WHERE source='live:tiger' "
+        "ORDER BY entry_date DESC, trade_id DESC"
+    ).fetchall()
+    out = []
+    for t in trades:
+        legs = conn.execute(
+            "SELECT right, strike, side, entry_price FROM trade_legs WHERE trade_id=? ORDER BY strike",
+            (t["trade_id"],),
+        ).fetchall()
+        out.append({
+            "entry_date": t["entry_date"], "expiration_date": t["expiration_date"],
+            "strategy": t["strategy"], "contracts": t["contracts"],
+            "entry_credit": t["entry_credit"], "max_loss": t["max_loss"],
+            "status": t["status"], "pnl": t["realized_pnl"],
+            "legs": [f"{l['side']} {l['right']}{l['strike']:.0f} @ {l['entry_price']:.2f}" for l in legs],
+        })
+    conn.close()
+    return out
+
+
 def export_inventory() -> dict:
-    positions = get_inventory_snapshot()
+    try:
+        positions = get_inventory_snapshot()
+    except Exception as e:
+        print(f"Open-positions snapshot unavailable ({e}); exporting trade history only.")
+        positions = []
     return {
         "caveat": INVENTORY_CAVEAT,
+        "trade_history": _tiger_trade_history(),
         "positions": [
             {
                 "symbol": p.symbol,

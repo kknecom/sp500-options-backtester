@@ -17,3 +17,4 @@ secrets/
 *.properties
 *.pem
 .env
+data/real/tiger_raw_dump.json

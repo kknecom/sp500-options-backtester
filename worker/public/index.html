@@ -262,7 +262,7 @@
 			<button class="tab-btn active" data-tab="backtest">Backtesting</button>
 			<button class="tab-btn" data-tab="calc">Strike Calculator</button>
 			<button class="tab-btn" data-tab="gex">GEX / Walls</button>
-			<button class="tab-btn" data-tab="inventory">Inventory</button>
+			<button class="tab-btn" data-tab="inventory">Trade Journal</button>
 			<button class="tab-btn" data-tab="signals">Signal Accuracy</button>
 		</div>
 
@@ -1152,18 +1152,18 @@
 	}
 
 	function renderInventory(inv) {
-		if (!inv.positions.length) {
-			return `<h2>Inventory <span class="badge live">Live Tiger account</span></h2>
-				<div class="caveat">${inv.caveat}</div>
-				<div class="panel">No open option positions.</div>`;
-		}
-		const totalValue = sum(inv.positions.map(p => p.market_value || 0));
-		const totalUnrealized = sum(inv.positions.map(p => p.unrealized_pnl || 0));
-		const totalToday = sum(inv.positions.map(p => p.today_pnl || 0));
+		const hist = inv.trade_history || [];
+		let html = `<h2>Trade Journal <span class="badge live">Live Tiger account</span></h2>
+			<div class="caveat">${inv.caveat}</div>`;
 
-		return `<h2>Inventory <span class="badge live">Live Tiger account</span></h2>
-			<div class="caveat">${inv.caveat}</div>
-			<div class="stat-grid">
+		html += `<h3>Open positions</h3>`;
+		if (!inv.positions.length) {
+			html += `<div class="panel">No open option positions.</div>`;
+		} else {
+			const totalValue = sum(inv.positions.map(p => p.market_value || 0));
+			const totalUnrealized = sum(inv.positions.map(p => p.unrealized_pnl || 0));
+			const totalToday = sum(inv.positions.map(p => p.today_pnl || 0));
+			html += `<div class="stat-grid">
 				${statCard('Open positions', inv.positions.length)}
 				${statCard('Market value', fmtMoney(totalValue), cls(totalValue))}
 				${statCard('Unrealized P&amp;L', fmtMoney(totalUnrealized), cls(totalUnrealized))}
@@ -1180,6 +1180,33 @@
 				{ label: 'Unrealized P&amp;L', num: true, render: p => `<span class="${cls(p.unrealized_pnl)}">${fmtMoney(p.unrealized_pnl)}</span>` },
 				{ label: "Today's P&amp;L", num: true, render: p => `<span class="${cls(p.today_pnl)}">${fmtMoney(p.today_pnl)}</span>` },
 			])}`;
+		}
+
+		html += `<h3>Trade history (Tiger)</h3>`;
+		if (!hist.length) {
+			html += `<div class="panel">No Tiger trades synced yet &mdash; run <code>python run_trade_history_sync.py</code>, then <code>python export_results.py</code>.</div>`;
+		} else {
+			const graded = hist.filter(t => t.pnl != null);
+			const totalPnl = sum(graded.map(t => t.pnl));
+			html += `<div class="stat-grid">
+				${statCard('Trades synced', hist.length)}
+				${statCard('First trade', hist[hist.length - 1].entry_date)}
+				${statCard('Latest trade', hist[0].entry_date)}
+				${statCard('With realized P&amp;L', graded.length)}
+				${graded.length ? statCard('Realized P&amp;L', fmtMoney(totalPnl), cls(totalPnl)) : ''}
+			</div>
+			${tradesTable(hist, [
+				{ label: 'Entry', render: t => t.entry_date },
+				{ label: 'Expiry', render: t => t.expiration_date },
+				{ label: 'Strategy', render: t => strategyLabel(t.strategy) },
+				{ label: 'Qty', num: true, render: t => t.contracts },
+				{ label: 'Legs', render: t => t.legs.join(', ') },
+				{ label: 'Credit', num: true, render: t => fmtMoney(t.entry_credit) },
+				{ label: 'Max loss', num: true, render: t => fmtMoney(t.max_loss) },
+				{ label: 'P&amp;L', num: true, render: t => t.pnl == null ? '&mdash;' : `<span class="${cls(t.pnl)}">${fmtMoney(t.pnl)}</span>` },
+			])}`;
+		}
+		return html;
 	}
 
 	function renderSignalAccuracy(sig) {
