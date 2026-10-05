@@ -238,7 +238,8 @@
 			border: 1px solid var(--panel-border); flex-shrink: 0;
 			box-shadow: 0 0 0 3px rgba(91,140,255,0.12);
 		}
-	</style>
+	.jgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin:14px 0}.jcard{padding:14px}.jtitle{font-size:13px;font-weight:600;margin-bottom:8px}.jsvg{width:100%;height:auto;max-height:220px}
+</style>
 </head>
 <body>
 	<main>
@@ -1151,6 +1152,108 @@
 		return { html, walls };
 	}
 
+
+	// ---- Trade Journal (Tradervue-style) -------------------------------------------
+	function svgCard(title, body) {
+		return `<div class="panel jcard"><div class="jtitle">${title}</div>${body}</div>`;
+	}
+	function jDonut(win, loss) {
+		const tot = win + loss || 1, r = 52, c = 2 * Math.PI * r, wl = c * win / tot;
+		return `<svg viewBox="0 0 140 140" class="jsvg"><g transform="rotate(-90 70 70)">
+			<circle cx="70" cy="70" r="${r}" fill="none" stroke="#e5484d" stroke-width="22"/>
+			<circle cx="70" cy="70" r="${r}" fill="none" stroke="#30a46c" stroke-width="22" stroke-dasharray="${wl} ${c - wl}"/></g>
+			<text x="70" y="66" text-anchor="middle" font-size="18" font-weight="600" fill="currentColor">${Math.round(100 * win / tot)}%</text>
+			<text x="70" y="84" text-anchor="middle" font-size="10" fill="#888">${win}W / ${loss}L</text></svg>`;
+	}
+	function jHBars(a, b, la, lb, fmt) {
+		const m = Math.max(Math.abs(a), Math.abs(b), 1e-9);
+		const row = (v, lab, col, y) => `<text x="0" y="${y + 10}" font-size="11" fill="#888">${lab}</text>
+			<rect x="0" y="${y + 14}" width="${Math.max(2, 260 * Math.abs(v) / m)}" height="18" rx="3" fill="${col}"/>
+			<text x="${Math.max(2, 260 * Math.abs(v) / m) + 6}" y="${y + 28}" font-size="12" fill="currentColor">${fmt(v)}</text>`;
+		return `<svg viewBox="0 0 360 80" class="jsvg">${row(a, la, '#30a46c', 0)}${row(b, lb, '#e5484d', 42)}</svg>`;
+	}
+	function jLine(vals, color, fill, labels) {
+		if (!vals.length) return '<div class="muted">No data</div>';
+		const W = 560, H = 190, pl = 52, pr = 8, pt = 10, pb = 22;
+		const lo = Math.min(0, ...vals), hi = Math.max(0, ...vals), span = (hi - lo) || 1;
+		const x = i => pl + (vals.length === 1 ? 0 : i * (W - pl - pr) / (vals.length - 1));
+		const y = v => pt + (hi - v) * (H - pt - pb) / span;
+		const pts = vals.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+		const area = `${x(0)},${y(0)} ${pts} ${x(vals.length - 1)},${y(0)}`;
+		let g = '';
+		for (let k = 0; k <= 3; k++) { const v = lo + span * k / 3; g += `<line x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}" stroke="#8884" stroke-dasharray="2 3"/><text x="${pl - 6}" y="${y(v) + 4}" text-anchor="end" font-size="10" fill="#888">${fmtMoney(v)}</text>`; }
+		const xl = labels ? `<text x="${pl}" y="${H - 6}" font-size="10" fill="#888">${labels[0]}</text><text x="${W - pr}" y="${H - 6}" text-anchor="end" font-size="10" fill="#888">${labels[1]}</text>` : '';
+		return `<svg viewBox="0 0 ${W} ${H}" class="jsvg">${g}${fill ? `<polygon points="${area}" fill="${color}" opacity=".18"/>` : ''}<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2"/>${xl}</svg>`;
+	}
+	function jBars(items, fmt) {
+		// items: [{label, value, color}] vertical bars from a zero line
+		const W = 360, H = 170, pb = 22, pt = 14, bw = W / items.length;
+		const lo = Math.min(0, ...items.map(i => i.value)), hi = Math.max(0, ...items.map(i => i.value)), span = (hi - lo) || 1;
+		const y = v => pt + (hi - v) * (H - pt - pb) / span;
+		return `<svg viewBox="0 0 ${W} ${H}" class="jsvg"><line x1="0" x2="${W}" y1="${y(0)}" y2="${y(0)}" stroke="#8886"/>` + items.map((it, i) => {
+			const top = Math.min(y(it.value), y(0)), ht = Math.max(1, Math.abs(y(it.value) - y(0)));
+			return `<rect x="${i * bw + 8}" y="${top}" width="${bw - 16}" height="${ht}" rx="3" fill="${it.color}"/>
+				<text x="${i * bw + bw / 2}" y="${H - 6}" text-anchor="middle" font-size="11" fill="#888">${it.label}</text>
+				<text x="${i * bw + bw / 2}" y="${top - 3}" text-anchor="middle" font-size="10" fill="currentColor">${fmt(it.value)}</text>`;
+		}).join('') + '</svg>';
+	}
+	const fmtHold = (m) => m == null ? '&mdash;' : m >= 1440 ? (m / 1440).toFixed(1) + ' d' : m >= 60 ? (m / 60).toFixed(1) + ' h' : Math.round(m) + ' m';
+	const strikesLabel = (t) => t.legs.map(l => `${l.side === 'SHORT' ? '-' : '+'}${l.right}${fmtNum(l.strike)}`).join(' / ');
+
+	function renderJournal(j) {
+		if (!j || (!j.closed_trades.length && !j.open_trades.length)) {
+			return `<div class="panel">No journal data yet &mdash; run <code>python dump_tiger_raw.py</code>, then <code>python export_results.py</code>.</div>`;
+		}
+		const C = j.closed_trades.slice().sort((a, b) => a.exit_time < b.exit_time ? -1 : 1);
+		const wins = C.filter(t => t.pnl > 0), losses = C.filter(t => t.pnl < 0);
+		const avg = a => a.length ? sum(a.map(t => t.pnl)) / a.length : 0;
+		const total = sum(C.map(t => t.pnl));
+		const gp = sum(wins.map(t => t.pnl)), gl = -sum(losses.map(t => t.pnl));
+		const cum = []; let run = 0; C.forEach(t => { run += t.pnl; cum.push(run); });
+		const dd = []; let peak = 0; cum.forEach(v => { peak = Math.max(peak, v); dd.push(v - peak); });
+		const holdAvg = a => a.length ? sum(a.map(t => t.hold_minutes || 0)) / a.length : 0;
+		const best = C.reduce((m, t) => t.pnl > m.pnl ? t : m, C[0]);
+		const worst = C.reduce((m, t) => t.pnl < m.pnl ? t : m, C[0]);
+		const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+		const byDay = days.map((d, i) => {
+			const ts = C.filter(t => new Date(t.exit_date + 'T12:00:00').getDay() === i + 1);
+			return { label: d, value: ts.length ? 100 * ts.filter(t => t.pnl > 0).length / ts.length : 0, color: '#3e63dd' };
+		});
+		const stats = `<div class="stat-grid">
+			${statCard('Closed trades', C.length)}
+			${statCard('Total P&amp;L (gross)', fmtMoney(total), cls(total))}
+			${statCard('Win rate', fmtPct(C.length ? wins.length / C.length : 0))}
+			${statCard('Profit factor', gl ? (gp / gl).toFixed(2) : '&mdash;')}
+			${statCard('Avg win / loss', `${fmtMoney(avg(wins))} / ${fmtMoney(avg(losses))}`)}
+			${statCard('Max drawdown', fmtMoney(Math.min(0, ...dd)), 'neg')}
+		</div>`;
+		const charts = `<div class="jgrid">
+			${svgCard('Cumulative P&amp;L', jLine(cum, '#30a46c', true, [C[0].exit_date, C[C.length - 1].exit_date]))}
+			${svgCard('Winning vs Losing trades', jDonut(wins.length, losses.length))}
+			${svgCard('Hold time: winning vs losing', jHBars(holdAvg(wins), holdAvg(losses), 'Winning', 'Losing', fmtHold))}
+			${svgCard('Average winning vs losing trade', jHBars(avg(wins), Math.abs(avg(losses)), 'Avg win', 'Avg loss', v => fmtMoney(v)))}
+			${svgCard('Largest gain vs largest loss', jHBars(best.pnl, Math.abs(worst.pnl), 'Largest gain', 'Largest loss', v => fmtMoney(v)))}
+			${svgCard('Win % by day of week', jBars(byDay, v => v.toFixed(0) + '%'))}
+			${svgCard('Cumulative drawdown', jLine(dd, '#e5484d', true, [C[0].exit_date, C[C.length - 1].exit_date]))}
+		</div>`;
+		const cols = (isClosed) => [
+			{ label: 'Entry time', render: t => t.entry_time },
+			{ label: 'Strike price', render: t => strikesLabel(t) },
+			{ label: 'Stock price', render: () => '&mdash;' },
+			{ label: 'Strategy', render: t => strategyLabel(t.strategy) },
+			{ label: 'Qty', num: true, render: t => t.contracts },
+			{ label: 'Exit time', render: t => isClosed ? t.exit_time + (t.held_to_expiry ? ' <span class="muted">(expiry)</span>' : '') : '&mdash;' },
+			{ label: 'Hold', num: true, render: t => isClosed ? fmtHold(t.hold_minutes) : '&mdash;' },
+			{ label: 'Profit', num: true, render: t => isClosed ? `<span class="${cls(t.pnl)}">${fmtMoney(t.pnl)}</span>` : '&mdash;' },
+			{ label: 'Platform fee', num: true, render: t => t.fee == null ? '&mdash;' : fmtMoney(t.fee) },
+		];
+		const closedDesc = C.slice().reverse();
+		return `<h3>Performance</h3>${stats}${charts}
+			<h3>Open trades</h3>${j.open_trades.length ? tradesTable(j.open_trades, cols(false)) : '<div class="panel">No open spreads in the executions feed.</div>'}
+			<h3>Closed trades</h3>${tradesTable(closedDesc, cols(true))}
+			<div class="caveat">P&amp;L is gross of commissions on legs closed by buy-back (the Tiger API returns no fees); expired legs use Tiger's own figure. Platform fee and stock price at entry are not in the API &mdash; they need the monthly statement CSV. ${j.unresolved_count} early-2026 trade(s) could not be matched to an expiry record and are excluded rather than guessed.</div>`;
+	}
+
 	function renderInventory(inv) {
 		const hist = inv.trade_history || [];
 		let html = `<h2>Trade Journal <span class="badge live">Live Tiger account</span></h2>
@@ -1182,30 +1285,7 @@
 			])}`;
 		}
 
-		html += `<h3>Trade history (Tiger)</h3>`;
-		if (!hist.length) {
-			html += `<div class="panel">No Tiger trades synced yet &mdash; run <code>python run_trade_history_sync.py</code>, then <code>python export_results.py</code>.</div>`;
-		} else {
-			const graded = hist.filter(t => t.pnl != null);
-			const totalPnl = sum(graded.map(t => t.pnl));
-			html += `<div class="stat-grid">
-				${statCard('Trades synced', hist.length)}
-				${statCard('First trade', hist[hist.length - 1].entry_date)}
-				${statCard('Latest trade', hist[0].entry_date)}
-				${statCard('With realized P&amp;L', graded.length)}
-				${graded.length ? statCard('Realized P&amp;L', fmtMoney(totalPnl), cls(totalPnl)) : ''}
-			</div>
-			${tradesTable(hist, [
-				{ label: 'Entry', render: t => t.entry_date },
-				{ label: 'Expiry', render: t => t.expiration_date },
-				{ label: 'Strategy', render: t => strategyLabel(t.strategy) },
-				{ label: 'Qty', num: true, render: t => t.contracts },
-				{ label: 'Legs', render: t => t.legs.join(', ') },
-				{ label: 'Credit', num: true, render: t => fmtMoney(t.entry_credit) },
-				{ label: 'Max loss', num: true, render: t => fmtMoney(t.max_loss) },
-				{ label: 'P&amp;L', num: true, render: t => t.pnl == null ? '&mdash;' : `<span class="${cls(t.pnl)}">${fmtMoney(t.pnl)}</span>` },
-			])}`;
-		}
+		html += renderJournal(inv.journal);
 		return html;
 	}
 

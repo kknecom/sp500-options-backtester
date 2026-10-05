@@ -392,6 +392,18 @@ def _tiger_trade_history() -> list[dict]:
     return out
 
 
+def _journal() -> dict:
+    """Closed/open trades rebuilt from raw Tiger executions (journal_builder.py)."""
+    try:
+        from journal_builder import load_journal
+        j = load_journal()
+        return {"closed_trades": j["closed_trades"], "open_trades": j["open_trades"],
+                "unresolved_count": len(j["unresolved"]), "generated_from": j.get("generated_from")}
+    except Exception as e:
+        print(f"Journal unavailable ({e}); run `python dump_tiger_raw.py` first.")
+        return {"closed_trades": [], "open_trades": [], "unresolved_count": 0, "generated_from": None}
+
+
 def export_inventory() -> dict:
     try:
         positions = get_inventory_snapshot()
@@ -400,7 +412,7 @@ def export_inventory() -> dict:
         positions = []
     return {
         "caveat": INVENTORY_CAVEAT,
-        "trade_history": _tiger_trade_history(),
+        "journal": _journal(),
         "positions": [
             {
                 "symbol": p.symbol,
