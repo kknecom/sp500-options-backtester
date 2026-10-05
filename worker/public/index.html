@@ -1247,8 +1247,34 @@
 			{ label: 'Profit', num: true, render: t => isClosed ? `<span class="${cls(t.pnl)}">${fmtMoney(t.pnl)}</span>` : '&mdash;' },
 			{ label: 'Platform fee', num: true, render: t => t.fee == null ? '&mdash;' : fmtMoney(t.fee) },
 		];
+		const mm = {};
+		C.forEach(t => { const k = t.exit_date.slice(0, 7); (mm[k] = mm[k] || []).push(t); });
+		const mkeys = Object.keys(mm).sort();
+		const mrows = mkeys.map(k => {
+			const ts = mm[k], w = ts.filter(t => t.pnl > 0), l = ts.filter(t => t.pnl < 0), p = sum(ts.map(t => t.pnl));
+			return { k, n: ts.length, w: w.length, l: l.length, wr: ts.length ? w.length / ts.length : 0, p,
+				avg: p / ts.length, best: Math.max(...ts.map(t => t.pnl)), worst: Math.min(...ts.map(t => t.pnl)),
+				ic: ts.filter(t => t.strategy === 'iron_condor').length, vs: ts.filter(t => t.strategy !== 'iron_condor').length,
+				contracts: sum(ts.map(t => t.contracts)) };
+		});
+		const monthly = `<h3>Monthly breakdown</h3>
+			<div class="jgrid">${svgCard('Trades per month', jBars(mrows.map(r => ({ label: r.k.slice(2), value: r.n, color: '#3e63dd' })), v => v))}
+			${svgCard('P&amp;L per month', jBars(mrows.map(r => ({ label: r.k.slice(2), value: r.p, color: r.p >= 0 ? '#30a46c' : '#e5484d' })), v => fmtMoney(v)))}</div>
+			${tradesTable(mrows.slice().reverse().concat([{ k: 'Total', n: C.length, w: wins.length, l: losses.length, wr: wins.length / C.length, p: total, avg: total / C.length, best: best.pnl, worst: worst.pnl, ic: C.filter(t => t.strategy === 'iron_condor').length, vs: C.filter(t => t.strategy !== 'iron_condor').length, contracts: sum(C.map(t => t.contracts)) }]), [
+				{ label: 'Month (closed)', render: r => r.k === 'Total' ? '<b>Total</b>' : r.k },
+				{ label: 'Trades', num: true, render: r => r.n },
+				{ label: 'Iron condors', num: true, render: r => r.ic },
+				{ label: 'Verticals', num: true, render: r => r.vs },
+				{ label: 'Contracts', num: true, render: r => r.contracts },
+				{ label: 'Wins / Losses', num: true, render: r => `${r.w} / ${r.l}` },
+				{ label: 'Win %', num: true, render: r => fmtPct(r.wr) },
+				{ label: 'P&amp;L', num: true, render: r => `<span class="${cls(r.p)}">${fmtMoney(r.p)}</span>` },
+				{ label: 'Avg / trade', num: true, render: r => `<span class="${cls(r.avg)}">${fmtMoney(r.avg)}</span>` },
+				{ label: 'Best', num: true, render: r => fmtMoney(r.best) },
+				{ label: 'Worst', num: true, render: r => `<span class="neg">${fmtMoney(r.worst)}</span>` },
+			])}`;
 		const closedDesc = C.slice().reverse();
-		return `<h3>Performance</h3>${stats}${charts}
+		return `<h3>Performance</h3>${stats}${charts}${monthly}
 			<h3>Open trades</h3>${j.open_trades.length ? tradesTable(j.open_trades, cols(false)) : '<div class="panel">No open spreads in the executions feed.</div>'}
 			<h3>Closed trades</h3>${tradesTable(closedDesc, cols(true))}
 			<div class="caveat">P&amp;L is gross of commissions on legs closed by buy-back (the Tiger API returns no fees); expired legs use Tiger's own figure. Platform fee and stock price at entry are not in the API &mdash; they need the monthly statement CSV. ${j.unresolved_count} early-2026 trade(s) could not be matched to an expiry record and are excluded rather than guessed.</div>`;
